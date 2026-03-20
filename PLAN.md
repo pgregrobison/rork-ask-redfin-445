@@ -1,9 +1,14 @@
-# Polish Tab Bar: Remove shimmer, fix FAB size, add symbol transitions
+# Persist map position & wire up locate button
 
-**Changes**
+**What's changing:**
 
-- **Remove shimmer ring** — Delete the `ShimmerRingModifier` and its extension entirely. The Ask Redfin FAB will be a clean circle with no animated ring.
+### 1. Persist map position across view changes
+- Save the map's camera position whenever you stop panning/zooming, so switching to list view, navigating to a listing detail, or changing tabs and coming back always returns you to where you left off
+- The map already stores its position in memory — we just need to capture camera changes so user-driven pans are remembered
 
-- **Fix Ask Redfin FAB to true 62×62pt** — Reduce the sparkle icon size from 22pt down to 19pt (matching the tab bar icons), then keep the 62×62pt frame so the extra space becomes padding around the icon.
-
-- **SF Symbol transitions on tab switch** — Use `.contentTransition(.symbolEffect(.replace))` on each tab icon so it animates smoothly when switching tabs. Selected tabs use the `.fill` variant of their icon (e.g. `heart.fill`, `house.fill`, `square.stack.fill`) while unselected tabs use the outline variant.
+### 2. Wire up the "locate me" button
+- Tapping the crosshair/location button on the map will request your current location and smoothly pan the map to it
+- A new location service runs behind the scenes to handle permissions and fetch your GPS position
+- The locate button icon updates to show a filled state when the map is centered on your location
+- If location permission hasn't been granted yet, tapping the button will trigger the system permission prompt
+- Adds the required location permission description: *"See homes near your current location"*

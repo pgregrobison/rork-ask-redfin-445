@@ -413,6 +413,7 @@
 				INFOPLIST_KEY_EXPO_PUBLIC_TEAM_ID = "$(EXPO_PUBLIC_TEAM_ID)";
 				INFOPLIST_KEY_EXPO_PUBLIC_RORK_APP_KEY = "$(EXPO_PUBLIC_RORK_APP_KEY)";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "See homes near your current location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -454,6 +455,7 @@
 				INFOPLIST_KEY_EXPO_PUBLIC_TEAM_ID = "$(EXPO_PUBLIC_TEAM_ID)";
 				INFOPLIST_KEY_EXPO_PUBLIC_RORK_APP_KEY = "$(EXPO_PUBLIC_RORK_APP_KEY)";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "See homes near your current location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

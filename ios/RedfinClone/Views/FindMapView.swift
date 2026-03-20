@@ -25,6 +25,7 @@ struct FindMapView: View {
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .onMapCameraChange(frequency: .onEnd) { context in
+                viewModel.persistMapRegion(context.region)
                 viewModel.updateLocationName(for: context.region)
             }
             .ignoresSafeArea()
@@ -37,7 +38,9 @@ struct FindMapView: View {
                 GlassActionButtonStack(items: [
                     GlassActionButtonItem(icon: "square.3.layers.3d", action: {}),
                     GlassActionButtonItem(icon: "hand.draw", action: {}),
-                    GlassActionButtonItem(icon: "location", action: {})
+                    GlassActionButtonItem(icon: viewModel.locationService.isTrackingUser ? "location.fill" : "location", action: {
+                        viewModel.locateUser()
+                    })
                 ])
                 .padding(.trailing, 16)
                 .padding(.top, 4)
@@ -54,6 +57,11 @@ struct FindMapView: View {
                 .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewModel.selectedListing?.id)
+            }
+        }
+        .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
+            if viewModel.locationService.isTrackingUser {
+                viewModel.panToUserLocation()
             }
         }
     }

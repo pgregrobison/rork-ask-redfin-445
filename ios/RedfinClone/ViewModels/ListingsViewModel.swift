@@ -24,6 +24,7 @@ class ListingsViewModel {
     var locationName: String = "New York City"
     private var geocodeTask: Task<Void, Never>?
     private let geocoder = CLGeocoder()
+    let locationService = LocationService()
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
@@ -98,6 +99,25 @@ class ListingsViewModel {
     func dismissOverlay() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
             selectedListing = nil
+        }
+    }
+
+    func persistMapRegion(_ region: MKCoordinateRegion) {
+        mapPosition = .region(region)
+        locationService.isTrackingUser = false
+    }
+
+    func locateUser() {
+        locationService.locateUser()
+    }
+
+    func panToUserLocation() {
+        guard let location = locationService.userLocation else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            mapPosition = .region(MKCoordinateRegion(
+                center: location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+            ))
         }
     }
 
