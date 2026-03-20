@@ -20,12 +20,16 @@ struct ListingDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 16) {
+                HStack(spacing: 4) {
                     ShareLink(item: listing.shareText) {
                         Image(systemName: "square.and.arrow.up")
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     Button(action: onToggleSave) {
                         Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
             }

@@ -53,7 +53,7 @@ struct FindView: View {
             }
 
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 8) {
+                HStack(spacing: 4) {
                     if viewModel.showListView {
                         Menu {
                             ForEach(SortOption.allCases, id: \.self) { option in
@@ -70,11 +70,15 @@ struct FindView: View {
                             }
                         } label: {
                             Image(systemName: "arrow.up.arrow.down")
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
                         }
                     }
 
                     Button {} label: {
                         Image(systemName: "person.crop.circle")
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
             }
