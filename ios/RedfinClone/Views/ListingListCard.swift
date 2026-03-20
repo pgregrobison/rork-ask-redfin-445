@@ -29,7 +29,7 @@ struct ListingListCard: View {
             .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
             .overlay(alignment: .bottomTrailing) {
                 Image(systemName: "mappin.circle")
-                    .font(.system(size: 28))
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.white)
                     .shadow(radius: 4)
                     .padding(12)
@@ -55,18 +55,24 @@ struct ListingListCard: View {
 
                 Spacer()
 
-                HStack(spacing: 12) {
+                HStack(spacing: 4) {
                     ShareLink(item: listing.shareText) {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 17))
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.secondary)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
 
                     Button(action: onToggleSave) {
                         Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 17))
+                            .font(.system(size: 20, weight: .semibold))
+                            .contentTransition(.symbolEffect(.replace))
                             .foregroundStyle(isSaved ? .primary : .secondary)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .sensoryFeedback(.selection, trigger: isSaved)
                 }
             }
 

@@ -65,17 +65,23 @@ struct ChatMessageBubble: View {
     }
 
     private var feedbackButtons: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 8) {
             Button { onFeedback(.thumbsUp) } label: {
                 Image(systemName: message.feedback == .thumbsUp ? "hand.thumbsup.fill" : "hand.thumbsup")
-                    .font(.system(size: 14))
+                    .font(.system(size: 20, weight: .semibold))
+                    .contentTransition(.symbolEffect(.replace))
                     .foregroundStyle(message.feedback == .thumbsUp ? .primary : Color.secondary.opacity(0.5))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
 
             Button { onFeedback(.thumbsDown) } label: {
                 Image(systemName: message.feedback == .thumbsDown ? "hand.thumbsdown.fill" : "hand.thumbsdown")
-                    .font(.system(size: 14))
+                    .font(.system(size: 20, weight: .semibold))
+                    .contentTransition(.symbolEffect(.replace))
                     .foregroundStyle(message.feedback == .thumbsDown ? .primary : Color.secondary.opacity(0.5))
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
         }
         .padding(.horizontal, 16)

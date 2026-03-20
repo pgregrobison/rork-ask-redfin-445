@@ -70,7 +70,7 @@ struct MyHomeView: View {
     private func featureTile(icon: String, title: String, description: String) -> some View {
         VStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 24))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.primary)
 
             Text(title)

@@ -23,7 +23,7 @@ struct TourRouteMapWidget: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 Image(systemName: "map")
-                    .font(.system(size: 18))
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(.primary)
 
                 VStack(alignment: .leading, spacing: 2) {

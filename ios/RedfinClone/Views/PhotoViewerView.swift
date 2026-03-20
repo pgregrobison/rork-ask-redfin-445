@@ -55,8 +55,10 @@ struct PhotoViewerView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
-                            .fontWeight(.semibold)
+                            .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
                 ToolbarItem(placement: .principal) {
