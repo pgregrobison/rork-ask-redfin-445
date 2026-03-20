@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "Redfin Clone",
+      "path": "ios",
+      "framework": "swift"
+    }
+  ]
+}
