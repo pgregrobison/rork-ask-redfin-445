@@ -13,6 +13,11 @@ struct ListingListCard: View {
         }
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 16))
+        .overlay(alignment: .topTrailing) {
+            cardActions
+                .padding(.top, 4)
+                .padding(.trailing, 4)
+        }
     }
 
     private var photoSection: some View {
@@ -47,34 +52,32 @@ struct ListingListCard: View {
             }
     }
 
+    private var cardActions: some View {
+        HStack(spacing: 4) {
+            ShareLink(item: listing.shareText) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+
+            Button(action: onToggleSave) {
+                Image(systemName: isSaved ? "heart.fill" : "heart")
+                    .font(.system(size: 20, weight: .semibold))
+                    .contentTransition(.symbolEffect(.replace))
+                    .foregroundStyle(isSaved ? .primary : .secondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .sensoryFeedback(.selection, trigger: isSaved)
+        }
+    }
+
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                Text(listing.formattedFullPrice)
-                    .font(.title2.bold())
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    ShareLink(item: listing.shareText) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-
-                    Button(action: onToggleSave) {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 20, weight: .semibold))
-                            .contentTransition(.symbolEffect(.replace))
-                            .foregroundStyle(isSaved ? .primary : .secondary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .sensoryFeedback(.selection, trigger: isSaved)
-                }
-            }
+            Text(listing.formattedFullPrice)
+                .font(.title2.bold())
 
             HStack(spacing: 8) {
                 Text("\(listing.beds) bd")

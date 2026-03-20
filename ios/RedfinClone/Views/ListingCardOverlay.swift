@@ -64,50 +64,47 @@ struct ListingCardOverlay: View {
     }
 
     private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(listing.formattedFullPrice)
-                        .font(.title2.bold())
+        VStack(alignment: .leading, spacing: 4) {
+            Text(listing.formattedFullPrice)
+                .font(.title2.bold())
 
-                    HStack(spacing: 8) {
-                        Text("\(listing.beds) beds")
-                        Text("•")
-                        Text("\(listing.bathsFormatted) baths")
-                        Text("•")
-                        Text("\(listing.sqft.formatted()) sq. ft.")
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                    Text(listing.fullAddress)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    ShareLink(item: listing.shareText) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-
-                    Button(action: onToggleSave) {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 20, weight: .semibold))
-                            .contentTransition(.symbolEffect(.replace))
-                            .foregroundStyle(isSaved ? .primary : .secondary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .sensoryFeedback(.selection, trigger: isSaved)
-                }
+            HStack(spacing: 8) {
+                Text("\(listing.beds) beds")
+                Text("•")
+                Text("\(listing.bathsFormatted) baths")
+                Text("•")
+                Text("\(listing.sqft.formatted()) sq. ft.")
             }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+
+            Text(listing.fullAddress)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
         .padding(16)
+        .overlay(alignment: .topTrailing) {
+            HStack(spacing: 4) {
+                ShareLink(item: listing.shareText) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+
+                Button(action: onToggleSave) {
+                    Image(systemName: isSaved ? "heart.fill" : "heart")
+                        .font(.system(size: 20, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
+                        .foregroundStyle(isSaved ? .primary : .secondary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .sensoryFeedback(.selection, trigger: isSaved)
+            }
+            .padding(.top, 4)
+            .padding(.trailing, 4)
+        }
     }
 }

@@ -69,14 +69,8 @@ struct ChatListingCards: View {
                 }
 
             VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text(listing.formattedFullPrice)
-                        .font(.title3.bold())
-                    Spacer()
-                    Image(systemName: "heart")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                }
+                Text(listing.formattedFullPrice)
+                    .font(.title3.bold())
 
                 HStack(spacing: 6) {
                     Text("\(listing.beds) bd")
@@ -104,6 +98,15 @@ struct ChatListingCards: View {
         .frame(width: 300)
         .background(Color(.systemBackground))
         .clipShape(.rect(cornerRadius: 12))
+        .overlay(alignment: .topTrailing) {
+            Image(systemName: "heart")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+                .padding(.top, 4)
+                .padding(.trailing, 4)
+        }
         .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
     }
 }
