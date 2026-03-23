@@ -68,19 +68,19 @@ struct ChatMessageBubble: View {
         HStack(spacing: 8) {
             Button { onFeedback(.thumbsUp) } label: {
                 Image(systemName: message.feedback == .thumbsUp ? "hand.thumbsup.fill" : "hand.thumbsup")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.small, weight: .semibold))
                     .contentTransition(.symbolEffect(.replace))
                     .foregroundStyle(message.feedback == .thumbsUp ? .primary : Color.secondary.opacity(0.5))
-                    .frame(width: 44, height: 44)
+                    .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                     .contentShape(Rectangle())
             }
 
             Button { onFeedback(.thumbsDown) } label: {
                 Image(systemName: message.feedback == .thumbsDown ? "hand.thumbsdown.fill" : "hand.thumbsdown")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.small, weight: .semibold))
                     .contentTransition(.symbolEffect(.replace))
                     .foregroundStyle(message.feedback == .thumbsDown ? .primary : Color.secondary.opacity(0.5))
-                    .frame(width: 44, height: 44)
+                    .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                     .contentShape(Rectangle())
             }
         }

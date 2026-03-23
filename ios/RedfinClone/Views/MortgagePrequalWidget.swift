@@ -30,7 +30,7 @@ struct MortgagePrequalWidget: View {
     private var headerView: some View {
         HStack(spacing: 10) {
             Image(systemName: "banknote")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -167,7 +167,7 @@ struct MortgagePrequalWidget: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "checkmark.circle")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(Theme.redfinGreenColor)
                 Text("Prequalification Complete!")
                     .font(.headline)

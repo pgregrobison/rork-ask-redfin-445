@@ -34,7 +34,7 @@ struct TourSchedulerWidget: View {
     private var headerView: some View {
         HStack(spacing: 10) {
             Image(systemName: "calendar.badge.clock")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -114,7 +114,7 @@ struct TourSchedulerWidget: View {
     private var confirmationView: some View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.circle")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(Theme.redfinGreenColor)
 
             VStack(alignment: .leading, spacing: 4) {

@@ -87,18 +87,18 @@ struct ListingCardOverlay: View {
             HStack(spacing: 4) {
                 ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
                         .foregroundStyle(.secondary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                         .contentShape(Rectangle())
                 }
 
                 Button(action: onToggleSave) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
                         .contentTransition(.symbolEffect(.replace))
                         .foregroundStyle(isSaved ? .primary : .secondary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                         .contentShape(Rectangle())
                 }
                 .sensoryFeedback(.selection, trigger: isSaved)

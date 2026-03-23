@@ -1,22 +1,24 @@
-# Replace AI Chat with Keyword-Based Demo Responses
+# Define Medium & Small icon sizes across the app
 
-## What's Changing
+**Summary**
 
-The chat currently tries to connect to a real AI service (which fails). We'll replace it with a simple keyword-matching system that responds to specific words/phrases with pre-written replies — no internet connection needed.
+Introduce two standardized icon sizes — **Medium** (18pt, 44pt tap area) and **Small** (15pt, 36pt tap area) — replacing the current 20pt/44pt default everywhere (except the tab bar and Ask Redfin FAB, which stay as-is).
 
----
+**What changes**
 
-**Features**
+- **Medium icons (18pt / 44×44pt tap)** — used in:
+  - All toolbar/nav bar icons (Find view: list/map toggle, filter, sort, profile; Detail view: share, heart; Photo viewer: close; Ask Redfin: close button)
+  - Map action buttons (glass action buttons & stacks)
+  - Input bar icons in Ask Redfin (sparkle, mic, stop)
+  - Widget header icons (mortgage, tour scheduler, tour route map, market insight)
+  - "Show on map" button icon in chat listing cards
+  - Detail view content icons (mappin, key facts, hot home badge, disclosure rows)
+  - MyHome feature tile icons
+  - ForYou market insight icon
 
-- Type anything containing **"home"**, **"house"**, **"apartment"**, **"condo"**, **"listing"**, or **"find"** → the bot responds with a brief message and shows property listing cards from the mock data
-- Type anything containing **"tour"**, **"schedule"**, or **"visit"** → the bot suggests scheduling a tour with a helpful message
-- Any other message → the bot replies with a friendly nudge like *"I can help you find homes or schedule tours. Try asking me about homes in NYC!"*
-- Responses appear with a **simulated typing animation** (characters stream in with a short delay) so it feels realistic
-- The "thinking" indicator still shows briefly before the response starts streaming
-- Everything works **fully offline** — no network calls, no API keys needed
+- **Small icons (15pt / 36×36pt tap)** — used in:
+  - Property card actions (share & heart on ListingListCard, ListingCardOverlay, ChatListingCards)
+  - Chat thumbs up/down feedback buttons
+  - Mappin icon on property card photos
 
-**What stays the same**
-
-- All existing chat UI (bubbles, listing cards, thread management, feedback buttons)
-- The search/filter logic that picks which listings to show
-- Thread history and persistence
+- **No changes** to the tab bar icons or Ask Redfin floating action button

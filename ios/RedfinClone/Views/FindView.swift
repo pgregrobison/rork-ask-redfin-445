@@ -21,7 +21,7 @@ struct FindView: View {
                         viewModel.showListView.toggle()
                     } label: {
                         Image(systemName: viewModel.showListView ? "map" : "list.bullet")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .contentTransition(.symbolEffect(.replace))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
@@ -29,7 +29,7 @@ struct FindView: View {
 
                     Button {} label: {
                         Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
@@ -73,7 +73,7 @@ struct FindView: View {
                             }
                         } label: {
                             Image(systemName: "arrow.up.arrow.down")
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                                 .frame(width: 44, height: 44)
                                 .contentShape(Rectangle())
                         }
@@ -81,7 +81,7 @@ struct FindView: View {
 
                     Button {} label: {
                         Image(systemName: "person.crop.circle")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }

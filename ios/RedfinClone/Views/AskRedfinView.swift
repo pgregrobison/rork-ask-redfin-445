@@ -24,7 +24,7 @@ struct AskRedfinView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: onDismiss) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(.secondary)
                             .frame(width: 44, height: 44)
@@ -166,7 +166,7 @@ struct AskRedfinView: View {
     private var inputBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "sparkle")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
 
             TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
@@ -180,7 +180,7 @@ struct AskRedfinView: View {
             if chatViewModel.isTourDayThread {
                 Button { showVoiceMode = true } label: {
                     Image(systemName: "mic.fill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
@@ -192,7 +192,7 @@ struct AskRedfinView: View {
                     chatViewModel.stopStreaming()
                 } label: {
                     Image(systemName: "stop.circle.fill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())

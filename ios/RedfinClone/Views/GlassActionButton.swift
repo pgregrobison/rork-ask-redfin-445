@@ -9,7 +9,7 @@ struct GlassActionButton: View {
         if #available(iOS 26.0, *) {
             Button(action: action) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
                     .frame(width: 44, height: 44)
                     .contentShape(Circle())
@@ -18,7 +18,7 @@ struct GlassActionButton: View {
         } else {
             Button(action: action) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
@@ -38,7 +38,7 @@ struct GlassActionMenuButton<MenuContent: View>: View {
                 menuContent()
             } label: {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
                     .frame(width: 44, height: 44)
                     .contentShape(Circle())
@@ -49,7 +49,7 @@ struct GlassActionMenuButton<MenuContent: View>: View {
                 menuContent()
             } label: {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
@@ -80,7 +80,7 @@ struct GlassActionButtonStack: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 Button(action: item.action) {
                     Image(systemName: item.icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                 }
@@ -104,7 +104,7 @@ private struct GlassActionButtonStackIOS26: View {
                 ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                     Button(action: item.action) {
                         Image(systemName: item.icon)
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
                             .frame(width: 44, height: 44)
                     }
@@ -136,7 +136,7 @@ struct GlassActionButtonRow: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 Button(action: item.action) {
                     Image(systemName: item.icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                 }
@@ -160,7 +160,7 @@ private struct GlassActionButtonRowIOS26: View {
                 ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                     Button(action: item.action) {
                         Image(systemName: item.icon)
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
                             .frame(width: 44, height: 44)
                     }

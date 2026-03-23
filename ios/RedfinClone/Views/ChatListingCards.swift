@@ -33,7 +33,7 @@ struct ChatListingCards: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "map")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         Text("Show on map")
                             .font(.subheadline.weight(.semibold))
                     }
@@ -62,7 +62,7 @@ struct ChatListingCards: View {
                 .clipShape(.rect(topLeadingRadius: 12, topTrailingRadius: 12))
                 .overlay(alignment: .bottomTrailing) {
                     Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.white, Color(white: 0.2))
                         .padding(10)
@@ -100,9 +100,9 @@ struct ChatListingCards: View {
         .clipShape(.rect(cornerRadius: 12))
         .overlay(alignment: .topTrailing) {
             Image(systemName: "heart")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.small, weight: .semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 44, height: 44)
+                .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                 .contentShape(Rectangle())
                 .padding(.top, 4)
                 .padding(.trailing, 4)

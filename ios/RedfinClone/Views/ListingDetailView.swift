@@ -23,13 +23,13 @@ struct ListingDetailView: View {
                 HStack(spacing: 4) {
                     ShareLink(item: listing.shareText) {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
                     Button(action: onToggleSave) {
                         Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .contentTransition(.symbolEffect(.replace))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
@@ -148,7 +148,7 @@ struct ListingDetailView: View {
             Spacer()
 
             Image(systemName: "mappin.circle")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(Theme.redfinGreenColor)
                 .frame(width: 44, height: 44)
                 .background(Color(.tertiarySystemBackground), in: Circle())
@@ -220,7 +220,7 @@ struct ListingDetailView: View {
     private func keyFactRow(icon: String, value: String, label: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28)
 
@@ -238,7 +238,7 @@ struct ListingDetailView: View {
     private var hotHomeBadge: some View {
         HStack(spacing: 10) {
             Image(systemName: "flame")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Hot Home")
@@ -289,7 +289,7 @@ struct ListingDetailView: View {
         Button(action: {}) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .frame(width: 28)
                 Text(title)
@@ -322,7 +322,7 @@ struct ListingDetailView: View {
 
                 Button(action: {}) {
                     Image(systemName: "sparkle")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                 }
@@ -339,7 +339,7 @@ struct ListingDetailView: View {
 
                 Button(action: {}) {
                     Image(systemName: "sparkle")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
                         .background(.ultraThinMaterial, in: Circle())

@@ -170,7 +170,7 @@ struct ForYouView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: "chart.bar")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(.primary)
                 Text("Market Insight")
                     .font(.headline)
