@@ -5,63 +5,78 @@ struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let onToggleSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
     @State private var focusedPhotoIndex: Int? = nil
     @State private var sheetOffset: CGFloat = 0
     @State private var sheetSnap: SheetSnap = .collapsed
     @State private var dragStartOffset: CGFloat = 0
+    @State private var scrolledToTop: Bool = true
+    @State private var focusVisible: Bool = false
 
     private let collapsedPeekHeight: CGFloat = 220
-    private let sheetTopPadding: CGFloat = 100
+    private let headerHeight: CGFloat = 52
 
-    private var maxSheetTravel: CGFloat {
-        UIScreen.main.bounds.height - sheetTopPadding - collapsedPeekHeight
+    private var safeAreaTop: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.top ?? 0
     }
 
-    private var currentSheetY: CGFloat {
-        let screenH = UIScreen.main.bounds.height
-        let collapsedY = screenH - collapsedPeekHeight
-        return collapsedY - sheetOffset
+    private var safeAreaBottom: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.bottom ?? 0
+    }
+
+    private var sheetTopStop: CGFloat {
+        safeAreaTop + headerHeight + 8
+    }
+
+    private var maxSheetTravel: CGFloat {
+        UIScreen.main.bounds.height - sheetTopStop - collapsedPeekHeight
     }
 
     var body: some View {
         GeometryReader { geo in
-            ZStack(alignment: .bottom) {
+            ZStack {
                 photoScroll
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 detailSheet(in: geo)
 
+                navHeader
+
                 stickyFooter
+
+                if focusedPhotoIndex != nil {
+                    focusOverlay
+                }
             }
         }
         .ignoresSafeArea()
         .background(Color(.systemBackground))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    Button(action: onToggleSave) {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .foregroundStyle(isSaved ? .red : .primary)
-                    }
-                    Button(action: {}) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    }
-                }
+        .navigationBarHidden(true)
+    }
+
+    // MARK: - Navigation Header
+
+    private var navHeader: some View {
+        VStack {
+            HStack {
+                GlassActionButton(icon: "chevron.left", action: { dismiss() })
+
+                Spacer()
+
+                GlassActionButtonRow(items: [
+                    GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
+                    GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
+                ])
             }
-        }
-        .fullScreenCover(item: $focusedPhotoIndex) { index in
-            FocusedPhotoViewer(
-                photos: listing.photos,
-                selectedIndex: index,
-                isSaved: isSaved,
-                onToggleSave: onToggleSave,
-                listing: listing
-            )
+            .padding(.horizontal, 16)
+            .padding(.top, safeAreaTop + 4)
+
+            Spacer()
         }
     }
 
@@ -72,7 +87,10 @@ struct ListingDetailView: View {
             VStack(spacing: 2) {
                 ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
                     Button {
-                        focusedPhotoIndex = index
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            focusedPhotoIndex = index
+                            focusVisible = true
+                        }
                     } label: {
                         Color(.tertiarySystemBackground)
                             .frame(height: 300)
@@ -154,20 +172,61 @@ struct ListingDetailView: View {
     }
 
     private var sheetContent: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                headerSection
-                    .padding(.horizontal, 20)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    Color.clear.frame(height: 0).id("sheetTop")
 
-                if sheetSnap == .expanded {
-                    expandedContent
+                    headerSection
+                        .padding(.horizontal, 20)
+
+                    if sheetSnap == .expanded {
+                        expandedContent
+                    }
+
+                    Color.clear.frame(height: 100)
                 }
-
-                Color.clear.frame(height: 100)
+                .background(
+                    GeometryReader { inner in
+                        Color.clear.preference(
+                            key: ScrollOffsetKey.self,
+                            value: inner.frame(in: .named("sheetScroll")).minY
+                        )
+                    }
+                )
             }
+            .coordinateSpace(name: "sheetScroll")
+            .onPreferenceChange(ScrollOffsetKey.self) { value in
+                scrolledToTop = value >= -1
+            }
+            .scrollDisabled(sheetSnap == .collapsed)
+            .scrollIndicators(.hidden)
+            .simultaneousGesture(
+                sheetSnap == .expanded && scrolledToTop ?
+                DragGesture(minimumDistance: 10)
+                    .onChanged { value in
+                        guard value.translation.height > 0 else { return }
+                        let progress = min(value.translation.height / maxSheetTravel, 1.0)
+                        sheetOffset = maxSheetTravel * (1.0 - progress)
+                    }
+                    .onEnded { value in
+                        let threshold: CGFloat = 80
+                        if value.translation.height > threshold || value.predictedEndTranslation.height > 200 {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                sheetOffset = 0
+                                sheetSnap = .collapsed
+                            }
+                            dragStartOffset = 0
+                        } else {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                sheetOffset = maxSheetTravel
+                            }
+                            dragStartOffset = maxSheetTravel
+                        }
+                    }
+                : nil
+            )
         }
-        .scrollDisabled(sheetSnap == .collapsed)
-        .scrollIndicators(.hidden)
     }
 
     // MARK: - Header Section
@@ -280,10 +339,83 @@ struct ListingDetailView: View {
         .padding(.bottom, max(safeAreaBottom, 12))
     }
 
-    private var safeAreaBottom: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.bottom ?? 0
+    // MARK: - Focus Photo Overlay
+
+    private var focusOverlay: some View {
+        ZStack {
+            Color.black.opacity(focusVisible ? 0.85 : 0)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        focusVisible = false
+                        focusedPhotoIndex = nil
+                    }
+                }
+
+            if let index = focusedPhotoIndex, focusVisible {
+                TabView(selection: Binding(
+                    get: { index },
+                    set: { focusedPhotoIndex = $0 }
+                )) {
+                    ForEach(Array(listing.photos.enumerated()), id: \.offset) { i, url in
+                        AsyncImage(url: URL(string: url)) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else if phase.error != nil {
+                                Color.clear
+                            } else {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .tag(i)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .transition(.opacity)
+            }
+
+            VStack(spacing: 0) {
+                HStack {
+                    GlassActionButton(icon: "xmark") {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            focusVisible = false
+                            focusedPhotoIndex = nil
+                        }
+                    }
+
+                    Spacer()
+
+                    GlassActionButtonRow(items: [
+                        GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
+                        GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
+                    ])
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, safeAreaTop + 4)
+
+                Spacer()
+
+                HStack(spacing: 12) {
+                    Button(action: {}) {
+                        Text("Request showing")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
+                    }
+                    .buttonStyle(.plain)
+
+                    GlassActionButton(icon: "sparkle") {}
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, max(safeAreaBottom, 12))
+            }
+        }
     }
 
     // MARK: - About Section
@@ -460,6 +592,13 @@ struct ListingDetailView: View {
 private enum SheetSnap {
     case collapsed
     case expanded
+}
+
+private struct ScrollOffsetKey: PreferenceKey {
+    nonisolated static let defaultValue: CGFloat = 0
+    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
 }
 
 extension Int: @retroactive Identifiable {

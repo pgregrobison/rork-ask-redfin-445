@@ -1,19 +1,23 @@
-# Restore native toolbar transitions and floating glass footer on details page
+# Refine Details Page Toolbar, Sheet Behavior & Photo Focus View
 
 ## Changes
 
-### **Navigation Toolbar**
-- Remove the custom overlay nav header (the manually positioned glass X/heart/share buttons at the top of the detail page)
-- Use the native navigation bar toolbar instead, so pushing from the map to the detail page gets a smooth, system-animated toolbar transition
-- **Leading toolbar item**: Back chevron button (native back behavior via NavigationStack)
-- **Trailing toolbar items**: Heart (favorite toggle) and share button, styled as glass action buttons
-- The navigation bar will use an inline display mode with a transparent background so the photos show through behind it
+### 2. Sheet Extends to Just Below Header
 
-### **Sticky Footer**
-- Remove the solid `.ultraThinMaterial` background from the footer bar
-- Make it a row of floating, standalone glass buttons — the red "Request showing" pill and the sparkle glass button — sitting directly over the content with no backing bar
-- The buttons themselves provide their own visual weight; no full-width background strip needed
+- Increase the sheet's maximum travel so it reaches just below the custom navigation header (roughly the safe area top + header height)
+- When fully expanded, the sheet will stop right under the toolbar buttons, keeping them always accessible
 
-### **What stays the same**
-- The photo scroll, draggable detail sheet, expanded content, and all detail sections remain unchanged
-- The focused photo viewer keeps its own custom header (since it's a full-screen cover, not a navigation push)
+### 3. Pull-Down-to-Collapse When Fully Expanded
+
+- When the sheet is fully expanded and the scroll is at the top, dragging down anywhere on the sheet will collapse it back to its peek state
+- This uses scroll position tracking: if the user is at the top of the scrollable content and pulls down, the gesture collapses the sheet instead of bouncing the scroll view
+- When the sheet is not fully scrolled to top, normal scrolling behavior is preserved
+
+### 4. Inline Focus Photo View (Not Full-Screen Cover)
+
+- Replace the current full-screen cover photo viewer with an inline overlay that lives inside the details page
+- Tapping a photo darkens the background with a smooth fade and transitions the photo to the center of the screen
+- The same custom glass header (back → close, heart, share) and the same sticky footer ("Request showing" + sparkle button) remain visible throughout
+- Swiping between photos horizontally is supported in the focused state
+- Tapping the background or the close button exits focus mode, reversing the transition smoothly
+
