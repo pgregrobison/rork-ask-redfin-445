@@ -74,7 +74,8 @@ struct ListingCardOverlay: View {
         .overlay(alignment: .topLeading) {
             if let badge = listing.primaryBadge {
                 badgeView(badge)
-                    .padding(12)
+                    .padding(.top, 20)
+                    .padding(.leading, 20)
             }
         }
     }

@@ -76,7 +76,7 @@ struct HomeCardInfoSection: View {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .contentTransition(.symbolEffect(.replace))
-                        .foregroundStyle(isSaved ? .primary : .secondary)
+                        .foregroundStyle(isSaved ? .red : .secondary)
                         .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
