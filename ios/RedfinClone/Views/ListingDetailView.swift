@@ -23,8 +23,6 @@ struct ListingDetailView: View {
                 ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -32,8 +30,6 @@ struct ListingDetailView: View {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .contentTransition(.symbolEffect(.replace))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
                 }
                 .sensoryFeedback(.selection, trigger: isSaved)
             }
