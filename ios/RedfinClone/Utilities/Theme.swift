@@ -7,7 +7,7 @@ enum Theme {
     static let darkCardBackground = Color(white: 0.11)
 
     enum IconSize {
-        static let medium: CGFloat = 18
+        static let medium: CGFloat = 17
         static let mediumTap: CGFloat = 44
         static let small: CGFloat = 15
         static let smallTap: CGFloat = 36

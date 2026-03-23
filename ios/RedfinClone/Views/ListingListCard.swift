@@ -13,11 +13,7 @@ struct ListingListCard: View {
         }
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 16))
-        .overlay(alignment: .topTrailing) {
-            cardActions
-                .padding(.top, 4)
-                .padding(.trailing, 4)
-        }
+
     }
 
     private var photoSection: some View {
@@ -107,5 +103,10 @@ struct ListingListCard: View {
             }
         }
         .padding(16)
+        .overlay(alignment: .topTrailing) {
+            cardActions
+                .padding(.top, 4)
+                .padding(.trailing, 4)
+        }
     }
 }
