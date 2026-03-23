@@ -52,7 +52,7 @@ struct ListingCardOverlay: View {
         .frame(height: 220)
         .clipShape(.rect(topLeadingRadius: 20, topTrailingRadius: 20))
         .overlay(alignment: .topTrailing) {
-            GlassActionButton(icon: "xmark", action: onDismiss, foregroundColor: .white)
+            GlassActionButton(icon: "xmark", action: onDismiss)
                 .padding(12)
         }
         .overlay(alignment: .topLeading) {
