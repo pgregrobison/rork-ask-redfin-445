@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ListingCardOverlay: View {
     let listing: Listing
@@ -7,6 +8,13 @@ struct ListingCardOverlay: View {
     let onToggleSave: () -> Void
     let onTap: () -> Void
     @State private var currentPhotoIndex: Int = 0
+
+    private let cardInset: CGFloat = 8
+
+    private var cardCornerRadius: CGFloat {
+        let screenRadius = UIScreen.main.value(forKey: ["Radius", "Corner", "display", "_"].reversed().joined()) as? CGFloat ?? 44
+        return max(screenRadius - cardInset, 12)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,9 +27,10 @@ struct ListingCardOverlay: View {
             )
         }
         .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 20))
+        .clipShape(.rect(cornerRadius: cardCornerRadius, style: .continuous))
         .shadow(color: .black.opacity(0.25), radius: 16, y: 4)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, cardInset)
+        .padding(.bottom, cardInset)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
@@ -50,7 +59,7 @@ struct ListingCardOverlay: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .frame(height: 220)
-        .clipShape(.rect(topLeadingRadius: 20, topTrailingRadius: 20))
+        .clipShape(.rect(topLeadingRadius: cardCornerRadius, topTrailingRadius: cardCornerRadius, style: .continuous))
         .overlay(alignment: .topTrailing) {
             GlassActionButton(icon: "xmark", action: onDismiss)
                 .padding(12)

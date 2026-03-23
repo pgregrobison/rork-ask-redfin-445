@@ -1,4 +1,7 @@
-# Nudge home card actions 4pt down and 4pt left
+# Full-width map home card with device-matched corner radius
 
-**Change:**
-- Add 4pt of top padding and 4pt of right padding to the card action icons on home cards, pushing them slightly down and to the left from their current position in the upper-right corner of the info section.
+**Changes**
+
+- **Card margins**: The map home card will have 8pt spacing on the left, right, and bottom edges of the screen (reduced from the current 16pt horizontal padding)
+- **Corner radius**: The card's corner radius will be calculated from the device's own screen corner radius minus the 8pt inset, so the card's corners run concentrically with the device edges — this uses Apple's display corner radius API with `.continuous` corner curve for the squircle shape
+- **Fallback**: On devices where the screen corner radius isn't available (e.g. older flat-screen devices), a sensible default (44pt) will be used
