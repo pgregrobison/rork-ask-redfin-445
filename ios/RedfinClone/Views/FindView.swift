@@ -16,23 +16,23 @@ struct FindView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                HStack(spacing: 4) {
-                    Button {
-                        viewModel.showListView.toggle()
-                    } label: {
-                        Image(systemName: viewModel.showListView ? "map" : "list.bullet")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .contentTransition(.symbolEffect(.replace))
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
+                Button {
+                    viewModel.showListView.toggle()
+                } label: {
+                    Image(systemName: viewModel.showListView ? "map" : "list.bullet")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+            }
 
-                    Button {} label: {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
+            ToolbarItem(placement: .topBarLeading) {
+                Button {} label: {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
             }
 
@@ -55,36 +55,36 @@ struct FindView: View {
                 }
             }
 
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 4) {
-                    if viewModel.showListView {
-                        Menu {
-                            ForEach(SortOption.allCases, id: \.self) { option in
-                                Button {
-                                    viewModel.sortOption = option
-                                } label: {
-                                    HStack {
-                                        Text(option.rawValue)
-                                        if viewModel.sortOption == option {
-                                            Image(systemName: "checkmark")
-                                        }
+            if viewModel.showListView {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Button {
+                                viewModel.sortOption = option
+                            } label: {
+                                HStack {
+                                    Text(option.rawValue)
+                                    if viewModel.sortOption == option {
+                                        Image(systemName: "checkmark")
                                     }
                                 }
                             }
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
-                    }
-
-                    Button {} label: {
-                        Image(systemName: "person.crop.circle")
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
+                }
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {} label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
             }
         }
