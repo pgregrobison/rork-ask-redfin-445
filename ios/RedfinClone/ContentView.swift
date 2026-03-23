@@ -45,6 +45,7 @@ struct ContentView: View {
                     isSaved: viewModel.isSaved(listing),
                     onToggleSave: { viewModel.toggleSaved(listing) }
                 )
+                .toolbar(.hidden, for: .tabBar)
                 .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
                 .onDisappear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } }
             }

@@ -5,7 +5,6 @@ struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let onToggleSave: () -> Void
-    @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
     @State private var focusedPhotoIndex: Int? = nil
     @State private var sheetOffset: CGFloat = 0
@@ -33,14 +32,28 @@ struct ListingDetailView: View {
 
                 detailSheet(in: geo)
 
-                navHeader
                 stickyFooter
             }
         }
         .ignoresSafeArea()
         .background(Color(.systemBackground))
-        .navigationBarHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 12) {
+                    Button(action: onToggleSave) {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(isSaved ? .red : .primary)
+                    }
+                    Button(action: {}) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
+                }
+            }
+        }
         .fullScreenCover(item: $focusedPhotoIndex) { index in
             FocusedPhotoViewer(
                 photos: listing.photos,
@@ -240,36 +253,6 @@ struct ListingDetailView: View {
         .transition(.opacity)
     }
 
-    // MARK: - Nav Header
-
-    private var navHeader: some View {
-        VStack {
-            HStack {
-                GlassActionButton(icon: "xmark") {
-                    dismiss()
-                }
-
-                Spacer()
-
-                GlassActionButtonRow(items: [
-                    GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
-                    GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
-                ])
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 4)
-
-            Spacer()
-        }
-        .padding(.top, safeAreaTop)
-    }
-
-    private var safeAreaTop: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.top ?? 0
-    }
-
     // MARK: - Footer
 
     private var stickyFooter: some View {
@@ -294,9 +277,7 @@ struct ListingDetailView: View {
             GlassActionButton(icon: "sparkle") {}
         }
         .padding(.horizontal, 16)
-        .padding(.top, 12)
         .padding(.bottom, max(safeAreaBottom, 12))
-        .background(.ultraThinMaterial)
     }
 
     private var safeAreaBottom: CGFloat {

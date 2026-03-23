@@ -1,38 +1,19 @@
-# Redesign Listing Detail Page with Photo Scroll + Detail Sheet
+# Restore native toolbar transitions and floating glass footer on details page
 
-## Overview
-Completely rebuild the listing detail page to match the Redfin-style design with a full-screen photo scroller behind a draggable detail sheet, plus a focused photo viewer.
+## Changes
 
----
+### **Navigation Toolbar**
+- Remove the custom overlay nav header (the manually positioned glass X/heart/share buttons at the top of the detail page)
+- Use the native navigation bar toolbar instead, so pushing from the map to the detail page gets a smooth, system-animated toolbar transition
+- **Leading toolbar item**: Back chevron button (native back behavior via NavigationStack)
+- **Trailing toolbar items**: Heart (favorite toggle) and share button, styled as glass action buttons
+- The navigation bar will use an inline display mode with a transparent background so the photos show through behind it
 
-### **Features**
+### **Sticky Footer**
+- Remove the solid `.ultraThinMaterial` background from the footer bar
+- Make it a row of floating, standalone glass buttons — the red "Request showing" pill and the sparkle glass button — sitting directly over the content with no backing bar
+- The buttons themselves provide their own visual weight; no full-width background strip needed
 
-- **Vertically scrolling photo gallery** fills the full screen behind the detail sheet
-- **Draggable detail sheet** overlays the photos with two stops: collapsed (showing price, stats, address, map thumbnail) and full height (all details)
-- **Photos scroll independently** from the detail sheet — you can browse photos while the sheet stays in place
-- **Tapping a photo** opens a focused photo viewer with the photo centered on a black background
-- **Swipe left/right** in the focused view to browse all photos
-- **Swipe down or tap back** to dismiss the focused photo viewer
-- **Sticky footer** with "Request showing" button and sparkle button always visible at the bottom
-- **Glass-style navigation buttons** (close, heart, share) float over the photos
-- **Mini map thumbnail** next to the price showing the property's actual location via MapKit
-
----
-
-### **Design**
-
-- **Photo gallery**: Full-bleed photos stacked vertically with 2pt spacing, scrollable behind the sheet
-- **Navigation header**: Glass-effect circular buttons — close (X) on the left, heart + share grouped on the right — floating over the photos with safe area padding
-- **Detail sheet**: White card with rounded top corners, system drag indicator, snaps between a peek height (price + stats + address + map thumbnail) and full screen
-- **Collapsed sheet** shows: bold price, bed/bath/sqft stats, full address, and a small rounded MapKit snapshot on the right
-- **Expanded sheet** reveals: About this home (with "Continue reading"), days/views/favorites stats, Key Facts grid, Hot Home badge, Highlights tags, and more sections
-- **Map thumbnail**: Small rounded rectangle showing a real MapKit snapshot with a green pin at the property location
-- **Footer**: Red "Request showing" button + glass sparkle button, always pinned to the bottom edge above the safe area
-- **Focused photo view**: Black background, photo centered and fitted, same glass nav header (back arrow replaces X), same sticky footer, swipeable between photos
-
----
-
-### **Screens**
-
-1. **Listing Detail (base)** — Full-screen photo scroll with overlaid glass nav buttons, draggable detail sheet at bottom, sticky footer
-2. **Focused Photo Viewer** — Black background, centered photo, back button in nav header, swipe between photos, same sticky footer persists
+### **What stays the same**
+- The photo scroll, draggable detail sheet, expanded content, and all detail sections remain unchanged
+- The focused photo viewer keeps its own custom header (since it's a full-screen cover, not a navigation push)
