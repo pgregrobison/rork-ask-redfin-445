@@ -56,15 +56,10 @@ struct ListingCardOverlay: View {
                 .padding(12)
         }
         .overlay(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 6) {
-                if listing.isListedByRedfin {
-                    badgeView(.listedByRedfin)
-                }
-                if listing.isHotHome {
-                    badgeView(.hot)
-                }
+            if let badge = listing.primaryBadge {
+                badgeView(badge)
+                    .padding(12)
             }
-            .padding(12)
         }
     }
 

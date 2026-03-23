@@ -76,4 +76,15 @@ nonisolated struct Listing: Identifiable, Hashable, Codable, Sendable {
     var shareText: String {
         "\(fullAddress) - \(formattedFullPrice)"
     }
+
+    var primaryBadge: HomeCardBadge? {
+        if daysOnMarket > 0 && daysOnMarket <= 14 {
+            return .daysAgo(daysOnMarket)
+        } else if isHotHome {
+            return .hot
+        } else if isListedByRedfin {
+            return .listedByRedfin
+        }
+        return nil
+    }
 }

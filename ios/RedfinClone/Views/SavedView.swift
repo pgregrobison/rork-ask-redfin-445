@@ -17,7 +17,7 @@ struct SavedView: View {
                                     listing: listing,
                                     size: .large,
                                     isSaved: true,
-                                    badge: listing.isHotHome ? .hot : nil,
+                                    badge: listing.primaryBadge,
                                     onToggleSave: { viewModel.toggleSaved(listing) }
                                 )
                             }

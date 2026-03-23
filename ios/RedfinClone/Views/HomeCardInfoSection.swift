@@ -16,17 +16,18 @@ struct HomeCardInfoSection: View {
             Text(listing.fullAddress)
                 .font(size.addressFont)
                 .foregroundStyle(.secondary)
-                .lineLimit(size.fixedWidth != nil ? 1 : nil)
+                .lineLimit(1)
 
             if !listing.tags.isEmpty {
                 tagsRow
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(size.infoPadding)
         .overlay(alignment: .topTrailing) {
             cardActions
-                .padding(.top, 4)
-                .padding(.trailing, 4)
+                .padding(.top, size.infoPadding.top)
+                .padding(.trailing, size.infoPadding.trailing)
         }
     }
 
@@ -47,12 +48,15 @@ struct HomeCardInfoSection: View {
             ForEach(listing.tags.prefix(3), id: \.self) { tag in
                 Text(tag)
                     .font(size.tagFont)
+                    .lineLimit(1)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Color(.tertiarySystemBackground))
                     .clipShape(Capsule())
             }
         }
+        .lineLimit(1)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var cardActions: some View {
@@ -60,9 +64,9 @@ struct HomeCardInfoSection: View {
             if size.showShareAction {
                 ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.secondary)
-                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
+                        .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
             }
@@ -70,10 +74,10 @@ struct HomeCardInfoSection: View {
             if let onToggleSave {
                 Button(action: onToggleSave) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .contentTransition(.symbolEffect(.replace))
                         .foregroundStyle(isSaved ? .primary : .secondary)
-                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
+                        .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
                 .sensoryFeedback(.selection, trigger: isSaved)

@@ -15,7 +15,7 @@ struct FindListView: View {
                             listing: listing,
                             size: .large,
                             isSaved: viewModel.isSaved(listing),
-                            badge: listing.isHotHome ? .hot : nil,
+                            badge: listing.primaryBadge,
                             onToggleSave: { viewModel.toggleSaved(listing) }
                         )
                     }

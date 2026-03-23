@@ -21,7 +21,7 @@ struct ChatListingCards: View {
                             HomeCard(
                                 listing: listing,
                                 size: .medium,
-                                badge: listing.isHotHome ? .hot : nil
+                                badge: listing.primaryBadge
                             )
                         }
                         .buttonStyle(.plain)

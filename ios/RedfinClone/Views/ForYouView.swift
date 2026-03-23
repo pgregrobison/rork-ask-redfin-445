@@ -54,7 +54,7 @@ struct ForYouView: View {
                         HomeCard(
                             listing: listing,
                             size: .compact(width: 280),
-                            badge: .hot
+                            badge: listing.primaryBadge
                         )
                     }
                     .buttonStyle(.plain)
@@ -73,7 +73,7 @@ struct ForYouView: View {
                         HomeCard(
                             listing: listing,
                             size: .compact(width: 260),
-                            badge: .daysAgo(listing.daysOnMarket)
+                            badge: listing.primaryBadge
                         )
                     }
                     .buttonStyle(.plain)
