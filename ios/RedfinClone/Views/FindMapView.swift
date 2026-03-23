@@ -48,9 +48,9 @@ struct FindMapView: View {
                 )
                 .id(listing.id)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing != nil)
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()

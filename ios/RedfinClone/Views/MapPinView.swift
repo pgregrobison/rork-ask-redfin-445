@@ -15,6 +15,8 @@ struct MapPinView: View {
             .padding(.vertical, 6)
             .background(backgroundColor, in: Capsule())
             .shadow(color: .black.opacity(0.22), radius: 4, y: 2)
+            .padding(2)
+            .contentShape(Rectangle())
             .animation(.easeInOut(duration: 0.2), value: isSelected)
             .animation(.easeInOut(duration: 0.2), value: isSeen)
     }

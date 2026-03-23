@@ -1,7 +1,8 @@
-# Fix map home card close button, pin centering, and smooth panning
+# Fix slow map panning and enlarge pin tap targets
 
-**Changes**
+**Issue 1: Slow map panning**
+- The card appear/disappear animation is currently applied to the entire map + card container, which accidentally double-animates the map camera
+- Move the animation so it only affects the listing card sliding in/out, leaving the map camera free to pan at its intended speed
 
-- **Glass close button with interaction animation**: Update the close (×) button on the map home card to use the interactive liquid glass style (with press animation feedback), matching the map action buttons
-- **Center pin on true screen center**: Remove the vertical offset that pushes the pin above the home card — the pin will now center in the middle of the full screen when selected
-- **Always smooth pin-to-pin panning**: Fix the issue where tapping from one pin to another sometimes snaps instantly — ensure every pan uses a smooth animation by preventing the map's camera-change callback from interrupting the animated position mid-flight
+**Issue 2: Larger pin tap targets**
+- Add 2pt of extra tap area around every map pin so they're easier to tap, without changing the pin's visual size
