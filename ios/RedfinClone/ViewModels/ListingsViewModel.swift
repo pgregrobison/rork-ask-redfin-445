@@ -93,9 +93,19 @@ class ListingsViewModel {
         }
         selectedListing = listing
         markSeen(listing)
-        withAnimation(.easeOut(duration: 0.15)) {
+        panToListing(listing)
+    }
+
+    func panToListing(_ listing: Listing) {
+        let cardFraction: Double = 0.22
+        let latOffset = currentSpan.latitudeDelta * cardFraction
+        let offsetCenter = CLLocationCoordinate2D(
+            latitude: listing.coordinate.latitude - latOffset,
+            longitude: listing.coordinate.longitude
+        )
+        withAnimation(.snappy(duration: 0.35)) {
             mapPosition = .region(MKCoordinateRegion(
-                center: listing.coordinate,
+                center: offsetCenter,
                 span: currentSpan
             ))
         }
