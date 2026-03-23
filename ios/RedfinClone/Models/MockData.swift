@@ -29,7 +29,8 @@ enum MockData {
             tags: ["Central Park proximity", "Private garden", "Historic"],
             daysOnMarket: 7,
             hoaDues: "N/A",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: true
         ),
         Listing(
             id: "2",
@@ -57,7 +58,8 @@ enum MockData {
             tags: ["Skyline views", "Full-service", "New construction"],
             daysOnMarket: 14,
             hoaDues: "$1,850/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "3",
@@ -85,7 +87,8 @@ enum MockData {
             tags: ["Pre-war charm", "Renovated", "Doorman"],
             daysOnMarket: 3,
             hoaDues: "$2,100/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: true
         ),
         Listing(
             id: "4",
@@ -113,7 +116,8 @@ enum MockData {
             tags: ["River views", "Concierge", "Rooftop"],
             daysOnMarket: 21,
             hoaDues: "$1,450/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "5",
@@ -141,7 +145,8 @@ enum MockData {
             tags: ["Harbor views", "Modern finishes", "Family-friendly"],
             daysOnMarket: 35,
             hoaDues: "$980/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "6",
@@ -169,7 +174,8 @@ enum MockData {
             tags: ["White-glove", "Sun-drenched", "Garage"],
             daysOnMarket: 5,
             hoaDues: "$1,600/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: true
         ),
         Listing(
             id: "7",
@@ -197,7 +203,8 @@ enum MockData {
             tags: ["City views", "Pet-friendly", "Doorman"],
             daysOnMarket: 28,
             hoaDues: "$230/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "8",
@@ -225,7 +232,8 @@ enum MockData {
             tags: ["Waterfront", "Balcony", "Skyline views"],
             daysOnMarket: 18,
             hoaDues: "$720/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "9",
@@ -253,7 +261,8 @@ enum MockData {
             tags: ["Landmark", "Luxury finishes", "Pool"],
             daysOnMarket: 2,
             hoaDues: "$1,100/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: true
         ),
         Listing(
             id: "10",
@@ -281,7 +290,8 @@ enum MockData {
             tags: ["Richard Meier", "Terrace", "Hudson views"],
             daysOnMarket: 42,
             hoaDues: "$1,300/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "11",
@@ -309,7 +319,8 @@ enum MockData {
             tags: ["Brownstone", "Exposed brick", "Garden"],
             daysOnMarket: 45,
             hoaDues: "$350/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: false
         ),
         Listing(
             id: "12",
@@ -337,7 +348,8 @@ enum MockData {
             tags: ["Skyline views", "Parking", "Rooftop deck"],
             daysOnMarket: 12,
             hoaDues: "$580/mo",
-            buyerAgentFee: "2.5%"
+            buyerAgentFee: "2.5%",
+            isListedByRedfin: true
         )
     ]
 }

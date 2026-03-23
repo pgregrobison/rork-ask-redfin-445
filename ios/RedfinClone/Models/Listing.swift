@@ -23,6 +23,7 @@ nonisolated struct Listing: Identifiable, Hashable, Codable, Sendable {
     let daysOnMarket: Int
     let hoaDues: String
     let buyerAgentFee: String
+    var isListedByRedfin: Bool = false
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

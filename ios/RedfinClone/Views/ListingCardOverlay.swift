@@ -14,8 +14,8 @@ struct ListingCardOverlay: View {
             infoSection
         }
         .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.3), radius: 20, y: -5)
+        .clipShape(.rect(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.25), radius: 16, y: 4)
         .padding(.horizontal, 16)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
@@ -45,28 +45,62 @@ struct ListingCardOverlay: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .frame(height: 220)
-        .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
+        .clipShape(.rect(topLeadingRadius: 20, topTrailingRadius: 20))
         .overlay(alignment: .topTrailing) {
             GlassActionButton(icon: "xmark", action: onDismiss, foregroundColor: .white)
                 .padding(12)
         }
         .overlay(alignment: .topLeading) {
-            if listing.isHotHome {
-                Text("HOT HOME")
-                    .font(.caption2.bold())
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(white: 0.15), in: Capsule())
-                    .padding(12)
+            VStack(alignment: .leading, spacing: 6) {
+                if listing.isListedByRedfin {
+                    Text("LISTED BY REDFIN")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 4))
+                }
+                if listing.isHotHome {
+                    Text("HOT HOME")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(white: 0.15), in: Capsule())
+                }
             }
+            .padding(12)
         }
     }
 
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(listing.formattedFullPrice)
-                .font(.title2.bold())
+            HStack(alignment: .top) {
+                Text(listing.formattedFullPrice)
+                    .font(.title2.bold())
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    ShareLink(item: listing.shareText) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: Theme.IconSize.small, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
+                            .contentShape(Rectangle())
+                    }
+
+                    Button(action: onToggleSave) {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .font(.system(size: Theme.IconSize.small, weight: .semibold))
+                            .contentTransition(.symbolEffect(.replace))
+                            .foregroundStyle(isSaved ? .primary : .secondary)
+                            .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
+                            .contentShape(Rectangle())
+                    }
+                    .sensoryFeedback(.selection, trigger: isSaved)
+                }
+            }
 
             HStack(spacing: 8) {
                 Text("\(listing.beds) beds")
@@ -82,29 +116,8 @@ struct ListingCardOverlay: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .padding(16)
-        .overlay(alignment: .topTrailing) {
-            HStack(spacing: 4) {
-                ShareLink(item: listing.shareText) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
-                        .contentShape(Rectangle())
-                }
-
-                Button(action: onToggleSave) {
-                    Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                        .foregroundStyle(isSaved ? .primary : .secondary)
-                        .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
-                        .contentShape(Rectangle())
-                }
-                .sensoryFeedback(.selection, trigger: isSaved)
-            }
-            .padding(.top, 4)
-            .padding(.trailing, 4)
-        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 14)
     }
 }
