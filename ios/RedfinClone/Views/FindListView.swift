@@ -11,9 +11,11 @@ struct FindListView: View {
                     Button {
                         onListingTap(listing)
                     } label: {
-                        ListingListCard(
+                        HomeCard(
                             listing: listing,
+                            size: .large,
                             isSaved: viewModel.isSaved(listing),
+                            badge: listing.isHotHome ? .hot : nil,
                             onToggleSave: { viewModel.toggleSaved(listing) }
                         )
                     }

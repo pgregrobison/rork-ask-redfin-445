@@ -18,7 +18,11 @@ struct ChatListingCards: View {
                 HStack(spacing: 12) {
                     ForEach(matchedListings) { listing in
                         Button { onListingTap(listing) } label: {
-                            listingCard(listing)
+                            HomeCard(
+                                listing: listing,
+                                size: .medium,
+                                badge: listing.isHotHome ? .hot : nil
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -45,68 +49,5 @@ struct ChatListingCards: View {
                 .padding(.horizontal, 16)
             }
         }
-    }
-
-    private func listingCard(_ listing: Listing) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Color(.secondarySystemBackground)
-                .frame(width: 300, height: 220)
-                .overlay {
-                    AsyncImage(url: URL(string: listing.photos.first ?? "")) { phase in
-                        if let image = phase.image {
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        }
-                    }
-                    .allowsHitTesting(false)
-                }
-                .clipShape(.rect(topLeadingRadius: 12, topTrailingRadius: 12))
-                .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(.white, Color(white: 0.2))
-                        .padding(10)
-                }
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(listing.formattedFullPrice)
-                    .font(.title3.bold())
-
-                HStack(spacing: 6) {
-                    Text("\(listing.beds) bd")
-                    Text("\(listing.bathsFormatted) ba")
-                    Text("\(listing.sqft.formatted()) sq ft")
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-                Text(listing.fullAddress)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-
-                if !listing.tags.isEmpty {
-                    Text(listing.tags.prefix(3).joined(separator: " · "))
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-        }
-        .frame(width: 300)
-        .background(Color(.systemBackground))
-        .clipShape(.rect(cornerRadius: 12))
-        .overlay(alignment: .topTrailing) {
-            Image(systemName: "heart")
-                .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
-                .contentShape(Rectangle())
-                .padding(.top, 4)
-                .padding(.trailing, 4)
-        }
-        .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
     }
 }

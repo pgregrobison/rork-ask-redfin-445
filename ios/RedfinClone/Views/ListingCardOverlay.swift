@@ -11,7 +11,12 @@ struct ListingCardOverlay: View {
     var body: some View {
         VStack(spacing: 0) {
             photoCarousel
-            infoSection
+            HomeCardInfoSection(
+                listing: listing,
+                size: .large,
+                isSaved: isSaved,
+                onToggleSave: onToggleSave
+            )
         }
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 20))
@@ -53,71 +58,22 @@ struct ListingCardOverlay: View {
         .overlay(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 6) {
                 if listing.isListedByRedfin {
-                    Text("LISTED BY REDFIN")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 4))
+                    badgeView(.listedByRedfin)
                 }
                 if listing.isHotHome {
-                    Text("HOT HOME")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(white: 0.15), in: Capsule())
+                    badgeView(.hot)
                 }
             }
             .padding(12)
         }
     }
 
-    private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .top) {
-                Text(listing.formattedFullPrice)
-                    .font(.title2.bold())
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    ShareLink(item: listing.shareText) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
-                            .contentShape(Rectangle())
-                    }
-
-                    Button(action: onToggleSave) {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: Theme.IconSize.small, weight: .semibold))
-                            .contentTransition(.symbolEffect(.replace))
-                            .foregroundStyle(isSaved ? .primary : .secondary)
-                            .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
-                            .contentShape(Rectangle())
-                    }
-                    .sensoryFeedback(.selection, trigger: isSaved)
-                }
-            }
-
-            HStack(spacing: 8) {
-                Text("\(listing.beds) beds")
-                Text("•")
-                Text("\(listing.bathsFormatted) baths")
-                Text("•")
-                Text("\(listing.sqft.formatted()) sq. ft.")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-
-            Text(listing.fullAddress)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 14)
+    private func badgeView(_ badge: HomeCardBadge) -> some View {
+        Text(badge.text)
+            .font(.caption2.bold())
+            .foregroundStyle(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(badge.color, in: .rect(cornerRadius: 6))
     }
 }

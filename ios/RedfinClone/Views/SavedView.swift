@@ -13,9 +13,11 @@ struct SavedView: View {
                     LazyVStack(spacing: 16) {
                         ForEach(viewModel.savedListings) { listing in
                             Button { onListingTap(listing) } label: {
-                                ListingListCard(
+                                HomeCard(
                                     listing: listing,
+                                    size: .large,
                                     isSaved: true,
+                                    badge: listing.isHotHome ? .hot : nil,
                                     onToggleSave: { viewModel.toggleSaved(listing) }
                                 )
                             }
