@@ -112,7 +112,9 @@ class ListingsViewModel {
     }
 
     func dismissOverlay() {
-        selectedListing = nil
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            selectedListing = nil
+        }
     }
 
     func persistMapRegion(_ region: MKCoordinateRegion) {
