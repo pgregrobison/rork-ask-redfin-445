@@ -1,7 +1,8 @@
-# Full-width map home card with device-matched corner radius
+# Adjust home card actions padding and map home card positioning
 
-**Changes**
+Three tweaks to the home card layout:
 
-- **Card margins**: The map home card will have 8pt spacing on the left, right, and bottom edges of the screen (reduced from the current 16pt horizontal padding)
-- **Corner radius**: The card's corner radius will be calculated from the device's own screen corner radius minus the 8pt inset, so the card's corners run concentrically with the device edges — this uses Apple's display corner radius API with `.continuous` corner curve for the squircle shape
-- **Fallback**: On devices where the screen corner radius isn't available (e.g. older flat-screen devices), a sensible default (44pt) will be used
+1. **Add 8pt right padding to home card actions** — The share/heart action buttons in the info section get an extra 8pt of right padding
+2. **Move the map home card into the safe area** — The card will extend down so it sits 8pt from the actual device edge (ignoring the safe area at the bottom)
+3. **Modify the interior home card padding to 20pt**
+

@@ -9,28 +9,35 @@ struct ListingCardOverlay: View {
     let onTap: () -> Void
     @State private var currentPhotoIndex: Int = 0
 
-    private let cardInset: CGFloat = 8
+    private let cardInset: CGFloat = 20
+    private let deviceEdgeInset: CGFloat = 8
 
     private var cardCornerRadius: CGFloat {
         let screenRadius = UIScreen.main.value(forKey: ["Radius", "Corner", "display", "_"].reversed().joined()) as? CGFloat ?? 44
-        return max(screenRadius - cardInset, 12)
+        return max(screenRadius - deviceEdgeInset, 12)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            photoCarousel
-            HomeCardInfoSection(
-                listing: listing,
-                size: .large,
-                isSaved: isSaved,
-                onToggleSave: onToggleSave
-            )
+        GeometryReader { geo in
+            VStack {
+                Spacer()
+                VStack(spacing: 0) {
+                    photoCarousel
+                    HomeCardInfoSection(
+                        listing: listing,
+                        size: .large,
+                        isSaved: isSaved,
+                        onToggleSave: onToggleSave
+                    )
+                }
+                .background(Color(.secondarySystemBackground))
+                .clipShape(.rect(cornerRadius: cardCornerRadius, style: .continuous))
+                .shadow(color: .black.opacity(0.25), radius: 16, y: 4)
+                .padding(.horizontal, cardInset)
+                .padding(.bottom, max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0))
+            }
         }
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: cardCornerRadius, style: .continuous))
-        .shadow(color: .black.opacity(0.25), radius: 16, y: 4)
-        .padding(.horizontal, cardInset)
-        .padding(.bottom, cardInset)
+        .ignoresSafeArea(edges: .bottom)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
