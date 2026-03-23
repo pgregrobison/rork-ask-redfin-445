@@ -26,7 +26,7 @@ struct HomeCardInfoSection: View {
         .padding(size.infoPadding)
         .overlay(alignment: .topTrailing) {
             cardActions
-                .padding(.top, 4)
+                .padding(.top, size.fixedWidth == nil ? 8 : 4)
                 .padding(.trailing, 12)
         }
     }
