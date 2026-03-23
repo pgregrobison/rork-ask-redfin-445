@@ -1,8 +1,4 @@
-# Fix map home card close button color for light/dark mode
+# Nudge home card actions 4pt down and 4pt left
 
 **Change:**
-
-- Update the close ("X") button on the map home card to use the same adaptive color as all other glass action buttons
-- Currently it's forced to white, which doesn't respond to light/dark mode
-- It will use the default `.primary` color, matching the rest of the glass actions
-
+- Add 4pt of top padding and 4pt of right padding to the card action icons on home cards, pushing them slightly down and to the left from their current position in the upper-right corner of the info section.
