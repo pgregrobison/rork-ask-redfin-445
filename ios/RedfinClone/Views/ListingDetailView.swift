@@ -1,87 +1,211 @@
 import SwiftUI
+import MapKit
 
 struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let onToggleSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
-    @State private var showPhotoViewer: Bool = false
-    @State private var selectedPhotoIndex: Int = 0
+    @State private var focusedPhotoIndex: Int? = nil
+    @State private var sheetOffset: CGFloat = 0
+    @State private var sheetSnap: SheetSnap = .collapsed
+    @State private var dragStartOffset: CGFloat = 0
+
+    private let collapsedPeekHeight: CGFloat = 220
+    private let sheetTopPadding: CGFloat = 100
+
+    private var maxSheetTravel: CGFloat {
+        UIScreen.main.bounds.height - sheetTopPadding - collapsedPeekHeight
+    }
+
+    private var currentSheetY: CGFloat {
+        let screenH = UIScreen.main.bounds.height
+        let collapsedY = screenH - collapsedPeekHeight
+        return collapsedY - sheetOffset
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                photoGallery
-                detailContent
+        GeometryReader { geo in
+            ZStack(alignment: .bottom) {
+                photoScroll
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                detailSheet(in: geo)
+
+                navHeader
+                stickyFooter
             }
         }
-        .ignoresSafeArea(edges: .top)
+        .ignoresSafeArea()
         .background(Color(.systemBackground))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: listing.shareText) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: onToggleSave) {
-                    Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                }
-                .sensoryFeedback(.selection, trigger: isSaved)
-            }
-        }
-        .fullScreenCover(isPresented: $showPhotoViewer) {
-            PhotoViewerView(
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .fullScreenCover(item: $focusedPhotoIndex) { index in
+            FocusedPhotoViewer(
                 photos: listing.photos,
-                selectedIndex: $selectedPhotoIndex
+                selectedIndex: index,
+                isSaved: isSaved,
+                onToggleSave: onToggleSave,
+                listing: listing
             )
         }
     }
 
-    private var photoGallery: some View {
-        VStack(spacing: 2) {
-            ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
-                Button {
-                    selectedPhotoIndex = index
-                    showPhotoViewer = true
-                } label: {
-                    Color(.tertiarySystemBackground)
-                        .frame(height: 300)
-                        .overlay {
-                            AsyncImage(url: URL(string: url)) { phase in
-                                if let image = phase.image {
-                                    image.resizable().aspectRatio(contentMode: .fill)
-                                } else if phase.error != nil {
-                                    Color(.tertiarySystemBackground)
-                                } else {
-                                    ProgressView()
+    // MARK: - Photo Scroll
+
+    private var photoScroll: some View {
+        ScrollView {
+            VStack(spacing: 2) {
+                ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
+                    Button {
+                        focusedPhotoIndex = index
+                    } label: {
+                        Color(.tertiarySystemBackground)
+                            .frame(height: 300)
+                            .overlay {
+                                AsyncImage(url: URL(string: url)) { phase in
+                                    if let image = phase.image {
+                                        image.resizable().aspectRatio(contentMode: .fill)
+                                    } else if phase.error != nil {
+                                        Color(.tertiarySystemBackground)
+                                    } else {
+                                        ProgressView()
+                                    }
                                 }
+                                .allowsHitTesting(false)
                             }
-                            .allowsHitTesting(false)
-                        }
-                        .clipped()
+                            .clipped()
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+
+                Color.clear.frame(height: collapsedPeekHeight + 80)
             }
         }
+        .scrollIndicators(.hidden)
     }
 
-    private var detailContent: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    // MARK: - Detail Sheet
+
+    private func detailSheet(in geo: GeometryProxy) -> some View {
+        let screenH = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
+
+        return VStack(spacing: 0) {
+            sheetDragHandle
+            sheetContent
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemBackground))
+        .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 10, y: -5)
+        .offset(y: screenH - collapsedPeekHeight - sheetOffset)
+        .gesture(sheetDrag)
+    }
+
+    private var sheetDragHandle: some View {
+        VStack(spacing: 0) {
             Capsule()
                 .fill(Color(.systemGray3))
                 .frame(width: 36, height: 5)
-                .frame(maxWidth: .infinity)
                 .padding(.top, 10)
-                .padding(.bottom, 16)
+                .padding(.bottom, 12)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+    }
 
-            headerSection
-                .padding(.horizontal, 20)
+    private var sheetDrag: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                let translation = -value.translation.height
+                let newOffset = dragStartOffset + translation
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                let velocity = -value.predictedEndTranslation.height / max(1, abs(value.translation.height)) * abs(value.translation.height)
+                let projected = sheetOffset + velocity * 0.2
+                let midPoint = maxSheetTravel * 0.4
 
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    if projected > midPoint {
+                        sheetOffset = maxSheetTravel
+                        sheetSnap = .expanded
+                    } else {
+                        sheetOffset = 0
+                        sheetSnap = .collapsed
+                    }
+                }
+                dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
+            }
+    }
+
+    private var sheetContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                headerSection
+                    .padding(.horizontal, 20)
+
+                if sheetSnap == .expanded {
+                    expandedContent
+                }
+
+                Color.clear.frame(height: 100)
+            }
+        }
+        .scrollDisabled(sheetSnap == .collapsed)
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Header Section
+
+    private var headerSection: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(listing.formattedFullPrice)
+                    .font(.largeTitle.bold())
+
+                HStack(spacing: 8) {
+                    Text("\(listing.beds) bd")
+                    Text("\(listing.bathsFormatted) ba")
+                    Text("\(listing.sqft.formatted()) sq ft")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+                Text(listing.fullAddress)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            miniMapThumbnail
+        }
+    }
+
+    private var miniMapThumbnail: some View {
+        Map(initialPosition: .region(MKCoordinateRegion(
+            center: listing.coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+        ))) {
+            Annotation("", coordinate: listing.coordinate) {
+                Circle()
+                    .fill(Theme.redfinGreenColor)
+                    .frame(width: 12, height: 12)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
+            }
+        }
+        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .allowsHitTesting(false)
+        .frame(width: 70, height: 70)
+        .clipShape(.rect(cornerRadius: 12))
+    }
+
+    // MARK: - Expanded Content
+
+    private var expandedContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
             Divider().padding(.vertical, 16)
 
             aboutSection
@@ -112,44 +236,76 @@ struct ListingDetailView: View {
 
             moreSections
                 .padding(.horizontal, 20)
-
-            Color.clear.frame(height: 100)
         }
-        .background(Color(.systemBackground))
-        .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
-        .offset(y: -16)
+        .transition(.opacity)
     }
 
-    private var headerSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(listing.formattedFullPrice)
-                    .font(.largeTitle.bold())
+    // MARK: - Nav Header
 
-                HStack(spacing: 8) {
-                    Text("\(listing.beds) bd")
-                    Text("·")
-                    Text("\(listing.bathsFormatted) ba")
-                    Text("·")
-                    Text("\(listing.sqft.formatted()) sq ft")
+    private var navHeader: some View {
+        VStack {
+            HStack {
+                GlassActionButton(icon: "xmark") {
+                    dismiss()
                 }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
 
-                Text(listing.fullAddress)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                Spacer()
+
+                GlassActionButtonRow(items: [
+                    GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
+                    GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
+                ])
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
 
             Spacer()
+        }
+        .padding(.top, safeAreaTop)
+    }
 
-            Image(systemName: "mappin.circle")
-                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                .foregroundStyle(Theme.redfinGreenColor)
-                .frame(width: 44, height: 44)
-                .background(Color(.tertiarySystemBackground), in: Circle())
+    private var safeAreaTop: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.top ?? 0
+    }
+
+    // MARK: - Footer
+
+    private var stickyFooter: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            detailFooter
         }
     }
+
+    private var detailFooter: some View {
+        HStack(spacing: 12) {
+            Button(action: {}) {
+                Text("Request showing")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
+            }
+            .buttonStyle(.plain)
+
+            GlassActionButton(icon: "sparkle") {}
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, max(safeAreaBottom, 12))
+        .background(.ultraThinMaterial)
+    }
+
+    private var safeAreaBottom: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.bottom ?? 0
+    }
+
+    // MARK: - About Section
 
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -159,19 +315,27 @@ struct ListingDetailView: View {
             Text(listing.description)
                 .font(.body)
                 .foregroundStyle(.secondary)
-                .lineLimit(showFullDescription ? nil : 3)
+                .lineLimit(showFullDescription ? nil : 4)
 
             if listing.description.count > 120 {
-                Button(showFullDescription ? "Show less" : "Continue reading") {
+                Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showFullDescription.toggle()
                     }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(showFullDescription ? "Show less" : "Continue reading")
+                        Image(systemName: showFullDescription ? "chevron.up" : "chevron.down")
+                            .font(.caption.bold())
+                    }
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color(red: 0.78, green: 0.13, blue: 0.13))
                 }
-                .font(.subheadline.bold())
-                .foregroundStyle(.primary)
             }
         }
     }
+
+    // MARK: - Meta Stats
 
     private var metaStatsRow: some View {
         HStack(spacing: 0) {
@@ -193,6 +357,8 @@ struct ListingDetailView: View {
         }
         .frame(maxWidth: .infinity)
     }
+
+    // MARK: - Key Facts
 
     private var keyFactsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -231,6 +397,8 @@ struct ListingDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    // MARK: - Hot Home
+
     private var hotHomeBadge: some View {
         HStack(spacing: 10) {
             Image(systemName: "flame")
@@ -250,6 +418,8 @@ struct ListingDetailView: View {
         .clipShape(.rect(cornerRadius: 12))
     }
 
+    // MARK: - Highlights
+
     private var highlightsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Highlights")
@@ -267,6 +437,8 @@ struct ListingDetailView: View {
             }
         }
     }
+
+    // MARK: - More Sections
 
     private var moreSections: some View {
         VStack(spacing: 0) {
@@ -302,48 +474,13 @@ struct ListingDetailView: View {
         }
         .buttonStyle(.plain)
     }
+}
 
-    private var bottomActionBar: some View {
-        HStack(spacing: 12) {
-            if #available(iOS 26.0, *) {
-                Button(action: {}) {
-                    Text("Request showing")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(.primary, in: .rect(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
+private enum SheetSnap {
+    case collapsed
+    case expanded
+}
 
-                Button(action: {}) {
-                    Image(systemName: "sparkle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
-                }
-                .glassEffect(.regular.interactive(), in: .circle)
-            } else {
-                Button(action: {}) {
-                    Text("Request showing")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(.primary, in: .rect(cornerRadius: 12))
-                }
-
-                Button(action: {}) {
-                    Image(systemName: "sparkle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .adaptiveGlassBar()
-    }
+extension Int: @retroactive Identifiable {
+    public var id: Int { self }
 }
