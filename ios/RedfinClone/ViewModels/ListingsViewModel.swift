@@ -25,6 +25,7 @@ class ListingsViewModel {
     private var geocodeTask: Task<Void, Never>?
     private let geocoder = CLGeocoder()
     let locationService = LocationService()
+    private var currentSpan = MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
@@ -97,7 +98,7 @@ class ListingsViewModel {
         withAnimation(.easeInOut(duration: 0.4)) {
             mapPosition = .region(MKCoordinateRegion(
                 center: listing.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                span: currentSpan
             ))
         }
     }
@@ -109,6 +110,7 @@ class ListingsViewModel {
     }
 
     func persistMapRegion(_ region: MKCoordinateRegion) {
+        currentSpan = region.span
         mapPosition = .region(region)
         locationService.isTrackingUser = false
     }
