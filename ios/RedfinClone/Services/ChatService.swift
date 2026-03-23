@@ -20,7 +20,7 @@ class ChatService {
     private var appKey: String { Self.env("EXPO_PUBLIC_RORK_APP_KEY") }
 
     private nonisolated static func env(_ key: String) -> String {
-        if let v = Bundle.main.object(forInfoDictionaryKey: key) as? String,
+        if let v = Bundle.main.infoDictionary?[key] as? String,
            !v.isEmpty, !v.hasPrefix("$(") { return v }
         if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return v }
         return ""
@@ -43,7 +43,7 @@ class ChatService {
         let app = appKey
         let sysPrompt = systemPrompt
 
-        let apiMessages = Self.buildAPIMessages(from: messages, systemPrompt: sysPrompt)
+        let apiMessages = Self.buildAPIMessages(from: messages)
         let tools = Self.buildTools()
 
         return AsyncStream { continuation in
@@ -53,6 +53,7 @@ class ChatService {
                     projectId: proj,
                     teamId: team,
                     appKey: app,
+                    systemPrompt: sysPrompt,
                     messages: apiMessages,
                     tools: tools,
                     continuation: continuation
@@ -61,44 +62,60 @@ class ChatService {
         }
     }
 
-    private nonisolated static func buildAPIMessages(from messages: [ChatMessage], systemPrompt: String) -> [[String: Any]] {
-        var result: [[String: Any]] = [
-            ["role": "system", "content": systemPrompt]
-        ]
+    private nonisolated static func buildAPIMessages(from messages: [ChatMessage]) -> [[String: Any]] {
+        var result: [[String: Any]] = []
 
         for msg in messages {
             switch msg.role {
             case .user:
-                result.append(["role": "user", "content": msg.content])
+                result.append([
+                    "role": "user",
+                    "content": msg.content
+                ])
 
             case .assistant:
-                var parts: [[String: Any]] = []
+                if let toolCalls = msg.toolCalls, !toolCalls.isEmpty {
+                    var parts: [[String: Any]] = []
 
-                if !msg.content.isEmpty {
-                    parts.append(["type": "text", "text": msg.content])
-                }
-
-                if let toolCalls = msg.toolCalls {
-                    for tc in toolCalls {
-                        var toolPart: [String: Any] = [
-                            "type": "tool-invocation",
-                            "toolInvocationId": tc.id,
-                            "toolName": tc.name,
-                            "state": "output-available"
-                        ]
-                        if let argsData = tc.arguments.data(using: .utf8),
-                           let argsObj = try? JSONSerialization.jsonObject(with: argsData) {
-                            toolPart["input"] = argsObj
-                        } else {
-                            toolPart["input"] = [String: Any]()
-                        }
-                        toolPart["output"] = tc.result ?? ""
-                        parts.append(toolPart)
+                    if !msg.content.isEmpty {
+                        parts.append(["type": "text", "text": msg.content])
                     }
-                }
 
-                if !parts.isEmpty {
+                    for tc in toolCalls {
+                        var inputObj: Any = [String: Any]()
+                        if let argsData = tc.arguments.data(using: .utf8),
+                           let parsed = try? JSONSerialization.jsonObject(with: argsData) {
+                            inputObj = parsed
+                        }
+
+                        parts.append([
+                            "type": "tool-call",
+                            "toolCallId": tc.id,
+                            "toolName": tc.name,
+                            "args": inputObj
+                        ])
+                    }
+
                     result.append(["role": "assistant", "content": parts])
+
+                    for tc in toolCalls {
+                        result.append([
+                            "role": "tool",
+                            "content": [
+                                [
+                                    "type": "tool-result",
+                                    "toolCallId": tc.id,
+                                    "toolName": tc.name,
+                                    "result": tc.result ?? ""
+                                ] as [String: Any]
+                            ]
+                        ])
+                    }
+                } else if !msg.content.isEmpty {
+                    result.append([
+                        "role": "assistant",
+                        "content": msg.content
+                    ])
                 }
 
             case .system, .tool:
@@ -134,29 +151,31 @@ class ChatService {
         projectId: String,
         teamId: String,
         appKey: String,
+        systemPrompt: String,
         messages: [[String: Any]],
         tools: [String: Any],
         continuation: AsyncStream<StreamEvent>.Continuation
     ) async {
         guard !baseURL.isEmpty else {
-            continuation.yield(StreamEvent(kind: .error("Toolkit URL not configured. The app needs to be rebuilt with environment variables.")))
+            continuation.yield(StreamEvent(kind: .error("Toolkit URL not configured.")))
             continuation.finish()
             return
         }
 
         guard let endpoint = URL(string: "\(baseURL)/agent/chat") else {
-            continuation.yield(StreamEvent(kind: .error("Invalid toolkit URL: \(baseURL)")))
+            continuation.yield(StreamEvent(kind: .error("Invalid toolkit URL.")))
             continuation.finish()
             return
         }
 
         let body: [String: Any] = [
             "messages": messages,
-            "tools": tools
+            "tools": tools,
+            "system": systemPrompt
         ]
 
         guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
-            continuation.yield(StreamEvent(kind: .error("Failed to serialize request body.")))
+            continuation.yield(StreamEvent(kind: .error("Failed to build request.")))
             continuation.finish()
             return
         }
@@ -164,7 +183,6 @@ class ChatService {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         if !projectId.isEmpty { request.setValue(projectId, forHTTPHeaderField: "x-project-id") }
         if !teamId.isEmpty { request.setValue(teamId, forHTTPHeaderField: "x-team-id") }
         if !appKey.isEmpty { request.setValue(appKey, forHTTPHeaderField: "x-app-key") }
@@ -175,7 +193,7 @@ class ChatService {
             let (bytes, response) = try await URLSession.shared.bytes(for: request)
 
             guard let http = response as? HTTPURLResponse else {
-                continuation.yield(StreamEvent(kind: .error("Invalid response from server.")))
+                continuation.yield(StreamEvent(kind: .error("Invalid server response.")))
                 continuation.finish()
                 return
             }
@@ -190,7 +208,7 @@ class ChatService {
                     }
                     errorBody = String(data: data, encoding: .utf8) ?? ""
                 } catch {}
-                continuation.yield(StreamEvent(kind: .error("Server error \(http.statusCode): \(errorBody.prefix(500))")))
+                continuation.yield(StreamEvent(kind: .error("Error \(http.statusCode): \(errorBody.prefix(300))")))
                 continuation.finish()
                 return
             }
