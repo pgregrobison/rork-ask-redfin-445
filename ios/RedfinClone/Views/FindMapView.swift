@@ -4,6 +4,7 @@ import MapKit
 struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
     let onListingTap: (Listing) -> Void
+    @State private var isCardVisible: Bool = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -48,7 +49,18 @@ struct FindMapView: View {
                 )
                 .id(listing.id)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
+            }
+        }
+        .animation(isCardVisible ? nil : .spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
+        .onChange(of: viewModel.selectedListing?.id) { oldValue, newValue in
+            if oldValue == nil && newValue != nil {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isCardVisible = true
+                }
+            } else if newValue == nil {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isCardVisible = false
+                }
             }
         }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in

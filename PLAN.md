@@ -1,12 +1,7 @@
-# Add smooth map panning animation when tapping pins
+# Fix map card animation and smooth panning
 
-**What changes**
+**Two fixes:**
 
-- When you tap a pin, the map will now smoothly slide to center on that pin — just like Apple Maps does
-- Uses a quick spring animation so it feels responsive but not jarring
-- Rapid pin taps will interrupt the previous animation and start sliding to the new pin immediately
+1. **Slide-up animation only on first pin selection** — When tapping a pin while another pin's card is already showing, the card content will crossfade to the new listing instead of sliding up from the bottom again. The slide-up animation will only play when going from no selection to a selection.
 
-**How it works**
-
-- The pin selection already updates the map camera position — it just needs to be wrapped in an animation so MapKit interpolates between the old and new positions instead of jumping instantly
-- Same animation style already used for the "locate me" button, now applied consistently to pin taps too
+2. **Fix instant map snapping** — The map's "remember current region" callback can override an in-progress pan animation, causing the camera to snap. This will be fixed by briefly ignoring region updates while a pan animation is active, ensuring smooth panning every time.

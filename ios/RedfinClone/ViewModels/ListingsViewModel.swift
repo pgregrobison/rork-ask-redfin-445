@@ -26,6 +26,7 @@ class ListingsViewModel {
     private let geocoder = CLGeocoder()
     let locationService = LocationService()
     private var currentSpan = MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
+    private var isPanning: Bool = false
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
@@ -97,11 +98,16 @@ class ListingsViewModel {
     }
 
     func panToListing(_ listing: Listing) {
+        isPanning = true
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
             mapPosition = .region(MKCoordinateRegion(
                 center: listing.coordinate,
                 span: currentSpan
             ))
+        }
+        Task {
+            try? await Task.sleep(for: .milliseconds(400))
+            isPanning = false
         }
     }
 
@@ -111,6 +117,7 @@ class ListingsViewModel {
 
     func persistMapRegion(_ region: MKCoordinateRegion) {
         currentSpan = region.span
+        guard !isPanning else { return }
         mapPosition = .region(region)
         locationService.isTrackingUser = false
     }
