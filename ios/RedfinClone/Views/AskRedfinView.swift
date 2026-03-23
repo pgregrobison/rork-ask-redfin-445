@@ -27,8 +27,6 @@ struct AskRedfinView: View {
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(.secondary)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
                     }
                 }
             }

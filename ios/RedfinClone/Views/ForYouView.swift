@@ -30,8 +30,6 @@ struct ForYouView: View {
                 Button {} label: {
                     Image(systemName: "person.crop.circle")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
                 }
             }
         }

@@ -50,7 +50,7 @@ struct FindMapView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing != nil)
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()
@@ -72,6 +72,6 @@ private struct MapActionButtons: View {
         ])
         .padding(.trailing, 16)
         .padding(.top, 4)
-        .animation(nil, value: viewModel.selectedListing?.id)
+        .animation(nil, value: viewModel.selectedListing != nil)
     }
 }

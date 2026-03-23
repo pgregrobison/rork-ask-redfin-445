@@ -1,13 +1,16 @@
-# Fix sluggish pin selection and map action icon glitching
+# Fix map pan speed, card animation, and toolbar padding
 
-**Problem**
+**Three targeted fixes:**
 
-- Pin selection pans the map too slowly (0.4s ease-in-out)
-- The broad animation scope causes the map action buttons (layers, draw, location) to blur and re-grow when a pin is selected
+### 1. Snappier map panning on pin select
+- Remove the slow animated camera pan when tapping a pin — update the map position instantly (no `withAnimation` wrapper) so the map snaps to the selected pin's location immediately
 
-**Fixes**
+### 2. Card animation only on appear/dismiss
+- The listing preview card at the bottom of the map currently re-animates every time you switch between pins
+- Change the animation so it only triggers when a card appears (no pin → pin selected) or disappears (pin selected → deselected)
+- When switching between pins, the card content updates instantly without a spring animation
 
-1. **Faster map pan**: Replace the slow 0.4s ease-in-out with a snappy 0.25s ease-out animation for the map camera movement
-2. **Isolate card animation from map actions**: Scope the spring animation so it only affects the listing card appearance — not the entire view tree. This prevents the glass action buttons from being caught in the animation
-3. **Prevent action button re-renders**: Wrap the map action button overlay in a container that isn't affected by selection state changes, so they remain completely stable during pin selection
-
+### 3. Remove extra padding from toolbar action buttons
+- All toolbar buttons currently have an explicit 44×44 frame that adds unwanted spacing inside the native toolbar
+- Remove these frames from all toolbar items across every screen (Find, For You, Saved, My Home, Ask Redfin) so the native toolbar handles sizing and spacing naturally
+- Keep the icon font size and content shape for tap targets, just let the toolbar manage the layout
