@@ -1,310 +1,40 @@
 import Foundation
 
-nonisolated struct StreamEvent: Sendable {
-    enum Kind: Sendable {
-        case textDelta(String)
-        case toolCallStart(toolCallId: String, toolName: String)
-        case toolCallDelta(toolCallId: String, argsDelta: String)
-        case toolCallReady(toolCallId: String, toolName: String, input: String)
-        case done
-        case error(String)
-    }
-    let kind: Kind
+nonisolated enum DemoResponseType: Sendable {
+    case listings(text: String, filters: SearchFilters)
+    case tour(text: String)
+    case fallback(text: String)
 }
 
 @MainActor
 class ChatService {
-    private var toolkitURL: String { Self.env("EXPO_PUBLIC_TOOLKIT_URL") }
-    private var projectId: String { Self.env("EXPO_PUBLIC_PROJECT_ID") }
-    private var teamId: String { Self.env("EXPO_PUBLIC_TEAM_ID") }
-    private var appKey: String { Self.env("EXPO_PUBLIC_RORK_APP_KEY") }
 
-    private nonisolated static func env(_ key: String) -> String {
-        if let v = Bundle.main.infoDictionary?[key] as? String,
-           !v.isEmpty, !v.hasPrefix("$(") { return v }
-        if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return v }
-        return ""
-    }
+    func matchResponse(for input: String) -> DemoResponseType {
+        let lower = input.lowercased()
 
-    private let systemPrompt = """
-    You are Ask Redfin, an AI-powered real estate assistant. You help users find homes in the NYC metro area (Manhattan, Brooklyn, Queens, Long Island City, Astoria).
-
-    When users ask to find homes, apartments, condos, or properties, call the searchListings tool with appropriate filters.
-
-    If a user asks about properties outside NYC, let them know your listings currently cover the NYC metro area.
-
-    Keep responses brief and direct. When you call searchListings, don't describe individual results — listing cards appear automatically. Just acknowledge the search briefly.
-    """
-
-    func sendMessage(messages: [ChatMessage]) -> AsyncStream<StreamEvent> {
-        let url = toolkitURL
-        let proj = projectId
-        let team = teamId
-        let app = appKey
-        let sysPrompt = systemPrompt
-
-        let apiMessages = Self.buildAPIMessages(from: messages)
-        let tools = Self.buildTools()
-
-        return AsyncStream { continuation in
-            Task.detached {
-                await Self.performStream(
-                    baseURL: url,
-                    projectId: proj,
-                    teamId: team,
-                    appKey: app,
-                    systemPrompt: sysPrompt,
-                    messages: apiMessages,
-                    tools: tools,
-                    continuation: continuation
-                )
-            }
-        }
-    }
-
-    private nonisolated static func buildAPIMessages(from messages: [ChatMessage]) -> [[String: Any]] {
-        var result: [[String: Any]] = []
-
-        for msg in messages {
-            switch msg.role {
-            case .user:
-                result.append([
-                    "role": "user",
-                    "content": msg.content
-                ])
-
-            case .assistant:
-                if let toolCalls = msg.toolCalls, !toolCalls.isEmpty {
-                    var parts: [[String: Any]] = []
-
-                    if !msg.content.isEmpty {
-                        parts.append(["type": "text", "text": msg.content])
-                    }
-
-                    for tc in toolCalls {
-                        var inputObj: Any = [String: Any]()
-                        if let argsData = tc.arguments.data(using: .utf8),
-                           let parsed = try? JSONSerialization.jsonObject(with: argsData) {
-                            inputObj = parsed
-                        }
-
-                        parts.append([
-                            "type": "tool-call",
-                            "toolCallId": tc.id,
-                            "toolName": tc.name,
-                            "args": inputObj
-                        ])
-                    }
-
-                    result.append(["role": "assistant", "content": parts])
-
-                    for tc in toolCalls {
-                        result.append([
-                            "role": "tool",
-                            "content": [
-                                [
-                                    "type": "tool-result",
-                                    "toolCallId": tc.id,
-                                    "toolName": tc.name,
-                                    "result": tc.result ?? ""
-                                ] as [String: Any]
-                            ]
-                        ])
-                    }
-                } else if !msg.content.isEmpty {
-                    result.append([
-                        "role": "assistant",
-                        "content": msg.content
-                    ])
-                }
-
-            case .system, .tool:
-                break
-            }
+        if lower.containsAny(["home", "house", "apartment", "condo", "listing", "find", "search", "property", "place", "buy"]) {
+            let filters = extractFilters(from: lower)
+            let text = buildListingsResponse(from: lower, filters: filters)
+            return .listings(text: text, filters: filters)
         }
 
-        return result
-    }
+        if lower.containsAny(["tour", "schedule", "visit", "showing", "see the"]) {
+            let address = extractAddress(from: lower)
+            let text: String
+            if let address {
+                text = "I'd love to help you schedule a tour of \(address)! I have availability this weekend — Saturday at 11 AM or Sunday at 2 PM. Which works better for you?"
+            } else {
+                text = "I can help you schedule a tour! Just let me know which property you're interested in, and I'll find available times. You can also browse homes first — just ask me to find listings."
+            }
+            return .tour(text: text)
+        }
 
-    private nonisolated static func buildTools() -> [String: Any] {
-        return [
-            "searchListings": [
-                "description": "Search for home listings in NYC. Use when the user asks to find homes, apartments, condos, or properties.",
-                "parameters": [
-                    "type": "object",
-                    "properties": [
-                        "minBeds": ["type": "integer", "description": "Minimum bedrooms"],
-                        "maxBeds": ["type": "integer", "description": "Maximum bedrooms"],
-                        "minPrice": ["type": "integer", "description": "Minimum price in dollars"],
-                        "maxPrice": ["type": "integer", "description": "Maximum price in dollars"],
-                        "propertyType": ["type": "string", "description": "Property type", "enum": ["Condo", "Townhouse", "Co-op"]],
-                        "isHotHome": ["type": "boolean", "description": "Only hot homes"],
-                        "neighborhoods": ["type": "array", "description": "Neighborhoods", "items": ["type": "string"]]
-                    ] as [String: Any]
-                ] as [String: Any]
-            ] as [String: Any]
+        let fallbacks = [
+            "I can help you find homes or schedule tours in the NYC area. Try asking me something like \"show me homes in Brooklyn\" or \"find condos under $1M\"!",
+            "I'm your NYC real estate assistant! Ask me to find homes, apartments, or condos — or I can help schedule a tour. What are you looking for?",
+            "Looking for your next home? I can search listings across Manhattan, Brooklyn, Queens, and more. Just tell me what you're looking for!"
         ]
-    }
-
-    private nonisolated static func performStream(
-        baseURL: String,
-        projectId: String,
-        teamId: String,
-        appKey: String,
-        systemPrompt: String,
-        messages: [[String: Any]],
-        tools: [String: Any],
-        continuation: AsyncStream<StreamEvent>.Continuation
-    ) async {
-        guard !baseURL.isEmpty else {
-            continuation.yield(StreamEvent(kind: .error("Toolkit URL not configured.")))
-            continuation.finish()
-            return
-        }
-
-        guard let endpoint = URL(string: "\(baseURL)/agent/chat") else {
-            continuation.yield(StreamEvent(kind: .error("Invalid toolkit URL.")))
-            continuation.finish()
-            return
-        }
-
-        let body: [String: Any] = [
-            "messages": messages,
-            "tools": tools,
-            "system": systemPrompt
-        ]
-
-        guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
-            continuation.yield(StreamEvent(kind: .error("Failed to build request.")))
-            continuation.finish()
-            return
-        }
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if !projectId.isEmpty { request.setValue(projectId, forHTTPHeaderField: "x-project-id") }
-        if !teamId.isEmpty { request.setValue(teamId, forHTTPHeaderField: "x-team-id") }
-        if !appKey.isEmpty { request.setValue(appKey, forHTTPHeaderField: "x-app-key") }
-        request.httpBody = bodyData
-        request.timeoutInterval = 60
-
-        do {
-            let (bytes, response) = try await URLSession.shared.bytes(for: request)
-
-            guard let http = response as? HTTPURLResponse else {
-                continuation.yield(StreamEvent(kind: .error("Invalid server response.")))
-                continuation.finish()
-                return
-            }
-
-            guard (200...299).contains(http.statusCode) else {
-                var errorBody = ""
-                do {
-                    var data = Data()
-                    for try await byte in bytes {
-                        data.append(byte)
-                        if data.count > 4096 { break }
-                    }
-                    errorBody = String(data: data, encoding: .utf8) ?? ""
-                } catch {}
-                continuation.yield(StreamEvent(kind: .error("Error \(http.statusCode): \(errorBody.prefix(300))")))
-                continuation.finish()
-                return
-            }
-
-            var pendingTools: [String: (name: String, argsBuffer: String)] = [:]
-
-            for try await line in bytes.lines {
-                guard line.hasPrefix("data: ") else { continue }
-                let payload = String(line.dropFirst(6))
-
-                if payload == "[DONE]" {
-                    for (toolId, tool) in pendingTools {
-                        continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: tool.name, input: tool.argsBuffer)))
-                    }
-                    pendingTools.removeAll()
-                    continuation.yield(StreamEvent(kind: .done))
-                    break
-                }
-
-                guard let data = payload.data(using: .utf8),
-                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let type = json["type"] as? String else { continue }
-
-                switch type {
-                case "text-delta":
-                    if let delta = json["textDelta"] as? String {
-                        continuation.yield(StreamEvent(kind: .textDelta(delta)))
-                    } else if let delta = json["delta"] as? String {
-                        continuation.yield(StreamEvent(kind: .textDelta(delta)))
-                    }
-
-                case "tool-call":
-                    let toolId = json["toolCallId"] as? String ?? UUID().uuidString
-                    let toolName = json["toolName"] as? String ?? ""
-                    let args: String
-                    if let argsObj = json["args"] {
-                        if let d = try? JSONSerialization.data(withJSONObject: argsObj) {
-                            args = String(data: d, encoding: .utf8) ?? "{}"
-                        } else { args = "{}" }
-                    } else {
-                        args = pendingTools[toolId]?.argsBuffer ?? "{}"
-                    }
-                    pendingTools.removeValue(forKey: toolId)
-                    continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: toolName, input: args)))
-
-                case "tool-call-streaming-start", "tool-input-start":
-                    if let toolId = json["toolCallId"] as? String,
-                       let toolName = json["toolName"] as? String {
-                        pendingTools[toolId] = (name: toolName, argsBuffer: "")
-                        continuation.yield(StreamEvent(kind: .toolCallStart(toolCallId: toolId, toolName: toolName)))
-                    }
-
-                case "tool-call-delta":
-                    if let toolId = json["toolCallId"] as? String,
-                       let delta = json["argsTextDelta"] as? String {
-                        pendingTools[toolId]?.argsBuffer += delta
-                        continuation.yield(StreamEvent(kind: .toolCallDelta(toolCallId: toolId, argsDelta: delta)))
-                    }
-
-                case "tool-input-delta":
-                    if let toolId = json["toolCallId"] as? String,
-                       let delta = json["inputTextDelta"] as? String {
-                        pendingTools[toolId]?.argsBuffer += delta
-                        continuation.yield(StreamEvent(kind: .toolCallDelta(toolCallId: toolId, argsDelta: delta)))
-                    }
-
-                case "tool-input-available":
-                    if let toolId = json["toolCallId"] as? String,
-                       let toolName = json["toolName"] as? String {
-                        let args: String
-                        if let input = json["input"] {
-                            if let d = try? JSONSerialization.data(withJSONObject: input) {
-                                args = String(data: d, encoding: .utf8) ?? "{}"
-                            } else { args = "{}" }
-                        } else {
-                            args = pendingTools[toolId]?.argsBuffer ?? "{}"
-                        }
-                        pendingTools.removeValue(forKey: toolId)
-                        continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: toolName, input: args)))
-                    }
-
-                case "start", "text-start", "text-end", "message-start", "message-finish",
-                     "step-start", "step-finish", "tool-output-available", "finish", "abort",
-                     "ping", "source":
-                    break
-
-                default:
-                    break
-                }
-            }
-
-            continuation.finish()
-        } catch {
-            continuation.yield(StreamEvent(kind: .error("Connection failed: \(error.localizedDescription)")))
-            continuation.finish()
-        }
+        return .fallback(text: fallbacks.randomElement()!)
     }
 
     nonisolated func searchListings(filters: SearchFilters) -> [Listing] {
@@ -328,5 +58,90 @@ class ChatService {
         }
 
         return results
+    }
+
+    private func extractFilters(from input: String) -> SearchFilters {
+        var filters = SearchFilters()
+
+        let bedroomPatterns: [(String, Int)] = [
+            ("studio", 0), ("1 bed", 1), ("1 br", 1), ("one bed", 1), ("2 bed", 2), ("2 br", 2),
+            ("two bed", 2), ("3 bed", 3), ("3 br", 3), ("three bed", 3), ("4 bed", 4), ("4 br", 4)
+        ]
+        for (pattern, beds) in bedroomPatterns {
+            if input.contains(pattern) {
+                filters.minBeds = beds
+                break
+            }
+        }
+
+        if input.contains("under 1m") || input.contains("under $1m") || input.contains("below 1m") {
+            filters.maxPrice = 1_000_000
+        } else if input.contains("under 2m") || input.contains("under $2m") || input.contains("below 2m") {
+            filters.maxPrice = 2_000_000
+        } else if input.contains("under 500") || input.contains("under $500") {
+            filters.maxPrice = 500_000
+        }
+
+        if input.contains("condo") { filters.propertyType = "Condo" }
+        else if input.contains("townhouse") { filters.propertyType = "Townhouse" }
+        else if input.contains("co-op") || input.contains("coop") { filters.propertyType = "Co-op" }
+
+        if input.containsAny(["hot home", "hot listing", "trending", "popular"]) {
+            filters.isHotHome = true
+        }
+
+        let neighborhoods: [(String, String)] = [
+            ("manhattan", "Manhattan"), ("brooklyn", "Brooklyn"), ("queens", "Queens"),
+            ("lic", "Long Island City"), ("long island city", "Long Island City"),
+            ("astoria", "Astoria"), ("williamsburg", "Williamsburg"),
+            ("upper west", "Upper West Side"), ("upper east", "Upper East Side"),
+            ("tribeca", "Tribeca"), ("soho", "SoHo")
+        ]
+        var matched: [String] = []
+        for (keyword, name) in neighborhoods {
+            if input.contains(keyword) { matched.append(name) }
+        }
+        if !matched.isEmpty { filters.neighborhoods = matched }
+
+        return filters
+    }
+
+    private func extractAddress(from input: String) -> String? {
+        for listing in MockData.listings {
+            if input.contains(listing.address.lowercased()) || input.contains(listing.city.lowercased()) {
+                return listing.address
+            }
+        }
+        return nil
+    }
+
+    private func buildListingsResponse(from input: String, filters: SearchFilters) -> String {
+        let results = searchListings(filters: filters)
+        if results.isEmpty {
+            return "I couldn't find any listings matching those criteria. Try broadening your search — for example, ask me to show all homes in NYC."
+        }
+
+        var parts: [String] = []
+        if let beds = filters.minBeds { parts.append(beds == 0 ? "studios" : "\(beds)+ bedroom") }
+        if let type = filters.propertyType { parts.append(type.lowercased() + "s") }
+        if let neighborhoods = filters.neighborhoods { parts.append("in \(neighborhoods.joined(separator: " & "))") }
+        if let maxPrice = filters.maxPrice {
+            let fmt = maxPrice >= 1_000_000 ? "$\(maxPrice / 1_000_000)M" : "$\(maxPrice / 1000)K"
+            parts.append("under \(fmt)")
+        }
+        if filters.isHotHome == true { parts.append("that are trending") }
+
+        let count = results.count
+        if parts.isEmpty {
+            return "I found \(count) home\(count == 1 ? "" : "s") in NYC. Here's what's available:"
+        }
+        return "I found \(count) \(parts.joined(separator: " ")) home\(count == 1 ? "" : "s"). Take a look:"
+    }
+}
+
+private extension String {
+    func containsAny(_ keywords: [String]) -> Bool {
+        let lower = self.lowercased()
+        return keywords.contains { lower.contains($0) }
     }
 }

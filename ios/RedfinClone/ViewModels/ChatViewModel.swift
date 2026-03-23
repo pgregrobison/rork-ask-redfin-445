@@ -83,7 +83,7 @@ class ChatViewModel {
         updateThreadTitle(from: text)
 
         streamTask?.cancel()
-        streamTask = Task { await streamResponse() }
+        streamTask = Task { await generateResponse(for: text) }
     }
 
     func setFeedback(_ feedback: MessageFeedback, for messageId: String) {
@@ -110,113 +110,77 @@ class ChatViewModel {
         saveThreads()
     }
 
-    private func streamResponse() async {
+    private func generateResponse(for input: String) async {
         thinkingState = .thinking
+
+        let response = chatService.matchResponse(for: input)
+
+        try? await Task.sleep(for: .milliseconds(Int.random(in: 400...800)))
+        if Task.isCancelled { return }
 
         let assistantMsg = ChatMessage(role: .assistant, content: "", isStreaming: true)
         appendMessage(assistantMsg)
         let msgId = assistantMsg.id
 
-        var text = ""
-        var pendingToolCalls: [(id: String, name: String, args: String)] = []
-        var currentToolId: String?
+        let responseText: String
+        var searchFilters: SearchFilters?
 
-        for await event in chatService.sendMessage(messages: activeMessages) {
-            if Task.isCancelled { break }
+        switch response {
+        case .listings(let text, let filters):
+            thinkingState = .searching
+            try? await Task.sleep(for: .milliseconds(Int.random(in: 300...600)))
+            if Task.isCancelled { return }
+            thinkingState = .none
+            responseText = text
+            searchFilters = filters
 
-            switch event.kind {
-            case .textDelta(let delta):
-                text += delta
-                thinkingState = .none
-                updateMessageContent(msgId, content: text)
+        case .tour(let text):
+            thinkingState = .none
+            responseText = text
 
-            case .toolCallStart(let toolCallId, _):
-                currentToolId = toolCallId
-
-            case .toolCallDelta(_, _):
-                break
-
-            case .toolCallReady(let toolCallId, let toolName, let input):
-                pendingToolCalls.append((id: toolCallId, name: toolName, args: input))
-                currentToolId = nil
-
-            case .done:
-                break
-
-            case .error(let errorMsg):
-                if text.isEmpty {
-                    text = "I'm having trouble connecting right now. Please try again. (\(errorMsg))"
-                    updateMessageContent(msgId, content: text)
-                }
-                thinkingState = .none
-                finalizeMessage(msgId)
-                saveThreads()
-                return
-            }
+        case .fallback(let text):
+            thinkingState = .none
+            responseText = text
         }
 
-        if !pendingToolCalls.isEmpty {
-            for tc in pendingToolCalls {
-                await handleToolCall(messageId: msgId, toolId: tc.id, toolName: tc.name, arguments: tc.args, currentText: text)
-            }
+        await streamText(responseText, toMessageId: msgId)
+        if Task.isCancelled { return }
+
+        if let filters = searchFilters {
+            let results = chatService.searchListings(filters: filters)
+            lastSearchResults = results
+
+            guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
+                  let mi = threads[ti].messages.firstIndex(where: { $0.id == msgId }) else { return }
+
+            threads[ti].messages[mi].searchResults = results.map { $0.id }
         }
 
-        thinkingState = .none
         finalizeMessage(msgId)
         saveThreads()
     }
 
-    private func handleToolCall(messageId: String, toolId: String, toolName: String, arguments: String, currentText: String) async {
-        guard toolName == "searchListings" else { return }
+    private func streamText(_ text: String, toMessageId msgId: String) async {
+        var streamed = ""
+        let chars = Array(text)
+        var i = 0
 
-        thinkingState = .searching
+        while i < chars.count {
+            if Task.isCancelled { return }
 
-        let filters = parseSearchFilters(arguments)
-        let results = chatService.searchListings(filters: filters)
-        lastSearchResults = results
+            let chunkSize = min(Int.random(in: 1...3), chars.count - i)
+            for j in 0..<chunkSize {
+                streamed.append(chars[i + j])
+            }
+            i += chunkSize
 
-        guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
-              let mi = threads[ti].messages.firstIndex(where: { $0.id == messageId }) else { return }
+            updateMessageContent(msgId, content: streamed)
 
-        threads[ti].messages[mi].searchResults = results.map { $0.id }
-
-        let toolRecord = ToolCallRecord(id: toolId, name: toolName, arguments: arguments, result: "\(results.count) listings found")
-        if threads[ti].messages[mi].toolCalls == nil {
-            threads[ti].messages[mi].toolCalls = []
-        }
-        threads[ti].messages[mi].toolCalls?.append(toolRecord)
-
-        if threads[ti].messages[mi].content.isEmpty {
-            threads[ti].messages[mi].content = buildSearchSummary(results: results, filters: filters)
+            let delay = chars[i - 1] == "." || chars[i - 1] == "!" || chars[i - 1] == "?" ? 60 : Int.random(in: 15...35)
+            try? await Task.sleep(for: .milliseconds(delay))
         }
 
-        thinkingState = .none
-    }
-
-    private func parseSearchFilters(_ json: String) -> SearchFilters {
-        guard let data = json.data(using: .utf8) else { return SearchFilters() }
-        return (try? JSONDecoder().decode(SearchFilters.self, from: data)) ?? SearchFilters()
-    }
-
-    private func buildSearchSummary(results: [Listing], filters: SearchFilters) -> String {
-        if results.isEmpty {
-            return "I couldn't find any listings matching those criteria. Try adjusting your filters."
-        }
-
-        var desc = "I found \(results.count) home\(results.count == 1 ? "" : "s")"
-
-        var parts: [String] = []
-        if let minBeds = filters.minBeds { parts.append("\(minBeds)+ bedrooms") }
-        if let maxPrice = filters.maxPrice {
-            let fmt = maxPrice >= 1_000_000 ? "$\(maxPrice / 1_000_000)M" : "$\(maxPrice / 1000)K"
-            parts.append("under \(fmt)")
-        }
-        if let neighborhoods = filters.neighborhoods, !neighborhoods.isEmpty {
-            parts.append("in \(neighborhoods.joined(separator: ", "))")
-        }
-
-        if !parts.isEmpty { desc += " with \(parts.joined(separator: ", "))" }
-        return desc + ". Here's what I found:"
+        updateMessageContent(msgId, content: text)
     }
 
     private func appendMessage(_ message: ChatMessage) {

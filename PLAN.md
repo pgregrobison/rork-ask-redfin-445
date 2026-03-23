@@ -1,24 +1,22 @@
-# Fix AI Chat by using correct environment variable access
+# Replace AI Chat with Keyword-Based Demo Responses
 
-## Problem
-The AI chat always fails with "Toolkit URL not configured" because the code reads environment variables the wrong way. It tries to read from system-level sources that don't exist in this app, instead of using the built-in configuration that's injected at build time.
+## What's Changing
 
-## What Will Change
+The chat currently tries to connect to a real AI service (which fails). We'll replace it with a simple keyword-matching system that responds to specific words/phrases with pre-written replies — no internet connection needed.
 
-**Fix environment variable access**
-- Switch from the broken custom method to the app's built-in configuration system
-- This includes the Toolkit URL, Project ID, Team ID, and App Key
+---
 
-**Verify & fix the API request format**
-- Ensure the message format sent to the AI matches what the server expects (Vercel AI v5 format)
-- Ensure tool definitions use the correct schema format
-- Add proper error logging so if something still goes wrong, the error message is actually helpful
+**Features**
 
-## What Won't Change
-- The chat UI stays exactly as-is
-- The streaming SSE approach stays (it's correct)
-- The tool calling / listing search logic stays
-- Thread management, message history, all untouched
+- Type anything containing **"home"**, **"house"**, **"apartment"**, **"condo"**, **"listing"**, or **"find"** → the bot responds with a brief message and shows property listing cards from the mock data
+- Type anything containing **"tour"**, **"schedule"**, or **"visit"** → the bot suggests scheduling a tour with a helpful message
+- Any other message → the bot replies with a friendly nudge like *"I can help you find homes or schedule tours. Try asking me about homes in NYC!"*
+- Responses appear with a **simulated typing animation** (characters stream in with a short delay) so it feels realistic
+- The "thinking" indicator still shows briefly before the response starts streaming
+- Everything works **fully offline** — no network calls, no API keys needed
 
-## Expected Result
-When you type a message in Ask Redfin, it should connect to the AI service, stream a response, and support searching listings via tool calls — instead of immediately showing an error.
+**What stays the same**
+
+- All existing chat UI (bubbles, listing cards, thread management, feedback buttons)
+- The search/filter logic that picks which listings to show
+- Thread history and persistence
