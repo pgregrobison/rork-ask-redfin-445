@@ -35,15 +35,7 @@ struct FindMapView: View {
                 }
             }
             .overlay(alignment: .topTrailing) {
-                GlassActionButtonStack(items: [
-                    GlassActionButtonItem(icon: "square.3.layers.3d", action: {}),
-                    GlassActionButtonItem(icon: "hand.draw", action: {}),
-                    GlassActionButtonItem(icon: viewModel.locationService.isTrackingUser ? "location.fill" : "location", action: {
-                        viewModel.locateUser()
-                    })
-                ])
-                .padding(.trailing, 16)
-                .padding(.top, 4)
+                MapActionButtons(viewModel: viewModel)
             }
 
             if let listing = viewModel.selectedListing {
@@ -58,10 +50,28 @@ struct FindMapView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()
             }
         }
+    }
+}
+
+private struct MapActionButtons: View {
+    let viewModel: ListingsViewModel
+
+    var body: some View {
+        GlassActionButtonStack(items: [
+            GlassActionButtonItem(icon: "square.3.layers.3d", action: {}),
+            GlassActionButtonItem(icon: "hand.draw", action: {}),
+            GlassActionButtonItem(icon: viewModel.locationService.isTrackingUser ? "location.fill" : "location", action: {
+                viewModel.locateUser()
+            })
+        ])
+        .padding(.trailing, 16)
+        .padding(.top, 4)
+        .animation(nil, value: viewModel.selectedListing?.id)
     }
 }
