@@ -14,23 +14,15 @@ nonisolated struct StreamEvent: Sendable {
 
 @MainActor
 class ChatService {
-    private var toolkitURL: String {
-        readEnv("EXPO_PUBLIC_TOOLKIT_URL")
-    }
-    private var projectId: String {
-        readEnv("EXPO_PUBLIC_PROJECT_ID")
-    }
-    private var teamId: String {
-        readEnv("EXPO_PUBLIC_TEAM_ID")
-    }
-    private var appKey: String {
-        readEnv("EXPO_PUBLIC_RORK_APP_KEY")
-    }
+    private var toolkitURL: String { Self.env("EXPO_PUBLIC_TOOLKIT_URL") }
+    private var projectId: String { Self.env("EXPO_PUBLIC_PROJECT_ID") }
+    private var teamId: String { Self.env("EXPO_PUBLIC_TEAM_ID") }
+    private var appKey: String { Self.env("EXPO_PUBLIC_RORK_APP_KEY") }
 
-    private nonisolated func readEnv(_ key: String) -> String {
-        if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return v }
+    private nonisolated static func env(_ key: String) -> String {
         if let v = Bundle.main.object(forInfoDictionaryKey: key) as? String,
            !v.isEmpty, !v.hasPrefix("$(") { return v }
+        if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return v }
         return ""
     }
 
