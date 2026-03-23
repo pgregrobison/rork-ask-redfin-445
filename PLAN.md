@@ -1,8 +1,6 @@
-# Improve Map Home Card to Match Screenshot
+# Remove extra bottom padding so content hugs the safe area
 
-**Changes to the listing card that appears when you tap a pin on the map:**
+**Changes**
 
-- **"Listed by Redfin" badge**: Add a red "LISTED BY REDFIN" badge on the top-left of the photo (in addition to the existing "HOT HOME" badge — whichever applies to the listing will show)
-- **Price row layout**: Move the price to be larger/bolder, with the share and heart icons aligned to the right of the price on the same row (currently they sit in the top-right corner of the info area)
-- **Info section spacing**: Tighten the layout so beds/baths/sqft sits directly below the price, and the full address sits below that — matching the compact, clean look in the screenshot
-- **Card corners**: Slightly increase corner radius to better match the screenshot's rounder card shape
+- **Tab bar**: Remove the 2pt bottom padding on both the standard and glass variants so it sits flush against the safe area edge
+- **Map listing card**: Remove the 8pt bottom padding on the listing preview card when a pin is selected, so it sits directly above the safe area

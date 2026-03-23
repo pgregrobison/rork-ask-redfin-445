@@ -64,7 +64,6 @@ struct CustomTabBar: View {
                 .glassEffect(.regular.interactive(), in: .circle)
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 2)
         }
     }
 
@@ -89,7 +88,6 @@ struct CustomTabBar: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.bottom, 2)
     }
 
     private var tabPillContent: some View {

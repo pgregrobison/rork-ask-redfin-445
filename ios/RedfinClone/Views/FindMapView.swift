@@ -55,7 +55,6 @@ struct FindMapView: View {
                     onTap: { onListingTap(listing) }
                 )
                 .id(listing.id)
-                .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
