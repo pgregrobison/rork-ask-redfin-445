@@ -1,402 +1,319 @@
 import Foundation
 
-nonisolated struct StreamDelta: Sendable {
-    let text: String?
-    let toolCallId: String?
-    let toolCallName: String?
-    let toolCallArguments: String?
-    let finishReason: String?
+nonisolated struct StreamEvent: Sendable {
+    enum Kind: Sendable {
+        case textDelta(String)
+        case toolCallStart(toolCallId: String, toolName: String)
+        case toolCallDelta(toolCallId: String, argsDelta: String)
+        case toolCallReady(toolCallId: String, toolName: String, input: String)
+        case done
+        case error(String)
+    }
+    let kind: Kind
 }
 
 @MainActor
 class ChatService {
-    private var toolkitURL: String { Self.env("EXPO_PUBLIC_TOOLKIT_URL") }
-    private var projectId: String { Self.env("EXPO_PUBLIC_PROJECT_ID") }
-    private var teamId: String { Self.env("EXPO_PUBLIC_TEAM_ID") }
-    private var appKey: String { Self.env("EXPO_PUBLIC_RORK_APP_KEY") }
+    private var toolkitURL: String {
+        readEnv("EXPO_PUBLIC_TOOLKIT_URL")
+    }
+    private var projectId: String {
+        readEnv("EXPO_PUBLIC_PROJECT_ID")
+    }
+    private var teamId: String {
+        readEnv("EXPO_PUBLIC_TEAM_ID")
+    }
+    private var appKey: String {
+        readEnv("EXPO_PUBLIC_RORK_APP_KEY")
+    }
 
-    private static func env(_ key: String) -> String {
-        if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty {
-            return v
-        }
+    private nonisolated func readEnv(_ key: String) -> String {
+        if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return v }
         if let v = Bundle.main.object(forInfoDictionaryKey: key) as? String,
-           !v.isEmpty, !v.hasPrefix("$(") {
-            return v
-        }
+           !v.isEmpty, !v.hasPrefix("$(") { return v }
         return ""
     }
 
     private let systemPrompt = """
-    You are Ask Redfin, an AI-powered real estate assistant. You are professional, concise, and knowledgeable — like a top-performing real estate agent.
+    You are Ask Redfin, an AI-powered real estate assistant. You help users find homes in the NYC metro area (Manhattan, Brooklyn, Queens, Long Island City, Astoria).
 
-    You can answer general real estate questions about any market (market trends, buying tips, investment advice, neighborhood comparisons, etc.).
+    When users ask to find homes, apartments, condos, or properties, call the searchListings tool with appropriate filters.
 
-    For property searches, you have access to listings in the NYC metro area (Manhattan, Brooklyn, Queens, Long Island City, Astoria). When users ask to find homes, use the searchListings tool. When users want to schedule a tour, use the scheduleTour tool. When users ask about mortgage or prequalification, use the getMortgagePrequal tool.
+    If a user asks about properties outside NYC, let them know your listings currently cover the NYC metro area.
 
-    If a user asks to search for properties outside NYC, let them know your current listings cover the NYC metro area and offer to help them search there instead.
-
-    Keep responses brief and direct. When you call searchListings, do not describe the individual results — the listing cards will appear automatically. Just acknowledge the search with a short sentence.
+    Keep responses brief and direct. When you call searchListings, don't describe individual results — listing cards appear automatically. Just acknowledge the search briefly.
     """
 
-    private func buildToolDefinitions() -> [String: Any] {
-        [
-            "searchListings": [
-                "description": "Search for home listings in NYC. Use this when the user asks to find homes, apartments, condos, or any real estate properties.",
-                "parameters": [
-                    "type": "object",
-                    "properties": [
-                        "minBeds": ["type": "integer", "description": "Minimum number of bedrooms"],
-                        "maxBeds": ["type": "integer", "description": "Maximum number of bedrooms"],
-                        "minPrice": ["type": "integer", "description": "Minimum price in dollars"],
-                        "maxPrice": ["type": "integer", "description": "Maximum price in dollars"],
-                        "propertyType": ["type": "string", "description": "Property type filter", "enum": ["Condo", "Townhouse", "Co-op"]],
-                        "isHotHome": ["type": "boolean", "description": "Only show hot homes"],
-                        "neighborhoods": ["type": "array", "description": "Neighborhoods to search in", "items": ["type": "string"]]
-                    ] as [String: Any]
-                ] as [String: Any]
-            ] as [String: Any],
-            "scheduleTour": [
-                "description": "Schedule a home tour for the user.",
-                "parameters": [
-                    "type": "object",
-                    "properties": [
-                        "listingId": ["type": "string", "description": "The listing ID"],
-                        "address": ["type": "string", "description": "The address of the property"]
-                    ] as [String: Any]
-                ] as [String: Any]
-            ] as [String: Any],
-            "getMortgagePrequal": [
-                "description": "Start a mortgage prequalification process.",
-                "parameters": [
-                    "type": "object",
-                    "properties": [
-                        "listingId": ["type": "string", "description": "Optional listing ID for context"]
-                    ] as [String: Any]
-                ] as [String: Any]
-            ] as [String: Any]
-        ]
+    func sendMessage(messages: [ChatMessage]) -> AsyncStream<StreamEvent> {
+        let url = toolkitURL
+        let proj = projectId
+        let team = teamId
+        let app = appKey
+        let sysPrompt = systemPrompt
+
+        let apiMessages = Self.buildAPIMessages(from: messages, systemPrompt: sysPrompt)
+        let tools = Self.buildTools()
+
+        return AsyncStream { continuation in
+            Task.detached {
+                await Self.performStream(
+                    baseURL: url,
+                    projectId: proj,
+                    teamId: team,
+                    appKey: app,
+                    messages: apiMessages,
+                    tools: tools,
+                    continuation: continuation
+                )
+            }
+        }
     }
 
-    private func buildMessages(from messages: [ChatMessage]) -> [[String: Any]] {
+    private nonisolated static func buildAPIMessages(from messages: [ChatMessage], systemPrompt: String) -> [[String: Any]] {
         var result: [[String: Any]] = [
             ["role": "system", "content": systemPrompt]
         ]
 
         for msg in messages {
-            guard msg.role == .user || msg.role == .assistant else { continue }
-
-            if msg.role == .user {
+            switch msg.role {
+            case .user:
                 result.append(["role": "user", "content": msg.content])
-            } else {
-                if msg.content.isEmpty && msg.toolCalls == nil { continue }
 
+            case .assistant:
                 var parts: [[String: Any]] = []
 
                 if !msg.content.isEmpty {
                     parts.append(["type": "text", "text": msg.content])
                 }
 
-                if let toolCalls = msg.toolCalls, !toolCalls.isEmpty {
+                if let toolCalls = msg.toolCalls {
                     for tc in toolCalls {
                         var toolPart: [String: Any] = [
                             "type": "tool-invocation",
                             "toolInvocationId": tc.id,
                             "toolName": tc.name,
-                            "state": "result"
+                            "state": "output-available"
                         ]
                         if let argsData = tc.arguments.data(using: .utf8),
                            let argsObj = try? JSONSerialization.jsonObject(with: argsData) {
-                            toolPart["args"] = argsObj
+                            toolPart["input"] = argsObj
                         } else {
-                            toolPart["args"] = [String: Any]()
+                            toolPart["input"] = [String: Any]()
                         }
-                        toolPart["result"] = tc.result ?? ""
+                        toolPart["output"] = tc.result ?? ""
                         parts.append(toolPart)
                     }
                 }
 
-                result.append(["role": "assistant", "content": parts])
+                if !parts.isEmpty {
+                    result.append(["role": "assistant", "content": parts])
+                }
+
+            case .system, .tool:
+                break
             }
         }
 
         return result
     }
 
-    func sendMessage(messages: [ChatMessage]) -> AsyncStream<StreamDelta> {
-        let builtMessages = buildMessages(from: messages)
-        let tools = buildToolDefinitions()
-        let baseURL = toolkitURL
-        let projId = projectId
-        let tId = teamId
-        let aKey = appKey
+    private nonisolated static func buildTools() -> [String: Any] {
+        return [
+            "searchListings": [
+                "description": "Search for home listings in NYC. Use when the user asks to find homes, apartments, condos, or properties.",
+                "parameters": [
+                    "type": "object",
+                    "properties": [
+                        "minBeds": ["type": "integer", "description": "Minimum bedrooms"],
+                        "maxBeds": ["type": "integer", "description": "Maximum bedrooms"],
+                        "minPrice": ["type": "integer", "description": "Minimum price in dollars"],
+                        "maxPrice": ["type": "integer", "description": "Maximum price in dollars"],
+                        "propertyType": ["type": "string", "description": "Property type", "enum": ["Condo", "Townhouse", "Co-op"]],
+                        "isHotHome": ["type": "boolean", "description": "Only hot homes"],
+                        "neighborhoods": ["type": "array", "description": "Neighborhoods", "items": ["type": "string"]]
+                    ] as [String: Any]
+                ] as [String: Any]
+            ] as [String: Any]
+        ]
+    }
+
+    private nonisolated static func performStream(
+        baseURL: String,
+        projectId: String,
+        teamId: String,
+        appKey: String,
+        messages: [[String: Any]],
+        tools: [String: Any],
+        continuation: AsyncStream<StreamEvent>.Continuation
+    ) async {
+        guard !baseURL.isEmpty else {
+            continuation.yield(StreamEvent(kind: .error("Toolkit URL not configured. The app needs to be rebuilt with environment variables.")))
+            continuation.finish()
+            return
+        }
+
+        guard let endpoint = URL(string: "\(baseURL)/agent/chat") else {
+            continuation.yield(StreamEvent(kind: .error("Invalid toolkit URL: \(baseURL)")))
+            continuation.finish()
+            return
+        }
 
         let body: [String: Any] = [
-            "messages": builtMessages,
+            "messages": messages,
             "tools": tools
         ]
 
-        return AsyncStream { continuation in
-            Task.detached { [baseURL, body, projId, tId, aKey] in
+        guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
+            continuation.yield(StreamEvent(kind: .error("Failed to serialize request body.")))
+            continuation.finish()
+            return
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        if !projectId.isEmpty { request.setValue(projectId, forHTTPHeaderField: "x-project-id") }
+        if !teamId.isEmpty { request.setValue(teamId, forHTTPHeaderField: "x-team-id") }
+        if !appKey.isEmpty { request.setValue(appKey, forHTTPHeaderField: "x-app-key") }
+        request.httpBody = bodyData
+        request.timeoutInterval = 60
+
+        do {
+            let (bytes, response) = try await URLSession.shared.bytes(for: request)
+
+            guard let http = response as? HTTPURLResponse else {
+                continuation.yield(StreamEvent(kind: .error("Invalid response from server.")))
+                continuation.finish()
+                return
+            }
+
+            guard (200...299).contains(http.statusCode) else {
+                var errorBody = ""
                 do {
-                    guard !baseURL.isEmpty else {
-                        continuation.yield(StreamDelta(
-                            text: "Configuration error — toolkit URL is not set. The app needs to be rebuilt with environment variables injected.",
-                            toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "error"))
-                        continuation.finish()
-                        return
+                    var data = Data()
+                    for try await byte in bytes {
+                        data.append(byte)
+                        if data.count > 4096 { break }
+                    }
+                    errorBody = String(data: data, encoding: .utf8) ?? ""
+                } catch {}
+                continuation.yield(StreamEvent(kind: .error("Server error \(http.statusCode): \(errorBody.prefix(500))")))
+                continuation.finish()
+                return
+            }
+
+            var pendingTools: [String: (name: String, argsBuffer: String)] = [:]
+
+            for try await line in bytes.lines {
+                guard line.hasPrefix("data: ") else { continue }
+                let payload = String(line.dropFirst(6))
+
+                if payload == "[DONE]" {
+                    for (toolId, tool) in pendingTools {
+                        continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: tool.name, input: tool.argsBuffer)))
+                    }
+                    pendingTools.removeAll()
+                    continuation.yield(StreamEvent(kind: .done))
+                    break
+                }
+
+                guard let data = payload.data(using: .utf8),
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let type = json["type"] as? String else { continue }
+
+                switch type {
+                case "text-delta":
+                    if let delta = json["textDelta"] as? String {
+                        continuation.yield(StreamEvent(kind: .textDelta(delta)))
+                    } else if let delta = json["delta"] as? String {
+                        continuation.yield(StreamEvent(kind: .textDelta(delta)))
                     }
 
-                    guard let endpoint = URL(string: "\(baseURL)/agent/chat") else {
-                        continuation.yield(StreamDelta(
-                            text: "Configuration error — invalid toolkit URL: \(baseURL)",
-                            toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "error"))
-                        continuation.finish()
-                        return
+                case "tool-call":
+                    let toolId = json["toolCallId"] as? String ?? UUID().uuidString
+                    let toolName = json["toolName"] as? String ?? ""
+                    let args: String
+                    if let argsObj = json["args"] {
+                        if let d = try? JSONSerialization.data(withJSONObject: argsObj) {
+                            args = String(data: d, encoding: .utf8) ?? "{}"
+                        } else { args = "{}" }
+                    } else {
+                        args = pendingTools[toolId]?.argsBuffer ?? "{}"
+                    }
+                    pendingTools.removeValue(forKey: toolId)
+                    continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: toolName, input: args)))
+
+                case "tool-call-streaming-start", "tool-input-start":
+                    if let toolId = json["toolCallId"] as? String,
+                       let toolName = json["toolName"] as? String {
+                        pendingTools[toolId] = (name: toolName, argsBuffer: "")
+                        continuation.yield(StreamEvent(kind: .toolCallStart(toolCallId: toolId, toolName: toolName)))
                     }
 
-                    var urlRequest = URLRequest(url: endpoint)
-                    urlRequest.httpMethod = "POST"
-                    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                    if !projId.isEmpty { urlRequest.setValue(projId, forHTTPHeaderField: "x-project-id") }
-                    if !tId.isEmpty { urlRequest.setValue(tId, forHTTPHeaderField: "x-team-id") }
-                    if !aKey.isEmpty { urlRequest.setValue(aKey, forHTTPHeaderField: "x-app-key") }
-                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
-                    urlRequest.timeoutInterval = 60
-
-                    let (bytes, response) = try await URLSession.shared.bytes(for: urlRequest)
-
-                    guard let httpResponse = response as? HTTPURLResponse,
-                          (200...299).contains(httpResponse.statusCode) else {
-                        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-                        var errorDetail = "error \(statusCode)"
-                        do {
-                            var bodyData = Data()
-                            for try await byte in bytes {
-                                bodyData.append(byte)
-                                if bodyData.count > 4096 { break }
-                            }
-                            if let errorBody = String(data: bodyData, encoding: .utf8), !errorBody.isEmpty {
-                                errorDetail = "error \(statusCode): \(errorBody.prefix(500))"
-                            }
-                        } catch {}
-                        continuation.yield(StreamDelta(
-                            text: "I'm having trouble connecting (\(errorDetail)). Please try again.",
-                            toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "error"))
-                        continuation.finish()
-                        return
+                case "tool-call-delta":
+                    if let toolId = json["toolCallId"] as? String,
+                       let delta = json["argsTextDelta"] as? String {
+                        pendingTools[toolId]?.argsBuffer += delta
+                        continuation.yield(StreamEvent(kind: .toolCallDelta(toolCallId: toolId, argsDelta: delta)))
                     }
 
-                    var pendingToolInputs: [String: (name: String, argChunks: String)] = [:]
+                case "tool-input-delta":
+                    if let toolId = json["toolCallId"] as? String,
+                       let delta = json["inputTextDelta"] as? String {
+                        pendingTools[toolId]?.argsBuffer += delta
+                        continuation.yield(StreamEvent(kind: .toolCallDelta(toolCallId: toolId, argsDelta: delta)))
+                    }
 
-                    for try await line in bytes.lines {
-                        if line.hasPrefix("data: ") {
-                            let payload = String(line.dropFirst(6))
-
-                            if payload == "[DONE]" {
-                                for (toolId, tool) in pendingToolInputs {
-                                    continuation.yield(StreamDelta(text: nil, toolCallId: toolId, toolCallName: tool.name, toolCallArguments: tool.argChunks, finishReason: "tool_calls"))
-                                }
-                                pendingToolInputs.removeAll()
-                                continuation.yield(StreamDelta(text: nil, toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "stop"))
-                                break
-                            }
-
-                            guard let data = payload.data(using: .utf8),
-                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
-
-                            let eventType = json["type"] as? String ?? ""
-
-                            switch eventType {
-                            case "text-delta":
-                                if let delta = json["textDelta"] as? String {
-                                    continuation.yield(StreamDelta(text: delta, toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: nil))
-                                } else if let delta = json["delta"] as? String {
-                                    continuation.yield(StreamDelta(text: delta, toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: nil))
-                                }
-
-                            case "tool-call":
-                                let toolId = json["toolCallId"] as? String ?? UUID().uuidString
-                                let toolName = json["toolName"] as? String ?? ""
-                                let args: String
-                                if let argsDict = json["args"] {
-                                    if let argsData = try? JSONSerialization.data(withJSONObject: argsDict) {
-                                        args = String(data: argsData, encoding: .utf8) ?? "{}"
-                                    } else { args = "{}" }
-                                } else {
-                                    args = pendingToolInputs[toolId]?.argChunks ?? "{}"
-                                }
-                                pendingToolInputs.removeValue(forKey: toolId)
-                                continuation.yield(StreamDelta(text: nil, toolCallId: toolId, toolCallName: toolName, toolCallArguments: args, finishReason: "tool_calls"))
-
-                            case "tool-call-streaming-start":
-                                if let toolCallId = json["toolCallId"] as? String,
-                                   let toolName = json["toolName"] as? String {
-                                    pendingToolInputs[toolCallId] = (name: toolName, argChunks: "")
-                                }
-
-                            case "tool-call-delta":
-                                if let toolCallId = json["toolCallId"] as? String,
-                                   let argsDelta = json["argsTextDelta"] as? String {
-                                    pendingToolInputs[toolCallId]?.argChunks += argsDelta
-                                }
-
-                            case "tool-input-start":
-                                if let toolCallId = json["toolCallId"] as? String,
-                                   let toolName = json["toolName"] as? String {
-                                    pendingToolInputs[toolCallId] = (name: toolName, argChunks: "")
-                                }
-
-                            case "tool-input-delta":
-                                if let toolCallId = json["toolCallId"] as? String,
-                                   let inputDelta = json["inputTextDelta"] as? String {
-                                    pendingToolInputs[toolCallId]?.argChunks += inputDelta
-                                }
-
-                            case "tool-input-available":
-                                if let toolCallId = json["toolCallId"] as? String,
-                                   let toolName = json["toolName"] as? String {
-                                    let args: String
-                                    if let input = json["input"] {
-                                        if let inputData = try? JSONSerialization.data(withJSONObject: input) {
-                                            args = String(data: inputData, encoding: .utf8) ?? "{}"
-                                        } else { args = "{}" }
-                                    } else {
-                                        args = pendingToolInputs[toolCallId]?.argChunks ?? "{}"
-                                    }
-                                    pendingToolInputs.removeValue(forKey: toolCallId)
-                                    continuation.yield(StreamDelta(text: nil, toolCallId: toolCallId, toolCallName: toolName, toolCallArguments: args, finishReason: "tool_calls"))
-                                }
-
-                            case "start", "text-start", "text-end", "message-start", "message-finish",
-                                 "step-start", "step-finish", "tool-output-available", "abort", "finish":
-                                break
-
-                            default:
-                                break
-                            }
-
-                        } else if !line.isEmpty {
-                            Self.parseNumberedLine(line, pendingToolInputs: &pendingToolInputs, continuation: continuation)
+                case "tool-input-available":
+                    if let toolId = json["toolCallId"] as? String,
+                       let toolName = json["toolName"] as? String {
+                        let args: String
+                        if let input = json["input"] {
+                            if let d = try? JSONSerialization.data(withJSONObject: input) {
+                                args = String(data: d, encoding: .utf8) ?? "{}"
+                            } else { args = "{}" }
+                        } else {
+                            args = pendingTools[toolId]?.argsBuffer ?? "{}"
                         }
+                        pendingTools.removeValue(forKey: toolId)
+                        continuation.yield(StreamEvent(kind: .toolCallReady(toolCallId: toolId, toolName: toolName, input: args)))
                     }
 
-                    continuation.finish()
-                } catch {
-                    continuation.yield(StreamDelta(
-                        text: "Connection error: \(error.localizedDescription)",
-                        toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "error"))
-                    continuation.finish()
-                }
-            }
-        }
-    }
+                case "start", "text-start", "text-end", "message-start", "message-finish",
+                     "step-start", "step-finish", "tool-output-available", "finish", "abort",
+                     "ping", "source":
+                    break
 
-    private nonisolated static func parseNumberedLine(
-        _ line: String,
-        pendingToolInputs: inout [String: (name: String, argChunks: String)],
-        continuation: AsyncStream<StreamDelta>.Continuation
-    ) {
-        guard let colonIndex = line.firstIndex(of: ":"),
-              colonIndex != line.startIndex else { return }
-
-        let prefix = String(line[line.startIndex..<colonIndex])
-        let content = String(line[line.index(after: colonIndex)...])
-
-        switch prefix {
-        case "0":
-            if let data = content.data(using: .utf8),
-               let text = try? JSONSerialization.jsonObject(with: data) as? String {
-                continuation.yield(StreamDelta(text: text, toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: nil))
-            }
-
-        case "9":
-            if let data = content.data(using: .utf8),
-               let toolCall = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let toolId = toolCall["toolCallId"] as? String ?? UUID().uuidString
-                let toolName = toolCall["toolName"] as? String ?? ""
-                let args: String
-                if let argsObj = toolCall["args"] {
-                    if let argsData = try? JSONSerialization.data(withJSONObject: argsObj) {
-                        args = String(data: argsData, encoding: .utf8) ?? "{}"
-                    } else { args = "{}" }
-                } else { args = "{}" }
-                continuation.yield(StreamDelta(text: nil, toolCallId: toolId, toolCallName: toolName, toolCallArguments: args, finishReason: "tool_calls"))
-            }
-
-        case "b":
-            if let data = content.data(using: .utf8),
-               let toolStart = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let toolId = toolStart["toolCallId"] as? String ?? UUID().uuidString
-                let toolName = toolStart["toolName"] as? String ?? ""
-                pendingToolInputs[toolId] = (name: toolName, argChunks: "")
-            }
-
-        case "c":
-            if let data = content.data(using: .utf8),
-               let toolDelta = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let toolId = toolDelta["toolCallId"] as? String ?? ""
-                let argsDelta = toolDelta["argsTextDelta"] as? String ?? ""
-                pendingToolInputs[toolId]?.argChunks += argsDelta
-            }
-
-        case "a":
-            if let data = content.data(using: .utf8),
-               let toolResult = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let toolId = toolResult["toolCallId"] as? String ?? ""
-                if let tool = pendingToolInputs[toolId] {
-                    continuation.yield(StreamDelta(text: nil, toolCallId: toolId, toolCallName: tool.name, toolCallArguments: tool.argChunks, finishReason: "tool_calls"))
-                    pendingToolInputs.removeValue(forKey: toolId)
+                default:
+                    break
                 }
             }
 
-        case "3":
-            if let data = content.data(using: .utf8),
-               let errorText = try? JSONSerialization.jsonObject(with: data) as? String {
-                continuation.yield(StreamDelta(text: "Error: \(errorText)", toolCallId: nil, toolCallName: nil, toolCallArguments: nil, finishReason: "error"))
-            }
-
-        default:
-            break
+            continuation.finish()
+        } catch {
+            continuation.yield(StreamEvent(kind: .error("Connection failed: \(error.localizedDescription)")))
+            continuation.finish()
         }
     }
 
-    func searchListings(filters: SearchFilters) -> [Listing] {
+    nonisolated func searchListings(filters: SearchFilters) -> [Listing] {
         var results = MockData.listings
 
-        if let minBeds = filters.minBeds {
-            results = results.filter { $0.beds >= minBeds }
-        }
-        if let maxBeds = filters.maxBeds {
-            results = results.filter { $0.beds <= maxBeds }
-        }
-        if let minBaths = filters.minBaths {
-            results = results.filter { $0.baths >= minBaths }
-        }
-        if let maxBaths = filters.maxBaths {
-            results = results.filter { $0.baths <= maxBaths }
-        }
-        if let minPrice = filters.minPrice {
-            results = results.filter { $0.price >= minPrice }
-        }
-        if let maxPrice = filters.maxPrice {
-            results = results.filter { $0.price <= maxPrice }
-        }
-        if let minSqft = filters.minSqft {
-            results = results.filter { $0.sqft >= minSqft }
-        }
-        if let maxSqft = filters.maxSqft {
-            results = results.filter { $0.sqft <= maxSqft }
-        }
-        if let propertyType = filters.propertyType {
-            results = results.filter { $0.propertyType.lowercased() == propertyType.lowercased() }
-        }
-        if let isHotHome = filters.isHotHome, isHotHome {
-            results = results.filter { $0.isHotHome }
-        }
+        if let minBeds = filters.minBeds { results = results.filter { $0.beds >= minBeds } }
+        if let maxBeds = filters.maxBeds { results = results.filter { $0.beds <= maxBeds } }
+        if let minBaths = filters.minBaths { results = results.filter { $0.baths >= minBaths } }
+        if let maxBaths = filters.maxBaths { results = results.filter { $0.baths <= maxBaths } }
+        if let minPrice = filters.minPrice { results = results.filter { $0.price >= minPrice } }
+        if let maxPrice = filters.maxPrice { results = results.filter { $0.price <= maxPrice } }
+        if let minSqft = filters.minSqft { results = results.filter { $0.sqft >= minSqft } }
+        if let maxSqft = filters.maxSqft { results = results.filter { $0.sqft <= maxSqft } }
+        if let propertyType = filters.propertyType { results = results.filter { $0.propertyType.lowercased() == propertyType.lowercased() } }
+        if let isHotHome = filters.isHotHome, isHotHome { results = results.filter { $0.isHotHome } }
         if let neighborhoods = filters.neighborhoods, !neighborhoods.isEmpty {
-            let lowerNeighborhoods = neighborhoods.map { $0.lowercased() }
+            let lower = neighborhoods.map { $0.lowercased() }
             results = results.filter { listing in
-                lowerNeighborhoods.contains(where: { listing.city.lowercased().contains($0) })
+                lower.contains(where: { listing.city.lowercased().contains($0) })
             }
         }
 

@@ -12,19 +12,13 @@ nonisolated enum MessageFeedback: String, Codable, Sendable {
     case thumbsDown
 }
 
-nonisolated enum ToolCallStatus: String, Codable, Sendable {
-    case pending
-    case executing
-    case completed
-    case failed
+nonisolated struct TourRequest: Codable, Sendable {
+    let listingId: String?
+    let address: String?
 }
 
-nonisolated struct ToolCall: Identifiable, Codable, Sendable, Hashable {
-    let id: String
-    let name: String
-    let arguments: String
-    var status: ToolCallStatus
-    var result: String?
+nonisolated struct MortgageRequest: Codable, Sendable {
+    let listingId: String?
 }
 
 nonisolated struct SearchFilters: Codable, Sendable {
@@ -41,27 +35,18 @@ nonisolated struct SearchFilters: Codable, Sendable {
     var neighborhoods: [String]?
 }
 
-nonisolated struct TourRequest: Codable, Sendable {
-    let listingId: String?
-    let address: String?
-}
-
-nonisolated struct MortgageRequest: Codable, Sendable {
-    let listingId: String?
-}
-
 nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
     let id: String
     let role: ChatRole
     var content: String
     let timestamp: Date
     var feedback: MessageFeedback?
-    var toolCalls: [ToolCall]?
     var searchResults: [String]?
     var tourRequest: TourRequest?
     var mortgageRequest: MortgageRequest?
     var isStreaming: Bool
     var isTourRoute: Bool
+    var toolCalls: [ToolCallRecord]?
 
     init(
         id: String = UUID().uuidString,
@@ -69,24 +54,24 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         content: String,
         timestamp: Date = Date(),
         feedback: MessageFeedback? = nil,
-        toolCalls: [ToolCall]? = nil,
         searchResults: [String]? = nil,
         tourRequest: TourRequest? = nil,
         mortgageRequest: MortgageRequest? = nil,
         isStreaming: Bool = false,
-        isTourRoute: Bool = false
+        isTourRoute: Bool = false,
+        toolCalls: [ToolCallRecord]? = nil
     ) {
         self.id = id
         self.role = role
         self.content = content
         self.timestamp = timestamp
         self.feedback = feedback
-        self.toolCalls = toolCalls
         self.searchResults = searchResults
         self.tourRequest = tourRequest
         self.mortgageRequest = mortgageRequest
         self.isStreaming = isStreaming
         self.isTourRoute = isTourRoute
+        self.toolCalls = toolCalls
     }
 
     static func == (lhs: ChatMessage, rhs: ChatMessage) -> Bool {
@@ -96,6 +81,13 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+nonisolated struct ToolCallRecord: Codable, Sendable, Hashable {
+    let id: String
+    let name: String
+    let arguments: String
+    var result: String?
 }
 
 nonisolated struct ChatThread: Identifiable, Codable, Sendable {
