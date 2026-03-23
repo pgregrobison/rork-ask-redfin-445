@@ -1,8 +1,10 @@
-# Fix slow map panning and enlarge pin tap targets
+# Replace slow map panning with instant, interruptible transitions
 
-**Issue 1: Slow map panning**
-- The card appear/disappear animation is currently applied to the entire map + card container, which accidentally double-animates the map camera
-- Move the animation so it only affects the listing card sliding in/out, leaving the map camera free to pan at its intended speed
+**Problem**
+The current pin-tap animation uses a SwiftUI spring animation wrapper that locks the map during the transition, preventing rapid tapping and making everything feel sluggish.
 
-**Issue 2: Larger pin tap targets**
-- Add 2pt of extra tap area around every map pin so they're easier to tap, without changing the pin's visual size
+**Fix**
+- Remove the blocking animation wrapper and the "is panning" lock flag entirely
+- Set the map camera position directly when a pin is tapped — MapKit's built-in Map view already smoothly animates between positions on its own
+- This means every new pin tap instantly interrupts and redirects the camera, so rapid tapping feels snappy and responsive
+- No artificial delays or cooldowns — the map stays fully interactive at all times

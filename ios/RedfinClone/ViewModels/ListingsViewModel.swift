@@ -30,7 +30,6 @@ class ListingsViewModel {
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
     ))
-    private var isPanningToPin: Bool = false
 
     var sortedListings: [Listing] {
         switch sortOption {
@@ -98,17 +97,10 @@ class ListingsViewModel {
     }
 
     func panToListing(_ listing: Listing) {
-        isPanningToPin = true
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-            mapPosition = .region(MKCoordinateRegion(
-                center: listing.coordinate,
-                span: currentSpan
-            ))
-        }
-        Task {
-            try? await Task.sleep(for: .milliseconds(550))
-            isPanningToPin = false
-        }
+        mapPosition = .region(MKCoordinateRegion(
+            center: listing.coordinate,
+            span: currentSpan
+        ))
     }
 
     func dismissOverlay() {
@@ -117,7 +109,6 @@ class ListingsViewModel {
 
     func persistMapRegion(_ region: MKCoordinateRegion) {
         currentSpan = region.span
-        guard !isPanningToPin else { return }
         mapPosition = .region(region)
         locationService.isTrackingUser = false
     }
