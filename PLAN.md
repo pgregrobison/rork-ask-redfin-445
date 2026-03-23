@@ -1,6 +1,5 @@
-# Position home card actions at top-right of info section
+# Move action icons flush into upper-right corner of info section
 
-**Change**
-
-- Revert the action icons (heart, share) from being vertically centered with the price row
-- Instead, position them at the top-right corner (top: 0, right: 0) of the info section using an overlay or ZStack alignment, so they sit flush in the top-right regardless of content height
+**What changes:**
+- Remove the top and trailing padding from the action icons overlay so their tap targets sit flush against the upper-right corner of the info section
+- The icons will visually anchor to the corner while the text content keeps its normal padding
