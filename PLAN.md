@@ -1,8 +1,6 @@
-# Vertically align action icons with price text
+# Position home card actions at top-right of info section
 
-**What changes**
+**Change**
 
-- Adjust the vertical position of the heart and share icons so they visually align with the price text
-- The icons stay in the top-right corner (overlay position unchanged)
-- Instead of matching the top padding of the info section, the icons will be offset to sit at the same vertical center as the price line
-- No changes to the spacing between price, stats, address, or tags — only the icon position shifts slightly
+- Revert the action icons (heart, share) from being vertically centered with the price row
+- Instead, position them at the top-right corner (top: 0, right: 0) of the info section using an overlay or ZStack alignment, so they sit flush in the top-right regardless of content height

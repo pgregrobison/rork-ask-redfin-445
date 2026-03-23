@@ -8,12 +8,8 @@ struct HomeCardInfoSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: size.fixedWidth != nil ? 6 : 8) {
-            HStack(alignment: .center) {
-                Text(listing.formattedFullPrice)
-                    .font(size.priceFont)
-                Spacer(minLength: 0)
-                cardActions
-            }
+            Text(listing.formattedFullPrice)
+                .font(size.priceFont)
 
             statsRow
 
@@ -28,6 +24,11 @@ struct HomeCardInfoSection: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(size.infoPadding)
+        .overlay(alignment: .topTrailing) {
+            cardActions
+                .padding(.top, size.infoPadding.top)
+                .padding(.trailing, size.infoPadding.trailing)
+        }
     }
 
     private var statsRow: some View {
