@@ -165,10 +165,6 @@ struct AskRedfinView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
-            Image(systemName: "sparkle")
-                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                .foregroundStyle(.primary)
-
             TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
                 .font(.body)
                 .lineLimit(1...4)
@@ -201,7 +197,7 @@ struct AskRedfinView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color(.systemGray6), in: .capsule)
+        .adaptiveGlass(in: .capsule)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
     }

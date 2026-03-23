@@ -7,16 +7,10 @@ struct NudgeBubbleView: View {
 
     var body: some View {
         if isVisible {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.primary)
-
-                Text(String(text.prefix(visibleCharCount)))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
-            }
+            Text(String(text.prefix(visibleCharCount)))
+                .font(.caption)
+                .fontWeight(.medium)
+                .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(Color(.secondarySystemBackground))
