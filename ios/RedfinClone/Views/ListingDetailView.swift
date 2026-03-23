@@ -15,7 +15,6 @@ struct ListingDetailView: View {
     @State private var focusVisible: Bool = false
 
     private let collapsedPeekHeight: CGFloat = 220
-    private let headerHeight: CGFloat = 52
 
     private var safeAreaTop: CGFloat {
         UIApplication.shared.connectedScenes
@@ -30,7 +29,7 @@ struct ListingDetailView: View {
     }
 
     private var sheetTopStop: CGFloat {
-        safeAreaTop + headerHeight + 8
+        safeAreaTop + 52 + 8
     }
 
     private var maxSheetTravel: CGFloat {
@@ -45,8 +44,6 @@ struct ListingDetailView: View {
 
                 detailSheet(in: geo)
 
-                navHeader
-
                 stickyFooter
 
                 if focusedPhotoIndex != nil {
@@ -56,27 +53,21 @@ struct ListingDetailView: View {
         }
         .ignoresSafeArea()
         .background(Color(.systemBackground))
-        .navigationBarHidden(true)
-    }
-
-    // MARK: - Navigation Header
-
-    private var navHeader: some View {
-        VStack {
-            HStack {
-                GlassActionButton(icon: "chevron.left", action: { dismiss() })
-
-                Spacer()
-
-                GlassActionButtonRow(items: [
-                    GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
-                    GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
-                ])
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { onToggleSave() } label: {
+                    Image(systemName: isSaved ? "heart.fill" : "heart")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .foregroundStyle(isSaved ? .red : .primary)
+                }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, safeAreaTop + 4)
-
-            Spacer()
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {} label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                }
+            }
         }
     }
 
