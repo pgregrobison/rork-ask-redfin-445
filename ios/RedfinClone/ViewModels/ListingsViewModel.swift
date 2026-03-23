@@ -93,10 +93,12 @@ class ListingsViewModel {
         }
         selectedListing = listing
         markSeen(listing)
-        mapPosition = .region(MKCoordinateRegion(
-            center: listing.coordinate,
-            span: currentSpan
-        ))
+        withAnimation(.easeOut(duration: 0.15)) {
+            mapPosition = .region(MKCoordinateRegion(
+                center: listing.coordinate,
+                span: currentSpan
+            ))
+        }
     }
 
     func dismissOverlay() {
