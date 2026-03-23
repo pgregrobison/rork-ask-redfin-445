@@ -1,10 +1,12 @@
-# Replace slow map panning with instant, interruptible transitions
+# Add smooth map panning animation when tapping pins
 
-**Problem**
-The current pin-tap animation uses a SwiftUI spring animation wrapper that locks the map during the transition, preventing rapid tapping and making everything feel sluggish.
+**What changes**
 
-**Fix**
-- Remove the blocking animation wrapper and the "is panning" lock flag entirely
-- Set the map camera position directly when a pin is tapped — MapKit's built-in Map view already smoothly animates between positions on its own
-- This means every new pin tap instantly interrupts and redirects the camera, so rapid tapping feels snappy and responsive
-- No artificial delays or cooldowns — the map stays fully interactive at all times
+- When you tap a pin, the map will now smoothly slide to center on that pin — just like Apple Maps does
+- Uses a quick spring animation so it feels responsive but not jarring
+- Rapid pin taps will interrupt the previous animation and start sliding to the new pin immediately
+
+**How it works**
+
+- The pin selection already updates the map camera position — it just needs to be wrapped in an animation so MapKit interpolates between the old and new positions instead of jumping instantly
+- Same animation style already used for the "locate me" button, now applied consistently to pin taps too

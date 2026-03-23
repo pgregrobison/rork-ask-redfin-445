@@ -97,10 +97,12 @@ class ListingsViewModel {
     }
 
     func panToListing(_ listing: Listing) {
-        mapPosition = .region(MKCoordinateRegion(
-            center: listing.coordinate,
-            span: currentSpan
-        ))
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            mapPosition = .region(MKCoordinateRegion(
+                center: listing.coordinate,
+                span: currentSpan
+            ))
+        }
     }
 
     func dismissOverlay() {
