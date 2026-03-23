@@ -54,9 +54,9 @@ struct FindMapView: View {
                     onToggleSave: { viewModel.toggleSaved(listing) },
                     onTap: { onListingTap(listing) }
                 )
+                .id(listing.id)
                 .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: viewModel.selectedListing?.id)
             }
         }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in

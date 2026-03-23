@@ -34,9 +34,8 @@ struct ContentView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showTabBar)
             .onChange(of: viewModel.selectedListing?.id) { _, newValue in
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     showTabBar = newValue == nil
                 }
             }

@@ -86,9 +86,15 @@ class ListingsViewModel {
     }
 
     func selectListing(_ listing: Listing) {
-        selectedListing = listing
+        if selectedListing?.id == listing.id {
+            dismissOverlay()
+            return
+        }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+            selectedListing = listing
+        }
         markSeen(listing)
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        withAnimation(.easeInOut(duration: 0.4)) {
             mapPosition = .region(MKCoordinateRegion(
                 center: listing.coordinate,
                 span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
@@ -97,7 +103,7 @@ class ListingsViewModel {
     }
 
     func dismissOverlay() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+        withAnimation(.easeOut(duration: 0.2)) {
             selectedListing = nil
         }
     }
