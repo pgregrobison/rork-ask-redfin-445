@@ -61,7 +61,7 @@ enum HomeCardSize {
 
     var infoPadding: EdgeInsets {
         switch self {
-        case .large: EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
+        case .large: EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
         case .medium: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
         case .compact: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
         }

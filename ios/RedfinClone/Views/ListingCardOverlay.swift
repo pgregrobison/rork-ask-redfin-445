@@ -9,7 +9,7 @@ struct ListingCardOverlay: View {
     let onTap: () -> Void
     @State private var currentPhotoIndex: Int = 0
 
-    private let cardInset: CGFloat = 20
+    private let cardInset: CGFloat = 8
     private let deviceEdgeInset: CGFloat = 8
 
     private var cardCornerRadius: CGFloat {

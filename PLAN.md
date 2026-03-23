@@ -1,8 +1,6 @@
-# Adjust home card actions padding and map home card positioning
+# Adjust map home card padding: revert outer, increase inner to 20pt
 
-Three tweaks to the home card layout:
+**Changes:**
 
-1. **Add 8pt right padding to home card actions** — The share/heart action buttons in the info section get an extra 8pt of right padding
-2. **Move the map home card into the safe area** — The card will extend down so it sits 8pt from the actual device edge (ignoring the safe area at the bottom)
-3. **Modify the interior home card padding to 20pt**
-
+- Revert the map home card's outer horizontal padding from 20pt back to 8pt (the original device-edge spacing)
+- Increase the internal content padding within the home card's info section to 20pt for the large card size
