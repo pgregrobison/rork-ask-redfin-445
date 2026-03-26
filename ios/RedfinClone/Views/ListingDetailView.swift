@@ -65,8 +65,15 @@ struct ListingDetailView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
+                            .foregroundStyle(.white)
                     }
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                if let index = focusedPhotoIndex {
+                    Text("\(index + 1) of \(listing.photos.count)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -85,6 +92,7 @@ struct ListingDetailView: View {
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
+        .navigationBarBackButtonHidden(focusedPhotoIndex != nil)
     }
 
     // MARK: - Photo Scroll
@@ -330,6 +338,25 @@ struct ListingDetailView: View {
 
     private var detailFooter: some View {
         HStack(spacing: 12) {
+            requestShowingButton
+
+            GlassActionButton(icon: "sparkle") {}
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, max(safeAreaBottom, 12))
+    }
+
+    @ViewBuilder
+    private var requestShowingButton: some View {
+        if #available(iOS 26.0, *) {
+            Button(action: {}) {
+                Text("Request showing")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+            }
+            .glassEffect(.regular.tint(.red).interactive(), in: .capsule)
+        } else {
             Button(action: {}) {
                 Text("Request showing")
                     .font(.headline)
@@ -339,11 +366,7 @@ struct ListingDetailView: View {
                     .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
             }
             .buttonStyle(.plain)
-
-            GlassActionButton(icon: "sparkle") {}
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, max(safeAreaBottom, 12))
     }
 
     // MARK: - Focus Photo Overlay
