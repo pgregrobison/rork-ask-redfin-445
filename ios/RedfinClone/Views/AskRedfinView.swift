@@ -8,6 +8,7 @@ struct AskRedfinView: View {
     let onListingTap: (Listing) -> Void
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
+    @State private var scrollPositions: [String: String] = [:]
 
     var body: some View {
         NavigationStack {
@@ -112,9 +113,23 @@ struct AskRedfinView: View {
             .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
                 scrollToBottom(proxy: proxy)
             }
+            .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
+                if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
+                    scrollPositions[oldId] = lastVisible
+                }
+                if let currentId = chatViewModel.activeThreadId, let savedId = scrollPositions[currentId] {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        proxy.scrollTo(savedId, anchor: .bottom)
+                    }
+                }
+            }
         }
     }
 
+
+    private var canSend: Bool {
+        !chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     private var inputBar: some View {
         HStack(spacing: 10) {
@@ -126,30 +141,46 @@ struct AskRedfinView: View {
                     chatViewModel.sendMessage()
                 }
 
-            if chatViewModel.isTourDayThread {
-                Button { showVoiceMode = true } label: {
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-            }
-
             if chatViewModel.thinkingState != .none {
                 Button {
                     chatViewModel.stopStreaming()
                 } label: {
                     Image(systemName: "stop.circle.fill")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                        .frame(width: 34, height: 34)
+                        .contentShape(Circle())
                 }
+                .transition(.scale.combined(with: .opacity))
+            } else if chatViewModel.isTourDayThread && !canSend {
+                Button { showVoiceMode = true } label: {
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 34, height: 34)
+                        .contentShape(Circle())
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
+
+            if canSend {
+                Button {
+                    chatViewModel.sendMessage()
+                } label: {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color(.systemBackground))
+                        .frame(width: 34, height: 34)
+                        .background(Color.primary)
+                        .clipShape(Circle())
+                }
+                .transition(.scale.combined(with: .opacity))
             }
         }
+        .animation(.easeInOut(duration: 0.15), value: canSend)
+        .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 8)
         .adaptiveGlass(in: .capsule)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
