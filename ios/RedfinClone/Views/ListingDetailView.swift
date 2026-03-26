@@ -5,6 +5,7 @@ struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let onToggleSave: () -> Void
+    let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
     @State private var focusedPhotoIndex: Int? = nil
@@ -340,11 +341,33 @@ struct ListingDetailView: View {
         HStack(spacing: 12) {
             requestShowingButton
 
-            GlassActionButton(icon: "sparkle") {}
-                .frame(height: 52)
+            askRedfinButton
         }
         .padding(.horizontal, 16)
         .padding(.bottom, max(safeAreaBottom, 12))
+    }
+
+    @ViewBuilder
+    private var askRedfinButton: some View {
+        if #available(iOS 26.0, *) {
+            Button(action: onAskRedfin) {
+                Image(systemName: "sparkle")
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+            }
+            .glassEffect(.regular.interactive(), in: .capsule)
+        } else {
+            Button(action: onAskRedfin) {
+                Image(systemName: "sparkle")
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(.ultraThinMaterial, in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     @ViewBuilder

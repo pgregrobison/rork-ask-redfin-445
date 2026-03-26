@@ -43,7 +43,8 @@ struct ContentView: View {
                 ListingDetailView(
                     listing: listing,
                     isSaved: viewModel.isSaved(listing),
-                    onToggleSave: { viewModel.toggleSaved(listing) }
+                    onToggleSave: { viewModel.toggleSaved(listing) },
+                    onAskRedfin: { viewModel.showChat = true }
                 )
                 .toolbar(.hidden, for: .tabBar)
                 .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }

@@ -1,5 +1,7 @@
-# Match Ask Redfin button height to Request Showing button
+# Fix Ask Redfin button size and wire up chat sheet
 
-**What changes:**
-- Increase the size of the "Ask Redfin" sparkle button in the detail page sticky footer so its height matches the "Request Showing" button next to it
-- The Request Showing button is roughly 52pt tall (headline text + 16pt vertical padding); the sparkle button is currently 44pt — it will be increased to match
+Two changes to the detail page sticky footer:
+
+1. **Fix button size** — The Ask Redfin sparkle button will be resized to match the exact height of the "Request showing" button (using the same vertical padding approach instead of an external frame modifier that doesn't affect the inner button)
+
+2. **Open Ask Redfin chat** — Tapping the sparkle button will open the same Ask Redfin chat sheet that appears from the map page and other tabs
