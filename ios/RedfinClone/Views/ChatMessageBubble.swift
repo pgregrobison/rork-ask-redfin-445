@@ -62,6 +62,7 @@ struct ChatMessageBubble: View {
                 feedbackButtons
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var feedbackButtons: some View {

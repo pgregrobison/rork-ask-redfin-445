@@ -1,9 +1,28 @@
-# Photo counter, focus nav fix, and red glass Request button
+# Improve Chat UI — Message Input, Alignment, Feedback, Scrolling & Welcome Message
 
-**Changes**
 
-- **Photo counter in focus view** — A subtle "3 of 9" label appears just below the navigation header when viewing photos in focus mode, showing the current photo index out of total.
+## Changes
 
-- **Replace back arrow with close button in focus mode** — When focus photo view is active, the system back button is hidden and replaced by the close (✕) button, so users can't accidentally back out of the entire detail page. Closing focus mode restores the normal back arrow.
+**Message Input**
+- Users can type and send messages via the existing text field (already functional)
 
-- **Red glass "Request Showing" button** — The "Request showing" button in the sticky footer becomes a native Liquid Glass button with a red tint on iOS 26+, replacing the solid red background. On older iOS, it falls back to the current solid red style.
+**Bot Messages — Left Aligned**
+- Bot/assistant messages will be left-aligned instead of centered, matching the design screenshots
+- Text and content hugs the left edge with proper padding
+
+**Feedback Thumbs Up/Down**
+- Thumbs up and thumbs down buttons only appear once the bot has finished its full response (not while streaming)
+- Already partially implemented — will verify the `isStreaming` guard is working correctly
+
+**Auto-Scroll Behavior**
+- When a user sends a message, the scroll view auto-scrolls the user message to just below the navigation header (top-anchored), leaving room below for the bot's thinking indicator and response to appear
+
+**Thread Dropdown — Remove Sparkle Icon**
+- Remove the sparkle icon from the thread switcher menu label in the navigation bar
+
+**Close Button Styling**
+- Replace the current `xmark.circle.fill` close button with a `GlassActionButton` using the "xmark" icon, matching the consistent close button style used on map cards and elsewhere in the app
+
+**Welcome Message Instead of Empty State**
+- Replace the "Ask Redfin" splash screen (sparkle icon, title, suggestions) with an initial bot message bubble: *"Hey there! I see you're looking near Garner and Raleigh. I can help you find the perfect home — just let me know what you're looking for, and I'll take care of the rest."*
+- This message appears as a standard left-aligned assistant bubble when a new thread is created

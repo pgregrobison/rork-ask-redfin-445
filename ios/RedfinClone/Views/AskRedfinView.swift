@@ -22,12 +22,7 @@ struct AskRedfinView: View {
                     threadSwitcherMenu
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onDismiss) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.secondary)
-                    }
+                    GlassActionButton(icon: "xmark", action: onDismiss)
                 }
             }
         }
@@ -63,8 +58,10 @@ struct AskRedfinView: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: chatViewModel.isTourDayThread ? "car" : "sparkle")
-                    .font(.system(size: 12, weight: .semibold))
+                if chatViewModel.isTourDayThread {
+                    Image(systemName: "car")
+                        .font(.system(size: 12, weight: .semibold))
+                }
                 Text(chatViewModel.activeThread?.title ?? "Ask Redfin")
                     .font(.subheadline.bold())
                     .lineLimit(1)
@@ -79,10 +76,6 @@ struct AskRedfinView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    if chatViewModel.activeMessages.isEmpty {
-                        emptyState
-                    }
-
                     ForEach(chatViewModel.activeMessages) { message in
                         ChatMessageBubble(
                             message: message,
@@ -104,11 +97,13 @@ struct AskRedfinView: View {
                 .padding(.vertical, 16)
             }
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: chatViewModel.activeMessages.count) { _, _ in
-                scrollToBottom(proxy: proxy)
+            .onChange(of: chatViewModel.activeMessages.count) { _, newCount in
+                scrollToLatest(proxy: proxy, newCount: newCount)
             }
-            .onChange(of: chatViewModel.thinkingState) { _, _ in
-                scrollToBottom(proxy: proxy)
+            .onChange(of: chatViewModel.thinkingState) { _, newState in
+                if newState != .none {
+                    scrollToBottom(proxy: proxy)
+                }
             }
             .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
                 scrollToBottom(proxy: proxy)
@@ -116,50 +111,6 @@ struct AskRedfinView: View {
         }
     }
 
-    private var emptyState: some View {
-        VStack(spacing: 16) {
-            Spacer().frame(height: 40)
-
-            Image(systemName: "sparkle")
-                .font(.system(size: 40))
-                .foregroundStyle(.tertiary)
-
-            Text("Ask Redfin")
-                .font(.title2.bold())
-
-            Text("Your AI real estate assistant for NYC.\nSearch homes, schedule tours, or get prequalified.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            VStack(spacing: 8) {
-                suggestionButton("Show me condos under $1.5M in Manhattan")
-                suggestionButton("I want to schedule a tour")
-                suggestionButton("Help me get prequalified for a mortgage")
-                suggestionButton("What are the hot homes right now?")
-            }
-            .padding(.top, 8)
-
-            Spacer().frame(height: 40)
-        }
-        .padding(.horizontal, 20)
-    }
-
-    private func suggestionButton(_ text: String) -> some View {
-        Button {
-            chatViewModel.inputText = text
-            chatViewModel.sendMessage()
-        } label: {
-            Text(text)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(.rect(cornerRadius: 12))
-        }
-    }
 
     private var inputBar: some View {
         HStack(spacing: 10) {
@@ -198,6 +149,19 @@ struct AskRedfinView: View {
         .adaptiveGlass(in: .capsule)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
+    }
+
+    private func scrollToLatest(proxy: ScrollViewProxy, newCount: Int) {
+        let messages = chatViewModel.activeMessages
+        guard !messages.isEmpty else { return }
+        let lastMessage = messages[messages.count - 1]
+        if lastMessage.role == .user {
+            withAnimation(.easeOut(duration: 0.2)) {
+                proxy.scrollTo(lastMessage.id, anchor: .top)
+            }
+        } else {
+            scrollToBottom(proxy: proxy)
+        }
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
