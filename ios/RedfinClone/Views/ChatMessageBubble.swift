@@ -6,6 +6,7 @@ struct ChatMessageBubble: View {
     let onFeedback: (MessageFeedback) -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         if message.role == .user {
@@ -22,7 +23,7 @@ struct ChatMessageBubble: View {
                 .font(.body)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .background(Color(.systemGray6))
+                .background(userBubbleBackground)
                 .clipShape(.rect(cornerRadius: 18, style: .continuous))
         }
         .padding(.horizontal, 16)
@@ -63,6 +64,12 @@ struct ChatMessageBubble: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var userBubbleBackground: Color {
+        colorScheme == .dark
+            ? Color(red: 254/255, green: 254/255, blue: 254/255).opacity(0.12)
+            : Color(.systemGray6)
     }
 
     private var feedbackButtons: some View {

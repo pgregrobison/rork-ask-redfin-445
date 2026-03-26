@@ -132,7 +132,7 @@ struct AskRedfinView: View {
     }
 
     private var inputBar: some View {
-        HStack(spacing: 10) {
+        HStack(alignment: .bottom, spacing: 10) {
             TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
                 .font(.body)
                 .lineLimit(1...4)
@@ -148,7 +148,7 @@ struct AskRedfinView: View {
                     Image(systemName: "stop.circle.fill")
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .frame(width: 34, height: 34)
+                        .frame(width: 44, height: 44)
                         .contentShape(Circle())
                 }
                 .transition(.scale.combined(with: .opacity))
@@ -157,7 +157,7 @@ struct AskRedfinView: View {
                     Image(systemName: "mic.fill")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.secondary)
-                        .frame(width: 34, height: 34)
+                        .frame(width: 44, height: 44)
                         .contentShape(Circle())
                 }
                 .transition(.scale.combined(with: .opacity))
@@ -170,7 +170,7 @@ struct AskRedfinView: View {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Color(.systemBackground))
-                        .frame(width: 34, height: 34)
+                        .frame(width: 44, height: 44)
                         .background(Color.primary)
                         .clipShape(Circle())
                 }
@@ -179,9 +179,13 @@ struct AskRedfinView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: canSend)
         .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .adaptiveGlass(in: .capsule)
+        .padding(.leading, 16)
+        .padding(.trailing, 6)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
     }
