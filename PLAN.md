@@ -1,7 +1,9 @@
-# Update chat input padding
+# Overlay action buttons on chat input field
 
-**Changes**
+**What changes:**
 
-- Set the text input's left padding to 16pt (already in place — no change needed)
-- Set the text input's vertical padding to 12pt (currently 6pt), bringing the single-line input height to 48pt
-
+- Convert the input bar from an `HStack` layout (text field + buttons side by side) to an **overlay** layout where action buttons float over the input field
+- The text field fills the full width of the input bar, with right padding (~54pt) to keep text from running under the button
+- The send button (and future voice button, stop button) is positioned as an `.overlay(alignment: .bottomTrailing)` on the input background, anchored to the bottom-right
+- As the text field grows in height (multi-line), the button stays pinned to the bottom-right corner
+- No visual or sizing changes to the buttons themselves — they remain 44×44 with the same styling

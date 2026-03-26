@@ -163,63 +163,68 @@ struct AskRedfinView: View {
         !chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var hasActionButton: Bool {
+        chatViewModel.thinkingState != .none || (chatViewModel.isTourDayThread && !canSend) || canSend
+    }
+
     private var inputBar: some View {
-        HStack(alignment: .bottom, spacing: 10) {
-            TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
-                .font(.body)
-                .lineLimit(1...4)
-                .focused($isInputFocused)
-                .onSubmit {
-                    sendAndScroll()
-                }
-
-            if chatViewModel.thinkingState != .none {
-                Button {
-                    chatViewModel.stopStreaming()
-                } label: {
-                    Image(systemName: "stop.circle.fill")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                }
-                .transition(.scale.combined(with: .opacity))
-            } else if chatViewModel.isTourDayThread && !canSend {
-                Button { showVoiceMode = true } label: {
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                }
-                .transition(.scale.combined(with: .opacity))
+        TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
+            .font(.body)
+            .lineLimit(1...4)
+            .focused($isInputFocused)
+            .onSubmit {
+                sendAndScroll()
             }
-
-            if canSend {
-                Button {
-                    sendAndScroll()
-                } label: {
-                    Image(systemName: "arrow.up")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color(.systemBackground))
-                        .frame(width: 44, height: 44)
-                        .background(Color.primary)
-                        .clipShape(Circle())
+            .padding(.leading, 16)
+            .padding(.trailing, hasActionButton ? 54 : 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .overlay(alignment: .bottomTrailing) {
+                Group {
+                    if chatViewModel.thinkingState != .none {
+                        Button {
+                            chatViewModel.stopStreaming()
+                        } label: {
+                            Image(systemName: "stop.circle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundStyle(.primary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Circle())
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    } else if chatViewModel.isTourDayThread && !canSend {
+                        Button { showVoiceMode = true } label: {
+                            Image(systemName: "mic.fill")
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Circle())
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    } else if canSend {
+                        Button {
+                            sendAndScroll()
+                        } label: {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(Color(.systemBackground))
+                                .frame(width: 44, height: 44)
+                                .background(Color.primary)
+                                .clipShape(Circle())
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    }
                 }
-                .transition(.scale.combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.15), value: canSend)
+                .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
+                .padding(.trailing, 4)
+                .padding(.bottom, 4)
             }
-        }
-        .animation(.easeInOut(duration: 0.15), value: canSend)
-        .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
-        .padding(.leading, 16)
-        .padding(.trailing, 6)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
     }
 
     private func sendAndScroll() {
