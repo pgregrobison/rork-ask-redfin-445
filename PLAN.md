@@ -1,10 +1,11 @@
-# Switch detail page to standard navigation toolbars
+# Improve Focus Photo Mode
 
-**What changes:**
+**Changes**
 
-- **Remove the custom floating header** on the detail page (the manually positioned back/heart/share buttons)
-- **Replace with standard navigation toolbar items** — back button handled by the system, heart and share as trailing toolbar items — matching the same sizing and style as the map page toolbar
-- **Remove `.navigationBarHidden(true)`** so the system navigation bar is visible and transitions cleanly from the map page
-- **Focus photo overlay** will keep its own close/heart/share buttons as an overlay (since it's a modal-like state on top of the detail page, not a navigation push)
+- **Full black background**: The focus photo overlay will use solid black (#000000 at 100% opacity) instead of the current 85% opacity, so nothing from the detail page behind is visible.
 
-This gives you the clean, native slide-in toolbar transition when tapping a listing from the map.
+- **Close button via native navigation**: Instead of tapping anywhere to dismiss, a close button (X icon) will appear in the upper-left of the navigation bar. The existing favorite and share actions in the upper-right will persist — same toolbar, just with an added close/dismiss button when in focus mode.
+
+- **Sticky footer persists**: The same sticky footer ("Request showing" + sparkle button) remains visible during focus mode, layered on top of the black background.
+
+- **Tap-to-dismiss removed**: Since we're adding a proper close button, tapping the black background will no longer dismiss the focus view. Swiping between photos still works as before.

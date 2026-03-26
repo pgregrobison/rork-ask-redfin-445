@@ -44,31 +44,47 @@ struct ListingDetailView: View {
 
                 detailSheet(in: geo)
 
-                stickyFooter
-
                 if focusedPhotoIndex != nil {
                     focusOverlay
                 }
+
+                stickyFooter
             }
         }
         .ignoresSafeArea()
         .background(Color(.systemBackground))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if focusedPhotoIndex != nil {
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            focusVisible = false
+                            focusedPhotoIndex = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
+                    }
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button { onToggleSave() } label: {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(isSaved ? .red : .primary)
+                        .foregroundStyle(isSaved ? .red : (focusedPhotoIndex != nil ? .white : .primary))
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {} label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
                 }
             }
         }
+        .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
     }
 
     // MARK: - Photo Scroll
@@ -334,14 +350,8 @@ struct ListingDetailView: View {
 
     private var focusOverlay: some View {
         ZStack {
-            Color.black.opacity(focusVisible ? 0.85 : 0)
+            Color.black
                 .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        focusVisible = false
-                        focusedPhotoIndex = nil
-                    }
-                }
 
             if let index = focusedPhotoIndex, focusVisible {
                 TabView(selection: Binding(
@@ -368,45 +378,8 @@ struct ListingDetailView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .transition(.opacity)
             }
-
-            VStack(spacing: 0) {
-                HStack {
-                    GlassActionButton(icon: "xmark") {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                            focusVisible = false
-                            focusedPhotoIndex = nil
-                        }
-                    }
-
-                    Spacer()
-
-                    GlassActionButtonRow(items: [
-                        GlassActionButtonItem(icon: isSaved ? "heart.fill" : "heart", action: onToggleSave),
-                        GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
-                    ])
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, safeAreaTop + 4)
-
-                Spacer()
-
-                HStack(spacing: 12) {
-                    Button(action: {}) {
-                        Text("Request showing")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
-                    }
-                    .buttonStyle(.plain)
-
-                    GlassActionButton(icon: "sparkle") {}
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, max(safeAreaBottom, 12))
-            }
         }
+        .allowsHitTesting(focusVisible)
     }
 
     // MARK: - About Section
