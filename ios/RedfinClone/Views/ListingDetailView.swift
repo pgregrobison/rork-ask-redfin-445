@@ -347,27 +347,8 @@ struct ListingDetailView: View {
         .padding(.bottom, max(safeAreaBottom, 12))
     }
 
-    @ViewBuilder
     private var askRedfinButton: some View {
-        if #available(iOS 26.0, *) {
-            Button(action: onAskRedfin) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-            }
-            .glassEffect(.regular.interactive(), in: .capsule)
-        } else {
-            Button(action: onAskRedfin) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .background(.ultraThinMaterial, in: Capsule())
-            }
-            .buttonStyle(.plain)
-        }
+        GlassActionButton(icon: "sparkle", action: onAskRedfin)
     }
 
     @ViewBuilder

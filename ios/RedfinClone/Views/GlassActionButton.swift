@@ -14,6 +14,7 @@ struct GlassActionButton: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Circle())
             }
+            .fixedSize()
             .glassEffect(.regular.interactive(), in: .circle)
         } else {
             Button(action: action) {
@@ -23,6 +24,7 @@ struct GlassActionButton: View {
                     .frame(width: 44, height: 44)
                     .background(.ultraThinMaterial, in: Circle())
             }
+            .fixedSize()
         }
     }
 }
