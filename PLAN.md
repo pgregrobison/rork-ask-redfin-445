@@ -1,8 +1,15 @@
-# Refine Chat Input & Send Button Styling
+# Fix chat scroll: user message slides to top on send
 
-**Changes**
+**What changes**
 
-- **Send button**: Resize to 44×44, remove liquid glass styling, use black background with white icon in light mode and white background with black icon in dark mode
-- **Send button position**: Anchor to the bottom-right of the input area so it stays pinned as the text field grows vertically
-- **Input field corner radius**: Change from fully rounded (capsule) to 24pt corner radius so multi-line input looks natural
-- **User message bubble (dark mode)**: Update the background color to #FEFEFE at 12% opacity in dark mode, keeping the current light mode style
+- When the user taps the send button, their message smoothly slides up to sit just below the header at the top of the visible area
+- The "Thinking..." indicator appears below the user message, with plenty of empty space beneath — exactly as shown in the screenshot
+- As the bot response streams in, the view stays anchored to the user message at top until the response is long enough to fill the screen, at which point it begins auto-scrolling to keep the latest text visible
+- The keyboard dismisses automatically after sending a message so the full chat area is visible
+
+**How it works**
+
+- After sending, scroll anchors the user message to the top instead of chasing the thinking indicator to the bottom
+- A flag tracks when we're in "just sent" mode so the thinking indicator and early streaming don't fight the scroll position
+- Once the bot response finishes streaming, normal bottom-anchored scrolling resumes for future messages
+- Keyboard is dismissed on send for a clean transition matching the screenshots

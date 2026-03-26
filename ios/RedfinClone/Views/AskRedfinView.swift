@@ -9,6 +9,7 @@ struct AskRedfinView: View {
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
     @State private var scrollPositions: [String: String] = [:]
+    @State private var justSentMessageId: String?
 
     var body: some View {
         NavigationStack {
@@ -106,12 +107,17 @@ struct AskRedfinView: View {
                 scrollToLatest(proxy: proxy, newCount: newCount)
             }
             .onChange(of: chatViewModel.thinkingState) { _, newState in
-                if newState != .none {
+                if newState == .none, justSentMessageId != nil {
+                    justSentMessageId = nil
+                }
+                if newState != .none, justSentMessageId == nil {
                     scrollToBottom(proxy: proxy)
                 }
             }
             .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
-                scrollToBottom(proxy: proxy)
+                if justSentMessageId == nil {
+                    scrollToBottom(proxy: proxy)
+                }
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
@@ -138,7 +144,7 @@ struct AskRedfinView: View {
                 .lineLimit(1...4)
                 .focused($isInputFocused)
                 .onSubmit {
-                    chatViewModel.sendMessage()
+                    sendAndScroll()
                 }
 
             if chatViewModel.thinkingState != .none {
@@ -165,7 +171,7 @@ struct AskRedfinView: View {
 
             if canSend {
                 Button {
-                    chatViewModel.sendMessage()
+                    sendAndScroll()
                 } label: {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 16, weight: .bold))
@@ -190,15 +196,25 @@ struct AskRedfinView: View {
         .padding(.bottom, 8)
     }
 
+    private func sendAndScroll() {
+        let willSendText = chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !willSendText.isEmpty else { return }
+        chatViewModel.sendMessage()
+        isInputFocused = false
+        if let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) {
+            justSentMessageId = lastUserMsg.id
+        }
+    }
+
     private func scrollToLatest(proxy: ScrollViewProxy, newCount: Int) {
         let messages = chatViewModel.activeMessages
         guard !messages.isEmpty else { return }
         let lastMessage = messages[messages.count - 1]
         if lastMessage.role == .user {
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.easeOut(duration: 0.3)) {
                 proxy.scrollTo(lastMessage.id, anchor: .top)
             }
-        } else {
+        } else if justSentMessageId == nil {
             scrollToBottom(proxy: proxy)
         }
     }
