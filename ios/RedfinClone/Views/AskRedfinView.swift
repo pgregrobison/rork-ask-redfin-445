@@ -213,7 +213,7 @@ struct AskRedfinView: View {
         .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
         .padding(.leading, 16)
         .padding(.trailing, 6)
-        .padding(.vertical, 6)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
