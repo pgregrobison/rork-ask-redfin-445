@@ -188,11 +188,12 @@ struct AskRedfinView: View {
                         Button {
                             chatViewModel.stopStreaming()
                         } label: {
-                            Image(systemName: "stop.circle.fill")
-                                .font(.system(size: 24, weight: .semibold))
-                                .foregroundStyle(.primary)
+                            Image(systemName: "stop.fill")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Color(.systemBackground))
                                 .frame(width: 44, height: 44)
-                                .contentShape(Circle())
+                                .background(Color.primary)
+                                .clipShape(Circle())
                         }
                         .transition(.scale.combined(with: .opacity))
                     } else if chatViewModel.isTourDayThread && !canSend {

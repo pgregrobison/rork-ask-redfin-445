@@ -119,7 +119,7 @@ class ChatViewModel {
 
         let response = chatService.matchResponse(for: input)
 
-        try? await Task.sleep(for: .milliseconds(Int.random(in: 400...800)))
+        try? await Task.sleep(for: .milliseconds(Int.random(in: 500...900)))
         if Task.isCancelled { return }
 
         let assistantMsg = ChatMessage(role: .assistant, content: "", isStreaming: true)
