@@ -1,13 +1,11 @@
-# Fix Ask Redfin and close buttons to be perfect circles
+# Fix Ask Redfin close button styling and sparkle button sizing
 
-**What's wrong:**
+**Two fixes:**
 
-- The Ask Redfin sparkle button on the detail page footer is an oval, not a circle — it uses uneven padding instead of a fixed square size
-- The close button inside the Ask Redfin chat sheet isn't a perfect circle because the system toolbar overrides its sizing
+### 1. Ask Redfin sheet close button
+- Replace the custom glass-styled close button in the Ask Redfin sheet toolbar with a plain icon button (just the "xmark" image), matching how the detail page and map page toolbars work
+- The native system toolbar already provides the circular glass appearance — layering a custom glass button on top creates a misshapen double-effect
 
-**What will change:**
-
-- **Detail page sparkle button**: Switch from asymmetric padding to a fixed square frame (matching the 44×44 size used by all other circular glass buttons), with a `.circle` glass shape instead of `.capsule`
-- **Ask Redfin close button**: Use a plain close button view in the toolbar that resists the toolbar's sizing interference, ensuring a perfect circle just like the close buttons elsewhere in the app
-- Both buttons will use the exact same `GlassActionButton` component and sizing as every other circular glass button in the app
-
+### 2. Ask Redfin sparkle button on detail page
+- Increase the sparkle button size from 44×44 to 52×52 so its height matches the "Request showing" button next to it
+- This requires a size parameter on the glass button component, since the default 44×44 is correct everywhere else

@@ -22,7 +22,11 @@ struct AskRedfinView: View {
                     threadSwitcherMenu
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    GlassActionButton(icon: "xmark", action: onDismiss)
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
                 }
             }
         }

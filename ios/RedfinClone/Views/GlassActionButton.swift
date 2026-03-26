@@ -4,6 +4,7 @@ struct GlassActionButton: View {
     let icon: String
     let action: () -> Void
     var foregroundColor: Color = .primary
+    var size: CGFloat = 44
 
     var body: some View {
         if #available(iOS 26.0, *) {
@@ -11,7 +12,7 @@ struct GlassActionButton: View {
                 Image(systemName: icon)
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
-                    .frame(width: 44, height: 44)
+                    .frame(width: size, height: size)
                     .contentShape(Circle())
             }
             .fixedSize()
@@ -21,7 +22,7 @@ struct GlassActionButton: View {
                 Image(systemName: icon)
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
-                    .frame(width: 44, height: 44)
+                    .frame(width: size, height: size)
                     .background(.ultraThinMaterial, in: Circle())
             }
             .fixedSize()

@@ -348,7 +348,7 @@ struct ListingDetailView: View {
     }
 
     private var askRedfinButton: some View {
-        GlassActionButton(icon: "sparkle", action: onAskRedfin)
+        GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
     }
 
     @ViewBuilder
