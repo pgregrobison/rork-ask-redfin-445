@@ -48,7 +48,7 @@ struct ContentView: View {
                 )
                 .toolbar(.hidden, for: .tabBar)
                 .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
-                .onDisappear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } }
+                .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
             }
         }
         .tint(.primary)
