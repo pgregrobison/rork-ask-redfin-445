@@ -10,6 +10,7 @@ struct AskRedfinView: View {
     @State private var showVoiceMode: Bool = false
     @State private var scrollPositions: [String: String] = [:]
     @State private var justSentMessageId: String?
+    @State private var scrollAreaHeight: CGFloat = 0
 
     var body: some View {
         NavigationStack {
@@ -99,8 +100,21 @@ struct AskRedfinView: View {
                         ThinkingIndicator(label: chatViewModel.thinkingState.label)
                             .id("thinking")
                     }
+
+                    if justSentMessageId != nil {
+                        Spacer()
+                            .frame(height: max(scrollAreaHeight - 120, 0))
+                    }
                 }
                 .padding(.vertical, 16)
+            }
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: ScrollAreaHeightKey.self, value: geo.size.height)
+                }
+            )
+            .onPreferenceChange(ScrollAreaHeightKey.self) { value in
+                scrollAreaHeight = value
             }
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: chatViewModel.activeMessages.count) { _, newCount in
@@ -211,8 +225,10 @@ struct AskRedfinView: View {
         guard !messages.isEmpty else { return }
         let lastMessage = messages[messages.count - 1]
         if lastMessage.role == .user {
-            withAnimation(.easeOut(duration: 0.3)) {
-                proxy.scrollTo(lastMessage.id, anchor: .top)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    proxy.scrollTo(lastMessage.id, anchor: .top)
+                }
             }
         } else if justSentMessageId == nil {
             scrollToBottom(proxy: proxy)
@@ -227,5 +243,12 @@ struct AskRedfinView: View {
                 proxy.scrollTo(lastId, anchor: .bottom)
             }
         }
+    }
+}
+
+private struct ScrollAreaHeightKey: PreferenceKey {
+    nonisolated static let defaultValue: CGFloat = 0
+    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
