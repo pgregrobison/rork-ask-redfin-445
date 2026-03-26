@@ -11,7 +11,8 @@ struct AskRedfinView: View {
     @State private var scrollPositions: [String: String] = [:]
     @State private var justSentMessageId: String?
     @State private var scrollAreaHeight: CGFloat = 0
-    @State private var pendingScrollToTop: String?
+    @State private var scrollLocked: Bool = false
+    @State private var pendingScrollTarget: String?
 
     var body: some View {
         NavigationStack {
@@ -103,8 +104,9 @@ struct AskRedfinView: View {
                     }
 
                     if justSentMessageId != nil {
-                        Spacer()
-                            .frame(height: max(scrollAreaHeight - 120, 0))
+                        Color.clear
+                            .frame(height: scrollAreaHeight)
+                            .id("scroll-spacer")
                     }
                 }
                 .padding(.vertical, 16)
@@ -118,32 +120,34 @@ struct AskRedfinView: View {
                 scrollAreaHeight = value
             }
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: pendingScrollToTop) { _, targetId in
+            .onChange(of: pendingScrollTarget) { _, targetId in
                 guard let targetId else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.easeOut(duration: 0.35)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    withAnimation(.easeOut(duration: 0.4)) {
                         proxy.scrollTo(targetId, anchor: .top)
                     }
-                    pendingScrollToTop = nil
+                    pendingScrollTarget = nil
                 }
             }
             .onChange(of: chatViewModel.activeMessages.count) { _, newCount in
-                if pendingScrollToTop == nil {
-                    scrollToLatest(proxy: proxy, newCount: newCount)
-                }
+                guard !scrollLocked else { return }
+                scrollToLatest(proxy: proxy, newCount: newCount)
             }
             .onChange(of: chatViewModel.thinkingState) { _, newState in
                 if newState == .none, justSentMessageId != nil {
                     justSentMessageId = nil
+                    scrollLocked = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        scrollToBottom(proxy: proxy)
+                    }
                 }
-                if newState != .none, justSentMessageId == nil {
+                if newState != .none, !scrollLocked {
                     scrollToBottom(proxy: proxy)
                 }
             }
             .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
-                if justSentMessageId == nil {
-                    scrollToBottom(proxy: proxy)
-                }
+                guard !scrollLocked else { return }
+                scrollToBottom(proxy: proxy)
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
@@ -235,7 +239,8 @@ struct AskRedfinView: View {
         chatViewModel.sendMessage()
         if let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) {
             justSentMessageId = lastUserMsg.id
-            pendingScrollToTop = lastUserMsg.id
+            scrollLocked = true
+            pendingScrollTarget = lastUserMsg.id
         }
     }
 
