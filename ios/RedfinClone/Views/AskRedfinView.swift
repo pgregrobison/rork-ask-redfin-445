@@ -11,6 +11,7 @@ struct AskRedfinView: View {
     @State private var scrollPositions: [String: String] = [:]
     @State private var justSentMessageId: String?
     @State private var scrollAreaHeight: CGFloat = 0
+    @State private var pendingScrollToTop: String?
 
     var body: some View {
         NavigationStack {
@@ -117,8 +118,19 @@ struct AskRedfinView: View {
                 scrollAreaHeight = value
             }
             .scrollDismissesKeyboard(.interactively)
+            .onChange(of: pendingScrollToTop) { _, targetId in
+                guard let targetId else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.easeOut(duration: 0.35)) {
+                        proxy.scrollTo(targetId, anchor: .top)
+                    }
+                    pendingScrollToTop = nil
+                }
+            }
             .onChange(of: chatViewModel.activeMessages.count) { _, newCount in
-                scrollToLatest(proxy: proxy, newCount: newCount)
+                if pendingScrollToTop == nil {
+                    scrollToLatest(proxy: proxy, newCount: newCount)
+                }
             }
             .onChange(of: chatViewModel.thinkingState) { _, newState in
                 if newState == .none, justSentMessageId != nil {
@@ -213,10 +225,11 @@ struct AskRedfinView: View {
     private func sendAndScroll() {
         let willSendText = chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !willSendText.isEmpty else { return }
-        chatViewModel.sendMessage()
         isInputFocused = false
+        chatViewModel.sendMessage()
         if let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) {
             justSentMessageId = lastUserMsg.id
+            pendingScrollToTop = lastUserMsg.id
         }
     }
 
@@ -225,11 +238,7 @@ struct AskRedfinView: View {
         guard !messages.isEmpty else { return }
         let lastMessage = messages[messages.count - 1]
         if lastMessage.role == .user {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    proxy.scrollTo(lastMessage.id, anchor: .top)
-                }
-            }
+            return
         } else if justSentMessageId == nil {
             scrollToBottom(proxy: proxy)
         }
