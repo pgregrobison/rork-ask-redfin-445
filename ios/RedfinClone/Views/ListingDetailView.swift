@@ -341,6 +341,7 @@ struct ListingDetailView: View {
             requestShowingButton
 
             GlassActionButton(icon: "sparkle") {}
+                .frame(height: 52)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, max(safeAreaBottom, 12))
