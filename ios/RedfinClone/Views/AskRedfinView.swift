@@ -1,10 +1,6 @@
 import SwiftUI
 
-private enum ChatScrollPhase: Equatable {
-    case idle
-    case userJustSent(messageId: String)
-    case streaming
-}
+
 
 struct AskRedfinView: View {
     @Bindable var chatViewModel: ChatViewModel
@@ -15,7 +11,6 @@ struct AskRedfinView: View {
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
     @State private var scrollPositions: [String: String] = [:]
-    @State private var scrollPhase: ChatScrollPhase = .idle
     @State private var visibleHeight: CGFloat = 0
     @State private var bottomSpacerHeight: CGFloat = 0
     @State private var scrollToTopTrigger: String?
@@ -131,23 +126,11 @@ struct AskRedfinView: View {
                     }
                 }
             }
-            .onChange(of: chatViewModel.activeMessages.count) { oldCount, newCount in
-                guard newCount > oldCount else { return }
-                if case .userJustSent = scrollPhase {
-                    scrollPhase = .streaming
-                }
-            }
-            .onChange(of: chatViewModel.activeMessages.last?.isStreaming) { _, isStreaming in
-                if isStreaming == false, case .streaming = scrollPhase {
-                    collapseSpacer()
-                }
-            }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
                     scrollPositions[oldId] = lastVisible
                 }
                 bottomSpacerHeight = 0
-                scrollPhase = .idle
                 if let currentId = chatViewModel.activeThreadId, let savedId = scrollPositions[currentId] {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         proxy.scrollTo(savedId, anchor: .bottom)
@@ -236,27 +219,9 @@ struct AskRedfinView: View {
         guard let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) else { return }
 
         let msgId = lastUserMsg.id
-        scrollPhase = .userJustSent(messageId: msgId)
-        bottomSpacerHeight = max(visibleHeight - 80, 200)
+        bottomSpacerHeight = visibleHeight
         scrollToTopTrigger = msgId
     }
 
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.2)) {
-            if chatViewModel.thinkingState != .none {
-                proxy.scrollTo("thinking", anchor: .bottom)
-            } else if let lastId = chatViewModel.activeMessages.last?.id {
-                proxy.scrollTo(lastId, anchor: .bottom)
-            }
-        }
-    }
 
-    private func collapseSpacer() {
-        withAnimation(.easeOut(duration: 0.3)) {
-            bottomSpacerHeight = 0
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            scrollPhase = .idle
-        }
-    }
 }
