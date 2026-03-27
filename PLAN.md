@@ -1,15 +1,8 @@
-# Persist chat scroll positions across sheet open/close
+# Extend share & favorite actions across all cards and detail page
 
-**Problem**
-When you close and reopen the Ask Redfin chat, every thread scrolls to the top because the scroll position data is lost when the sheet disappears.
+**Changes**
 
-**Fix**
-- Move the scroll position memory from the sheet into the persistent chat data layer (which stays alive even when the sheet is closed)
-- When you close the sheet, the current scroll position is saved
-- When you reopen the sheet, it automatically scrolls back to where you left off
-- Each thread remembers its own independent scroll position
-
-**What you'll experience**
-- Open a chat thread, scroll partway through, close the sheet → reopen and you're right where you left off
-- Switch between threads — each one remembers its own position
-- New messages still scroll as expected when you send them
+- **Detail page share button**: The share button in the top toolbar is currently non-functional — wire it up to share the listing text (same as the home card share), and add a haptic tap
+- **Home card share haptic**: Add a light haptic feedback when the share button is tapped on any home card
+- **Favorite (heart) on compact cards**: Add the save/unsave heart button to the small home cards that appear on the For You page (Hot Homes, Just Listed sections)
+- **Favorite (heart) on chat listing cards**: Add the save/unsave heart button to the medium home cards that appear inside Ask Redfin chat responses

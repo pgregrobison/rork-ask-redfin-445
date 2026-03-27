@@ -3,6 +3,8 @@ import SwiftUI
 struct ChatMessageBubble: View {
     let message: ChatMessage
     let allListings: [Listing]
+    let savedListingIDs: Set<String>
+    let onToggleSave: (Listing) -> Void
     let onFeedback: (MessageFeedback) -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
@@ -42,6 +44,8 @@ struct ChatMessageBubble: View {
                 ChatListingCards(
                     listingIds: searchResults,
                     allListings: allListings,
+                    savedListingIDs: savedListingIDs,
+                    onToggleSave: onToggleSave,
                     onShowOnMap: onShowOnMap,
                     onListingTap: onListingTap
                 )

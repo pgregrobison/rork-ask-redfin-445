@@ -69,6 +69,7 @@ struct HomeCardInfoSection: View {
                         .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
+                .sensoryFeedback(.selection, trigger: false)
             }
 
             if let onToggleSave {

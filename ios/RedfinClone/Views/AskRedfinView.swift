@@ -5,6 +5,8 @@ import SwiftUI
 struct AskRedfinView: View {
     @Bindable var chatViewModel: ChatViewModel
     let allListings: [Listing]
+    let savedListingIDs: Set<String>
+    let onToggleSave: (Listing) -> Void
     let onDismiss: () -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
@@ -88,6 +90,8 @@ struct AskRedfinView: View {
                         ChatMessageBubble(
                             message: message,
                             allListings: allListings,
+                            savedListingIDs: savedListingIDs,
+                            onToggleSave: onToggleSave,
                             onFeedback: { feedback in
                                 chatViewModel.setFeedback(feedback, for: message.id)
                             },

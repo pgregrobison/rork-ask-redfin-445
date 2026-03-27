@@ -81,15 +81,18 @@ struct ListingDetailView: View {
                 Button { onToggleSave() } label: {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
                         .foregroundStyle(isSaved ? .red : (focusedPhotoIndex != nil ? .white : .primary))
                 }
+                .sensoryFeedback(.selection, trigger: isSaved)
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
+                ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
                 }
+                .sensoryFeedback(.selection, trigger: false)
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)

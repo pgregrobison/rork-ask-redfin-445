@@ -54,7 +54,9 @@ struct ForYouView: View {
                         HomeCard(
                             listing: listing,
                             size: .compact(width: 280),
-                            badge: listing.primaryBadge
+                            isSaved: viewModel.isSaved(listing),
+                            badge: listing.primaryBadge,
+                            onToggleSave: { viewModel.toggleSaved(listing) }
                         )
                     }
                     .buttonStyle(.plain)
@@ -73,7 +75,9 @@ struct ForYouView: View {
                         HomeCard(
                             listing: listing,
                             size: .compact(width: 260),
-                            badge: listing.primaryBadge
+                            isSaved: viewModel.isSaved(listing),
+                            badge: listing.primaryBadge,
+                            onToggleSave: { viewModel.toggleSaved(listing) }
                         )
                     }
                     .buttonStyle(.plain)

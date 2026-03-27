@@ -56,6 +56,8 @@ struct ContentView: View {
             AskRedfinView(
                 chatViewModel: chatViewModel,
                 allListings: viewModel.listings,
+                savedListingIDs: viewModel.savedListingIDs,
+                onToggleSave: { listing in viewModel.toggleSaved(listing) },
                 onDismiss: {
                     viewModel.showChat = false
                 },

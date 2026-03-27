@@ -3,6 +3,8 @@ import SwiftUI
 struct ChatListingCards: View {
     let listingIds: [String]
     let allListings: [Listing]
+    let savedListingIDs: Set<String>
+    let onToggleSave: (Listing) -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
 
@@ -21,7 +23,9 @@ struct ChatListingCards: View {
                             HomeCard(
                                 listing: listing,
                                 size: .medium,
-                                badge: listing.primaryBadge
+                                isSaved: savedListingIDs.contains(listing.id),
+                                badge: listing.primaryBadge,
+                                onToggleSave: { onToggleSave(listing) }
                             )
                         }
                         .buttonStyle(.plain)
