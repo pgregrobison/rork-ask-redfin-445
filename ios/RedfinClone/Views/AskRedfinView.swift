@@ -10,9 +10,8 @@ struct AskRedfinView: View {
     let onListingTap: (Listing) -> Void
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
-    @State private var scrollPositions: [String: String] = [:]
-    @State private var bottomSpacerHeight: CGFloat = 0
     @State private var scrollToTopTrigger: String?
+    @State private var hasRestoredScroll: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -104,12 +103,26 @@ struct AskRedfinView: View {
                     }
 
                     Color.clear
-                        .frame(height: bottomSpacerHeight)
+                        .frame(height: currentBottomSpacerHeight)
                         .id("bottom-spacer")
                 }
                 .padding(.vertical, 16)
             }
             .scrollDismissesKeyboard(.interactively)
+            .onAppear {
+                guard !hasRestoredScroll else { return }
+                hasRestoredScroll = true
+                if let threadId = chatViewModel.activeThreadId,
+                   let savedId = chatViewModel.scrollPositions[threadId] {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        proxy.scrollTo(savedId, anchor: .bottom)
+                    }
+                }
+            }
+            .onDisappear {
+                saveCurrentScrollPosition()
+                hasRestoredScroll = false
+            }
             .onChange(of: scrollToTopTrigger) { _, targetId in
                 guard let targetId else { return }
                 scrollToTopTrigger = nil
@@ -121,10 +134,12 @@ struct AskRedfinView: View {
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
-                    scrollPositions[oldId] = lastVisible
+                    chatViewModel.scrollPositions[oldId] = lastVisible
                 }
-                bottomSpacerHeight = 0
-                if let currentId = chatViewModel.activeThreadId, let savedId = scrollPositions[currentId] {
+                if let threadId = chatViewModel.activeThreadId {
+                    chatViewModel.bottomSpacerHeights[threadId] = 0
+                }
+                if let currentId = chatViewModel.activeThreadId, let savedId = chatViewModel.scrollPositions[currentId] {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         proxy.scrollTo(savedId, anchor: .bottom)
                     }
@@ -205,6 +220,17 @@ struct AskRedfinView: View {
             .padding(.bottom, 8)
     }
 
+    private var currentBottomSpacerHeight: CGFloat {
+        guard let threadId = chatViewModel.activeThreadId else { return 0 }
+        return chatViewModel.bottomSpacerHeights[threadId] ?? 0
+    }
+
+    private func saveCurrentScrollPosition() {
+        guard let threadId = chatViewModel.activeThreadId,
+              let lastMsgId = chatViewModel.activeMessages.last?.id else { return }
+        chatViewModel.scrollPositions[threadId] = lastMsgId
+    }
+
     private func sendAndScroll() {
         let willSendText = chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !willSendText.isEmpty else { return }
@@ -213,7 +239,9 @@ struct AskRedfinView: View {
         guard let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) else { return }
 
         let msgId = lastUserMsg.id
-        bottomSpacerHeight = UIScreen.main.bounds.height
+        if let threadId = chatViewModel.activeThreadId {
+            chatViewModel.bottomSpacerHeights[threadId] = UIScreen.main.bounds.height
+        }
         scrollToTopTrigger = msgId
     }
 

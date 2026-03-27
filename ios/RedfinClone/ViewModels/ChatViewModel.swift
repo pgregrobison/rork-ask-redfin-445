@@ -24,6 +24,8 @@ class ChatViewModel {
     var thinkingState: ThinkingState = .none
     var showThreadSwitcher: Bool = false
     var lastSearchResults: [Listing] = []
+    var scrollPositions: [String: String] = [:]
+    var bottomSpacerHeights: [String: CGFloat] = [:]
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
