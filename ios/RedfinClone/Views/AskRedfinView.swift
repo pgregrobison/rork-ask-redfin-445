@@ -133,37 +133,8 @@ struct AskRedfinView: View {
             }
             .onChange(of: chatViewModel.activeMessages.count) { oldCount, newCount in
                 guard newCount > oldCount else { return }
-                let messages = chatViewModel.activeMessages
-                guard let last = messages.last else { return }
-
-                if last.role == .user {
-                    return
-                }
-
-                switch scrollPhase {
-                case .userJustSent:
+                if case .userJustSent = scrollPhase {
                     scrollPhase = .streaming
-                case .idle:
-                    scrollToBottom(proxy: proxy)
-                case .streaming:
-                    break
-                }
-            }
-            .onChange(of: chatViewModel.thinkingState) { _, newState in
-                switch scrollPhase {
-                case .userJustSent:
-                    break
-                case .streaming:
-                    break
-                case .idle:
-                    if newState != .none {
-                        scrollToBottom(proxy: proxy)
-                    }
-                }
-            }
-            .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
-                if case .idle = scrollPhase, chatViewModel.activeMessages.last?.isStreaming != true {
-                    scrollToBottom(proxy: proxy)
                 }
             }
             .onChange(of: chatViewModel.activeMessages.last?.isStreaming) { _, isStreaming in
@@ -198,6 +169,7 @@ struct AskRedfinView: View {
     private var inputBar: some View {
         TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
             .font(.body)
+            .lineSpacing(2)
             .lineLimit(1...4)
             .focused($isInputFocused)
             .onSubmit {
