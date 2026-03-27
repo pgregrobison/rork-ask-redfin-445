@@ -280,9 +280,11 @@ struct AskRedfinView: View {
     }
 
     private func collapseSpacer() {
-        scrollPhase = .idle
         withAnimation(.easeOut(duration: 0.3)) {
             bottomSpacerHeight = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            scrollPhase = .idle
         }
     }
 }

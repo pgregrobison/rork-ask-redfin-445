@@ -1,9 +1,12 @@
-# Fix bot response auto-scrolling back during streaming
+# Fix auto-scroll triggering when bot finishes responding
 
 **Problem**
-When a bot response streams in, the chat scrolls back down — undoing the "pin user message to top" behavior. This happens because the "thinking" indicator ends before streaming finishes, which prematurely resets the scroll phase to idle. Once idle, every content update triggers a scroll-to-bottom.
+When the bot finishes its response and the action bar appears, the chat auto-scrolls down — undoing the user's scroll position.
+
+**Root cause**
+When streaming ends, the code immediately sets the scroll phase to "idle" and collapses the spacer. But the action bar appearing right after causes a layout change, and since the phase is already "idle", the auto-scroll kicks in.
 
 **Fix**
-- When thinking ends and the phase is "streaming," don't collapse the spacer yet — leave it for the streaming-finished handler
-- When streaming finishes, smoothly collapse the spacer and reset the phase
-- Also guard the content-change handler so it never scrolls to bottom while the bot is still actively streaming (even if phase accidentally becomes idle)
+- Keep the scroll phase in "streaming" mode while collapsing the spacer
+- Only transition to "idle" after a short delay (e.g. 0.5s), giving the action bar time to appear without triggering auto-scroll
+- This ensures no bot-related layout change ever triggers auto-scroll
