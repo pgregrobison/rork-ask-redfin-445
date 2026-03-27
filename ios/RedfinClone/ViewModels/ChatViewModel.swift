@@ -130,6 +130,7 @@ class ChatViewModel {
 
         let responseText: String
         var searchFilters: SearchFilters?
+        var tourReq: TourRequest?
 
         switch response {
         case .listings(let text, let filters):
@@ -140,9 +141,10 @@ class ChatViewModel {
             responseText = text
             searchFilters = filters
 
-        case .tour(let text):
+        case .tour(let text, let request):
             thinkingState = .none
             responseText = text
+            tourReq = request
 
         case .fallback(let text):
             thinkingState = .none
@@ -152,14 +154,17 @@ class ChatViewModel {
         await streamText(responseText, toMessageId: msgId)
         if Task.isCancelled { return }
 
+        guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
+              let mi = threads[ti].messages.firstIndex(where: { $0.id == msgId }) else { return }
+
         if let filters = searchFilters {
             let results = chatService.searchListings(filters: filters)
             lastSearchResults = results
-
-            guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
-                  let mi = threads[ti].messages.firstIndex(where: { $0.id == msgId }) else { return }
-
             threads[ti].messages[mi].searchResults = results.map { $0.id }
+        }
+
+        if let tourReq {
+            threads[ti].messages[mi].tourRequest = tourReq
         }
 
         finalizeMessage(msgId)

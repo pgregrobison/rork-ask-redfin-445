@@ -2,7 +2,7 @@ import Foundation
 
 nonisolated enum DemoResponseType: Sendable {
     case listings(text: String, filters: SearchFilters)
-    case tour(text: String)
+    case tour(text: String, request: TourRequest)
     case fallback(text: String)
 }
 
@@ -18,15 +18,17 @@ class ChatService {
             return .listings(text: text, filters: filters)
         }
 
-        if lower.containsAny(["tour", "schedule", "visit", "showing", "see the"]) {
+        if lower.containsAny(["tour", "schedule a tour", "tour a home", "tour this", "visit", "showing", "see the"]) {
             let address = extractAddress(from: lower)
+            let listingId = extractListingId(from: lower)
             let text: String
             if let address {
-                text = "I'd love to help you schedule a tour of \(address)! I have availability this weekend — Saturday at 11 AM or Sunday at 2 PM. Which works better for you?"
+                text = "Let's get you scheduled for a tour of \(address)! Pick a day and time that works for you."
             } else {
-                text = "I can help you schedule a tour! Just let me know which property you're interested in, and I'll find available times. You can also browse homes first — just ask me to find listings."
+                text = "Let's get you scheduled! Pick a day and time that works for you."
             }
-            return .tour(text: text)
+            let request = TourRequest(listingId: listingId, address: address)
+            return .tour(text: text, request: request)
         }
 
         let fallbacks = [
@@ -110,6 +112,15 @@ class ChatService {
         for listing in MockData.listings {
             if input.contains(listing.address.lowercased()) || input.contains(listing.city.lowercased()) {
                 return listing.address
+            }
+        }
+        return nil
+    }
+
+    private func extractListingId(from input: String) -> String? {
+        for listing in MockData.listings {
+            if input.contains(listing.address.lowercased()) || input.contains(listing.city.lowercased()) {
+                return listing.id
             }
         }
         return nil

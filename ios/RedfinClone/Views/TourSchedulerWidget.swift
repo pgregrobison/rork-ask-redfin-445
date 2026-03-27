@@ -2,6 +2,8 @@ import SwiftUI
 
 struct TourSchedulerWidget: View {
     let tourRequest: TourRequest
+
+    @State private var currentStep: Int = 0
     @State private var selectedDate: Date = Date()
     @State private var selectedTime: Date = {
         var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
@@ -9,26 +11,26 @@ struct TourSchedulerWidget: View {
         components.minute = 0
         return Calendar.current.date(from: components) ?? Date()
     }()
-    @State private var firstName: String = ""
-    @State private var lastName: String = ""
+    @State private var fullName: String = ""
     @State private var phone: String = ""
-    @State private var agreedToTerms: Bool = false
-    @State private var isSubmitted: Bool = false
-    @State private var showContact: Bool = false
+    @State private var isConfirmed: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerView
 
-            if isSubmitted {
+            if isConfirmed {
                 confirmationView
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             } else {
-                formContent
+                stepsView
             }
         }
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 16))
         .padding(.horizontal, 16)
+        .animation(.snappy(duration: 0.35), value: currentStep)
+        .animation(.snappy(duration: 0.35), value: isConfirmed)
     }
 
     private var headerView: some View {
@@ -46,96 +48,217 @@ struct TourSchedulerWidget: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            Spacer()
         }
         .padding(16)
     }
 
-    private var formContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Date & Time")
-                    .font(.subheadline.bold())
+    private var stepsView: some View {
+        VStack(spacing: 0) {
+            stepRow(
+                index: 0,
+                title: "Pick a day",
+                summary: selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()),
+                content: { dayPickerContent }
+            )
 
-                DatePicker("Date", selection: $selectedDate, in: Date()..., displayedComponents: .date)
-                DatePicker("Time", selection: $selectedTime, displayedComponents: .hourAndMinute)
-            }
+            Divider().padding(.leading, 48)
 
-            if !showContact {
-                Button {
-                    withAnimation(.snappy(duration: 0.2)) { showContact = true }
-                } label: {
-                    Text("Continue")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.primary)
+            stepRow(
+                index: 1,
+                title: "Pick a time",
+                summary: selectedTime.formatted(date: .omitted, time: .shortened),
+                content: { timePickerContent }
+            )
+
+            Divider().padding(.leading, 48)
+
+            stepRow(
+                index: 2,
+                title: "Your info",
+                summary: fullName,
+                content: { contactContent }
+            )
+        }
+    }
+
+    private func stepRow<Content: View>(
+        index: Int,
+        title: String,
+        summary: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                if index < currentStep {
+                    currentStep = index
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
-            }
+            } label: {
+                HStack(spacing: 12) {
+                    stepIndicator(for: index)
 
-            if showContact {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Your info")
-                        .font(.subheadline.bold())
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title)
+                            .font(.subheadline.weight(currentStep == index ? .semibold : .regular))
+                            .foregroundStyle(index <= currentStep ? .primary : .tertiary)
 
-                    TextField("First name", text: $firstName)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.subheadline)
-
-                    TextField("Last name", text: $lastName)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.subheadline)
-
-                    TextField("Phone number", text: $phone)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.subheadline)
-                        .keyboardType(.phonePad)
-
-                    Toggle("I agree to be contacted about this tour", isOn: $agreedToTerms)
-                        .font(.caption)
-
-                    Button {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            isSubmitted = true
+                        if index < currentStep {
+                            Text(summary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                    } label: {
-                        Text("Request Tour")
-                            .font(.subheadline.bold())
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(canSubmit ? Color(white: 0.15) : Color.gray, in: .rect(cornerRadius: 10))
                     }
-                    .disabled(!canSubmit)
+
+                    Spacer()
+
+                    if index < currentStep {
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(index > currentStep)
+
+            if currentStep == index {
+                content()
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .padding(16)
+    }
+
+    private func stepIndicator(for index: Int) -> some View {
+        ZStack {
+            if index < currentStep {
+                Circle()
+                    .fill(Theme.redfinGreenColor)
+                    .frame(width: 24, height: 24)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white)
+            } else if index == currentStep {
+                Circle()
+                    .fill(Color.primary)
+                    .frame(width: 24, height: 24)
+                Text("\(index + 1)")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color(.systemBackground))
+            } else {
+                Circle()
+                    .strokeBorder(Color(.tertiaryLabel), lineWidth: 1.5)
+                    .frame(width: 24, height: 24)
+                Text("\(index + 1)")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    private var dayPickerContent: some View {
+        VStack(spacing: 12) {
+            DatePicker(
+                "Select date",
+                selection: $selectedDate,
+                in: Date()...,
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .labelsHidden()
+
+            continueButton { advanceStep() }
+        }
+    }
+
+    private var timePickerContent: some View {
+        VStack(spacing: 12) {
+            DatePicker(
+                "Select time",
+                selection: $selectedTime,
+                displayedComponents: .hourAndMinute
+            )
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .frame(height: 150)
+
+            continueButton { advanceStep() }
+        }
+    }
+
+    private var contactContent: some View {
+        VStack(spacing: 12) {
+            TextField("Full name", text: $fullName)
+                .textFieldStyle(.roundedBorder)
+                .font(.subheadline)
+                .textContentType(.name)
+
+            TextField("Phone number", text: $phone)
+                .textFieldStyle(.roundedBorder)
+                .font(.subheadline)
+                .keyboardType(.phonePad)
+                .textContentType(.telephoneNumber)
+
+            Button {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                isConfirmed = true
+            } label: {
+                Text("Request Tour")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(canSubmit ? Color(white: 0.15) : Color.gray, in: .rect(cornerRadius: 10))
+            }
+            .disabled(!canSubmit)
+        }
     }
 
     private var confirmationView: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle")
-                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 28, weight: .medium))
                 .foregroundStyle(Theme.redfinGreenColor)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Tour Requested!")
-                    .font(.headline)
-                Text("\(selectedDate.formatted(date: .abbreviated, time: .omitted)) at \(selectedTime.formatted(date: .omitted, time: .shortened))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text("We'll confirm your tour shortly.")
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Tour Requested")
+                    .font(.subheadline.bold())
+                Text("\(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())) at \(selectedTime.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("We'll confirm your tour shortly.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
         }
-        .padding(16)
-        .transition(.scale.combined(with: .opacity))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+    }
+
+    private func continueButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text("Continue")
+                .font(.subheadline.bold())
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color(white: 0.15), in: .rect(cornerRadius: 10))
+        }
+    }
+
+    private func advanceStep() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        currentStep += 1
     }
 
     private var canSubmit: Bool {
-        !firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !lastName.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !phone.trimmingCharacters(in: .whitespaces).isEmpty &&
-        agreedToTerms
+        !fullName.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !phone.trimmingCharacters(in: .whitespaces).isEmpty
     }
 }
