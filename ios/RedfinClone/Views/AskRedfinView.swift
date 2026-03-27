@@ -1,5 +1,11 @@
 import SwiftUI
 
+private enum ChatScrollPhase: Equatable {
+    case idle
+    case userJustSent(messageId: String)
+    case streaming
+}
+
 struct AskRedfinView: View {
     @Bindable var chatViewModel: ChatViewModel
     let allListings: [Listing]
@@ -9,10 +15,10 @@ struct AskRedfinView: View {
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
     @State private var scrollPositions: [String: String] = [:]
-    @State private var justSentMessageId: String?
-    @State private var scrollAreaHeight: CGFloat = 0
-    @State private var scrollLocked: Bool = false
-    @State private var pendingScrollTarget: String?
+    @State private var scrollPhase: ChatScrollPhase = .idle
+    @State private var visibleHeight: CGFloat = 0
+    @State private var bottomSpacerHeight: CGFloat = 0
+    @State private var scrollToTopTrigger: String?
 
     var body: some View {
         NavigationStack {
@@ -84,7 +90,7 @@ struct AskRedfinView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 16) {
+                VStack(spacing: 16) {
                     ForEach(chatViewModel.activeMessages) { message in
                         ChatMessageBubble(
                             message: message,
@@ -103,56 +109,84 @@ struct AskRedfinView: View {
                             .id("thinking")
                     }
 
-                    if justSentMessageId != nil {
-                        Color.clear
-                            .frame(height: scrollAreaHeight)
-                            .id("scroll-spacer")
-                    }
+                    Color.clear
+                        .frame(height: bottomSpacerHeight)
+                        .id("bottom-spacer")
                 }
                 .padding(.vertical, 16)
             }
             .background(
                 GeometryReader { geo in
-                    Color.clear.preference(key: ScrollAreaHeightKey.self, value: geo.size.height)
+                    Color.clear.onAppear { visibleHeight = geo.size.height }
+                        .onChange(of: geo.size.height) { _, newH in visibleHeight = newH }
                 }
             )
-            .onPreferenceChange(ScrollAreaHeightKey.self) { value in
-                scrollAreaHeight = value
-            }
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: pendingScrollTarget) { _, targetId in
+            .onChange(of: scrollToTopTrigger) { _, targetId in
                 guard let targetId else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                scrollToTopTrigger = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation(.easeOut(duration: 0.4)) {
                         proxy.scrollTo(targetId, anchor: .top)
                     }
-                    pendingScrollTarget = nil
                 }
             }
-            .onChange(of: chatViewModel.activeMessages.count) { _, newCount in
-                guard !scrollLocked else { return }
-                scrollToLatest(proxy: proxy, newCount: newCount)
+            .onChange(of: chatViewModel.activeMessages.count) { oldCount, newCount in
+                guard newCount > oldCount else { return }
+                let messages = chatViewModel.activeMessages
+                guard let last = messages.last else { return }
+
+                if last.role == .user {
+                    return
+                }
+
+                switch scrollPhase {
+                case .userJustSent:
+                    scrollPhase = .streaming
+                    scrollToBottom(proxy: proxy)
+                case .idle:
+                    scrollToBottom(proxy: proxy)
+                case .streaming:
+                    break
+                }
             }
             .onChange(of: chatViewModel.thinkingState) { _, newState in
-                if newState == .none, justSentMessageId != nil {
-                    justSentMessageId = nil
-                    scrollLocked = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                switch scrollPhase {
+                case .userJustSent:
+                    if newState != .none {
+                        scrollToBottom(proxy: proxy)
+                    }
+                case .streaming:
+                    if newState == .none {
+                        collapseSpacerAndScrollToBottom(proxy: proxy)
+                    } else {
+                        scrollToBottom(proxy: proxy)
+                    }
+                case .idle:
+                    if newState != .none {
                         scrollToBottom(proxy: proxy)
                     }
                 }
-                if newState != .none, !scrollLocked {
+            }
+            .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
+                if case .idle = scrollPhase {
+                    scrollToBottom(proxy: proxy)
+                }
+                if case .streaming = scrollPhase {
                     scrollToBottom(proxy: proxy)
                 }
             }
-            .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
-                guard !scrollLocked else { return }
-                scrollToBottom(proxy: proxy)
+            .onChange(of: chatViewModel.activeMessages.last?.isStreaming) { _, isStreaming in
+                if isStreaming == false, case .streaming = scrollPhase {
+                    collapseSpacerAndScrollToBottom(proxy: proxy)
+                }
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
                     scrollPositions[oldId] = lastVisible
                 }
+                bottomSpacerHeight = 0
+                scrollPhase = .idle
                 if let currentId = chatViewModel.activeThreadId, let savedId = scrollPositions[currentId] {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                         proxy.scrollTo(savedId, anchor: .bottom)
@@ -237,22 +271,12 @@ struct AskRedfinView: View {
         guard !willSendText.isEmpty else { return }
         isInputFocused = false
         chatViewModel.sendMessage()
-        if let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) {
-            justSentMessageId = lastUserMsg.id
-            scrollLocked = true
-            pendingScrollTarget = lastUserMsg.id
-        }
-    }
+        guard let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) else { return }
 
-    private func scrollToLatest(proxy: ScrollViewProxy, newCount: Int) {
-        let messages = chatViewModel.activeMessages
-        guard !messages.isEmpty else { return }
-        let lastMessage = messages[messages.count - 1]
-        if lastMessage.role == .user {
-            return
-        } else if justSentMessageId == nil {
-            scrollToBottom(proxy: proxy)
-        }
+        let msgId = lastUserMsg.id
+        scrollPhase = .userJustSent(messageId: msgId)
+        bottomSpacerHeight = max(visibleHeight - 80, 200)
+        scrollToTopTrigger = msgId
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -264,11 +288,14 @@ struct AskRedfinView: View {
             }
         }
     }
-}
 
-private struct ScrollAreaHeightKey: PreferenceKey {
-    nonisolated static let defaultValue: CGFloat = 0
-    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+    private func collapseSpacerAndScrollToBottom(proxy: ScrollViewProxy) {
+        scrollPhase = .idle
+        withAnimation(.easeOut(duration: 0.3)) {
+            bottomSpacerHeight = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            scrollToBottom(proxy: proxy)
+        }
     }
 }
