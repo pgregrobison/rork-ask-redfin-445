@@ -15,6 +15,9 @@ struct TourSchedulerWidget: View {
     @State private var phone: String = ""
     @State private var isConfirmed: Bool = false
 
+    nonisolated private enum Field { case name, phone }
+    @FocusState private var focusedField: Field?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerView
@@ -55,7 +58,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var stepsView: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 8) {
             stepRow(
                 index: 0,
                 title: "Pick a day",
@@ -198,12 +201,23 @@ struct TourSchedulerWidget: View {
                 .textFieldStyle(.roundedBorder)
                 .font(.subheadline)
                 .textContentType(.name)
+                .submitLabel(.next)
+                .focused($focusedField, equals: .name)
+                .onSubmit { focusedField = .phone }
+                .onChange(of: fullName) { oldValue, newValue in
+                    if oldValue.isEmpty && newValue.count > 1 {
+                        focusedField = .phone
+                    }
+                }
 
             TextField("Phone number", text: $phone)
                 .textFieldStyle(.roundedBorder)
                 .font(.subheadline)
                 .keyboardType(.phonePad)
                 .textContentType(.telephoneNumber)
+                .submitLabel(.done)
+                .focused($focusedField, equals: .phone)
+                .onSubmit { focusedField = nil }
 
             Button {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -211,10 +225,10 @@ struct TourSchedulerWidget: View {
             } label: {
                 Text("Request Tour")
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(canSubmit ? Color(white: 0.15) : Color.gray, in: .rect(cornerRadius: 10))
+                    .background(canSubmit ? Color.primary : Color.gray, in: .rect(cornerRadius: 10))
             }
             .disabled(!canSubmit)
         }
@@ -245,10 +259,10 @@ struct TourSchedulerWidget: View {
         Button(action: action) {
             Text("Continue")
                 .font(.subheadline.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.systemBackground))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color(white: 0.15), in: .rect(cornerRadius: 10))
+                .background(Color.primary, in: .rect(cornerRadius: 10))
         }
     }
 

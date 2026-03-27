@@ -17,7 +17,7 @@ struct AskRedfinView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack(alignment: .bottom) {
                 messageList
                 inputBar
             }
@@ -112,6 +112,7 @@ struct AskRedfinView: View {
                 }
                 .padding(.vertical, 16)
             }
+            .contentMargins(.bottom, 72)
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
                 guard !hasRestoredScroll else { return }
@@ -175,8 +176,7 @@ struct AskRedfinView: View {
             .padding(.trailing, hasActionButton ? 54 : 16)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
+                inputBackground
             )
             .overlay(alignment: .bottomTrailing) {
                 Group {
@@ -222,6 +222,18 @@ struct AskRedfinView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
+    }
+
+    @ViewBuilder
+    private var inputBackground: some View {
+        if #available(iOS 26.0, *) {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(.clear)
+                .glassEffect(in: .capsule)
+        } else {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(.ultraThinMaterial)
+        }
     }
 
     private var currentBottomSpacerHeight: CGFloat {
