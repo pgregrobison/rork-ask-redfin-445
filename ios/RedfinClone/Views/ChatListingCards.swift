@@ -45,10 +45,10 @@ struct ChatListingCards: View {
                         Text("Show on map")
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color(white: 0.12), in: .rect(cornerRadius: 14))
+                    .background(Color.primary, in: Capsule())
                 }
                 .padding(.horizontal, 16)
             }

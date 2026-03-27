@@ -228,7 +228,7 @@ struct TourSchedulerWidget: View {
                     .foregroundStyle(Color(.systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(canSubmit ? Color.primary : Color.gray, in: .rect(cornerRadius: 10))
+                    .background(canSubmit ? Color.primary : Color.gray, in: Capsule())
             }
             .disabled(!canSubmit)
         }
@@ -262,7 +262,7 @@ struct TourSchedulerWidget: View {
                 .foregroundStyle(Color(.systemBackground))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color.primary, in: .rect(cornerRadius: 10))
+                .background(Color.primary, in: Capsule())
         }
     }
 
