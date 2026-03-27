@@ -217,8 +217,8 @@ struct AskRedfinView: View {
                 }
                 .animation(.easeInOut(duration: 0.15), value: canSend)
                 .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
-                .padding(.trailing, 4)
-                .padding(.bottom, 4)
+                .padding(.trailing, 2)
+                .padding(.bottom, 2)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
