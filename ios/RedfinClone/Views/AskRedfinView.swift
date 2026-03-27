@@ -154,9 +154,7 @@ struct AskRedfinView: View {
                 case .userJustSent:
                     break
                 case .streaming:
-                    if newState == .none {
-                        collapseSpacer()
-                    }
+                    break
                 case .idle:
                     if newState != .none {
                         scrollToBottom(proxy: proxy)
@@ -164,7 +162,7 @@ struct AskRedfinView: View {
                 }
             }
             .onChange(of: chatViewModel.activeMessages.last?.content) { _, _ in
-                if case .idle = scrollPhase {
+                if case .idle = scrollPhase, chatViewModel.activeMessages.last?.isStreaming != true {
                     scrollToBottom(proxy: proxy)
                 }
             }

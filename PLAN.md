@@ -1,15 +1,9 @@
-# Stop bot response from auto-scrolling away from user message
+# Fix bot response auto-scrolling back during streaming
 
 **Problem**
-After sending a message, the user's message correctly slides up to just below the header. But then the bot's streaming response triggers auto-scroll handlers that pull the view back down, undoing the positioning.
+When a bot response streams in, the chat scrolls back down — undoing the "pin user message to top" behavior. This happens because the "thinking" indicator ends before streaming finishes, which prematurely resets the scroll phase to idle. Once idle, every content update triggers a scroll-to-bottom.
 
 **Fix**
-Remove all auto-scroll-to-bottom behavior that fires during and after bot response streaming. The scroll position set by the user-sent animation will be preserved naturally as new content appears below.
-
-Specifically:
-- When a new bot message arrives after a user send, do **not** scroll to bottom — just transition the phase to `.streaming` silently
-- When the thinking indicator appears during `.userJustSent`, do **not** scroll to bottom
-- While the bot response is streaming (content updating), do **not** scroll to bottom
-- When streaming finishes, collapse the bottom spacer but do **not** force-scroll to bottom — let the content settle naturally
-
-This means the user's message stays pinned near the top of the viewport, and the bot response simply fills in below it as it streams.
+- When thinking ends and the phase is "streaming," don't collapse the spacer yet — leave it for the streaming-finished handler
+- When streaming finishes, smoothly collapse the spacer and reset the phase
+- Also guard the content-change handler so it never scrolls to bottom while the bot is still actively streaming (even if phase accidentally becomes idle)
