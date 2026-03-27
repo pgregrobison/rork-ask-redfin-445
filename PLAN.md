@@ -1,14 +1,12 @@
-# Fix chat auto-scroll: stop scroll-back on bot finish & fix iPhone positioning
+# Fix scroll-to-top reliability and input field line height
 
-**Problem 1: Chat scrolls back down when bot finishes responding**
-- Currently, when the bot's response finishes streaming, the large spacer that holds the user's message at the top is animated away, which causes the entire chat to collapse downward
-- **Fix:** Remove the automatic spacer collapse when the bot finishes. Instead, the spacer will only reset when the user sends a new message or switches threads (both already handled). This keeps the user's message pinned at the top even after the bot finishes.
+**Two changes:**
 
-**Problem 2: On iPhone, user message only scrolls halfway up**
-- The spacer height is calculated using the visible area of the scroll view, but on a real device with the notch and home bar, the measured height may be smaller than expected
-- **Fix:** Use a more generous spacer height calculation that accounts for safe area differences, ensuring the user message reliably reaches the top on all devices
+### 1. Reliable scroll-to-top on all devices
+- **Problem:** The spacer height is measured dynamically from the scroll view, which reports different values on simulator vs. real iPhone (likely due to safe area differences in the sheet). This makes the spacer too short on device, so the message can't physically scroll far enough.
+- **Fix:** Replace the dynamic `visibleHeight` measurement with a guaranteed-large spacer using the screen height. This ensures there's always more than enough room below the user message to scroll it all the way to the top, regardless of device or safe area differences.
+- Remove the GeometryReader background that measures `visibleHeight` — it's no longer needed.
 
-**Changes summary:**
-- Remove the code that collapses the spacer when the bot stops streaming
-- Adjust the spacer height formula to be more robust on real devices
-- Clean up the now-unused collapse function and streaming phase tracking
+### 2. Input field line height
+- **Problem:** The current line spacing and padding don't produce the exact 24pt-per-line layout requested.
+- **Fix:** Set the vertical padding to 12pt (already in place), and use a combination of a minimum frame height of 24pt on the text field and line spacing of ~7pt (body font is ~17pt, so 24 − 17 = 7pt line spacing) to achieve 24pt per line of text. This yields 48pt for 1 line, 72pt for 2 lines, etc.

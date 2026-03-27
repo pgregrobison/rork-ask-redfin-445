@@ -11,7 +11,6 @@ struct AskRedfinView: View {
     @FocusState private var isInputFocused: Bool
     @State private var showVoiceMode: Bool = false
     @State private var scrollPositions: [String: String] = [:]
-    @State private var visibleHeight: CGFloat = 0
     @State private var bottomSpacerHeight: CGFloat = 0
     @State private var scrollToTopTrigger: String?
 
@@ -110,12 +109,6 @@ struct AskRedfinView: View {
                 }
                 .padding(.vertical, 16)
             }
-            .background(
-                GeometryReader { geo in
-                    Color.clear.onAppear { visibleHeight = geo.size.height }
-                        .onChange(of: geo.size.height) { _, newH in visibleHeight = newH }
-                }
-            )
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: scrollToTopTrigger) { _, targetId in
                 guard let targetId else { return }
@@ -152,7 +145,8 @@ struct AskRedfinView: View {
     private var inputBar: some View {
         TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
             .font(.body)
-            .lineSpacing(2)
+            .lineSpacing(7)
+            .frame(minHeight: 24)
             .lineLimit(1...4)
             .focused($isInputFocused)
             .onSubmit {
@@ -219,7 +213,7 @@ struct AskRedfinView: View {
         guard let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) else { return }
 
         let msgId = lastUserMsg.id
-        bottomSpacerHeight = visibleHeight
+        bottomSpacerHeight = UIScreen.main.bounds.height
         scrollToTopTrigger = msgId
     }
 
