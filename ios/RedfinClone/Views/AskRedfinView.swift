@@ -143,7 +143,6 @@ struct AskRedfinView: View {
                 switch scrollPhase {
                 case .userJustSent:
                     scrollPhase = .streaming
-                    scrollToBottom(proxy: proxy)
                 case .idle:
                     scrollToBottom(proxy: proxy)
                 case .streaming:
@@ -153,14 +152,10 @@ struct AskRedfinView: View {
             .onChange(of: chatViewModel.thinkingState) { _, newState in
                 switch scrollPhase {
                 case .userJustSent:
-                    if newState != .none {
-                        scrollToBottom(proxy: proxy)
-                    }
+                    break
                 case .streaming:
                     if newState == .none {
-                        collapseSpacerAndScrollToBottom(proxy: proxy)
-                    } else {
-                        scrollToBottom(proxy: proxy)
+                        collapseSpacer()
                     }
                 case .idle:
                     if newState != .none {
@@ -172,13 +167,10 @@ struct AskRedfinView: View {
                 if case .idle = scrollPhase {
                     scrollToBottom(proxy: proxy)
                 }
-                if case .streaming = scrollPhase {
-                    scrollToBottom(proxy: proxy)
-                }
             }
             .onChange(of: chatViewModel.activeMessages.last?.isStreaming) { _, isStreaming in
                 if isStreaming == false, case .streaming = scrollPhase {
-                    collapseSpacerAndScrollToBottom(proxy: proxy)
+                    collapseSpacer()
                 }
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
@@ -289,13 +281,10 @@ struct AskRedfinView: View {
         }
     }
 
-    private func collapseSpacerAndScrollToBottom(proxy: ScrollViewProxy) {
+    private func collapseSpacer() {
         scrollPhase = .idle
         withAnimation(.easeOut(duration: 0.3)) {
             bottomSpacerHeight = 0
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            scrollToBottom(proxy: proxy)
         }
     }
 }
