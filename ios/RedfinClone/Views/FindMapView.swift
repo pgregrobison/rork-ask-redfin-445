@@ -51,7 +51,6 @@ struct FindMapView: View {
                         onToggleSave: { viewModel.toggleSaved(listing) },
                         onTap: { onListingTap(listing) }
                     )
-                    .id(listing.id)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }

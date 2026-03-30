@@ -1,13 +1,9 @@
-# Fix map responsiveness and smooth compass zoom animation
+# Only animate map home card when going from no selection to a selection
 
-## What's changing
+**Problem**
+When tapping a new pin while a card is already showing, the card slides out and back in (the full enter/exit animation replays). It should only slide up when going from no pin selected → pin selected.
 
-### Fix 1: Unblock map interaction during pin selection
-- Remove the broad animation modifier wrapping the entire map area — this is what freezes panning, zooming, and pin tapping during the camera move
-- Only animate the home card overlay appearing/disappearing, not the map itself
-- Remove the `isPanning` flag and sleep-based timer that artificially blocks region updates — instead, use a simpler approach that lets the map stay interactive at all times
-- Pin taps, panning, and zooming will work immediately even while the map is moving to a selected pin
-
-### Fix 2: Smooth compass coming soon zoom
-- Instead of jumping instantly to the final zoomed-in position, animate the map camera smoothly over a longer duration so it feels like a fly-in
-- Use a slower, more gentle spring animation for the compass zoom so the transition from a wide view to a tight view feels natural and cinematic rather than jarring
+**Fix**
+- Remove the `.id(listing.id)` on the card overlay — this is what causes SwiftUI to treat each pin switch as a brand-new view, triggering the slide-in/slide-out transition every time
+- Without the forced identity swap, SwiftUI will keep the same card view and just update its content in place when switching between pins
+- The slide-up transition will still fire when going from nothing selected → a pin selected, and the slide-down will fire when dismissing
