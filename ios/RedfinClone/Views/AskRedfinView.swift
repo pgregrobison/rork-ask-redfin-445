@@ -13,30 +13,31 @@ struct AskRedfinView: View {
     @State private var hasRestoredScroll: Bool = false
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            customHeader
+            Divider()
             ZStack(alignment: .bottom) {
                 messageList
                 inputFooter
             }
-            .background(Color(.systemBackground))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    threadSwitcherMenu
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onDismiss) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .foregroundStyle(.primary)
-                    }
-                }
-            }
-            .toolbarRole(.navigationStack)
-            .toolbar(.visible, for: .navigationBar)
         }
+        .background(Color(.systemBackground))
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])
+    }
+
+    private var customHeader: some View {
+        HStack {
+            threadSwitcherMenu
+            Spacer()
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    .foregroundStyle(.primary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 
     private var threadSwitcherMenu: some View {
