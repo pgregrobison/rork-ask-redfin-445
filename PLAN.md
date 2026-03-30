@@ -1,17 +1,29 @@
-# Voice Mode with Audio Waves Icon & Refined Pulsating Orb
+# Redesign Voice Mode as Inline Experience
 
-## Features
+## What's Changing
 
-- **Voice mode button in chat input** — A waveform (audio waves) icon appears in place of the send button whenever the text input is empty, across all chat threads
-- **Tap to enter voice mode** — Tapping the waveform icon opens a full-screen voice mode overlay
-- **Auto-listen on open** — Voice mode automatically starts in the "listening" state with the orb pulsating immediately — no tap required
-- **Refined pulsating orb** — A more polished, distinctive orb with layered animated rings, subtle color shifts, and smoother breathing animations for a premium feel
-- **Dismiss voice mode** — An "End" button at the bottom lets you close voice mode and return to the chat
+Replace the full-screen voice mode overlay with a compact, inline voice experience that lives just above the chat input.
 
-## Design
+### **Features**
+- Tapping the voice icon (when no text is typed) activates voice mode inline — no full-screen takeover
+- The keyboard dismisses automatically when voice mode activates
+- A medium-sized (~100pt) pulsating orb with a subtle accent color appears just above the input bar, animated smoothly in
+- The voice icon seamlessly transforms into an **X** (close) button in-place, using identical styling to the send button (solid circle, primary color)
+- A **mute toggle** button appears to the left of the X, with secondary styling (lighter background)
+- Muting toggles the mic icon (filled ↔ slashed) without affecting the orb animation
+- Tapping X exits voice mode, smoothly animating the orb away and restoring the voice icon
+- Simulated live transcription: words appear one-by-one as a user message bubble (anchored to top of viewport, like a normal sent message)
+- After the "user stops speaking," a bot response streams in below the transcript — same as regular chat
 
-- **Waveform icon** — Replaces the current mic icon; uses the same circular button style as the send button but with a secondary color to indicate it's a passive action
-- **Orb redesign** — Multiple concentric rings with staggered animation timing, a soft white-to-cool-gray gradient core, and a subtle outer glow that pulses more dramatically when listening. The overall effect is more organic and alive
-- **Prompt cycling** — Rotating suggestion prompts continue to appear below the orb for conversational guidance
-- **Dark immersive background** — The full-screen overlay keeps the dark cinematic backdrop, drawing focus to the orb
-- **Smooth transitions** — The waveform icon animates in/out as you type, matching the existing send button transition style
+### **Design**
+- The orb uses a subtle accent-colored radial gradient (Redfin green tones) with soft glow rings
+- Orb pulsates with the same breathing animation style as before, but smaller and inline
+- The X button matches the send button exactly: solid primary-colored circle with contrasting icon
+- The mute button uses a secondary style: lighter fill, matching circle size
+- Smooth spring animations for orb appearing/disappearing and button swaps
+- "Listening…" label sits just below the orb, subtle and secondary-styled
+- The input field remains visible but disabled/dimmed during voice mode
+
+### **Screens**
+- **Ask Redfin chat (voice mode off):** Same as today — voice icon shows when input is empty
+- **Ask Redfin chat (voice mode on):** Orb floats above the input bar; X and mute buttons replace voice/send in the input bar; live transcription appears as user message bubbles in the chat scroll; bot response streams after

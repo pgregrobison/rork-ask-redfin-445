@@ -26,10 +26,18 @@ class ChatViewModel {
     var lastSearchResults: [Listing] = []
     var scrollPositions: [String: String] = [:]
     var bottomSpacerHeights: [String: CGFloat] = [:]
+    var isVoiceModeActive: Bool = false
+    var isVoiceMuted: Bool = false
+    var voiceTranscriptMessageId: String?
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
     private var streamTask: Task<Void, Never>?
+    private var voiceSimTask: Task<Void, Never>?
+
+    private let voiceSimPhrases = [
+        "I'm looking for a 3 bedroom home near downtown Raleigh with a big backyard"
+    ]
 
     var activeThread: ChatThread? {
         guard let id = activeThreadId else { return nil }
@@ -102,6 +110,63 @@ class ChatViewModel {
             threads[ti].messages[mi].feedback = feedback
         }
         saveThreads()
+    }
+
+    func activateVoiceMode() {
+        isVoiceModeActive = true
+        isVoiceMuted = false
+        voiceSimTask?.cancel()
+        voiceSimTask = Task { await simulateVoiceInput() }
+    }
+
+    func deactivateVoiceMode() {
+        isVoiceModeActive = false
+        isVoiceMuted = false
+        voiceSimTask?.cancel()
+        voiceSimTask = nil
+
+        if let msgId = voiceTranscriptMessageId {
+            finalizeMessage(msgId)
+            voiceTranscriptMessageId = nil
+        }
+    }
+
+    func toggleVoiceMute() {
+        isVoiceMuted.toggle()
+    }
+
+    private func simulateVoiceInput() async {
+        try? await Task.sleep(for: .seconds(1.5))
+        if Task.isCancelled { return }
+
+        let phrase = voiceSimPhrases[0]
+        let words = phrase.split(separator: " ").map(String.init)
+
+        let userMsg = ChatMessage(role: .user, content: "", isStreaming: true)
+        appendMessage(userMsg)
+        voiceTranscriptMessageId = userMsg.id
+        updateThreadTitle(from: phrase)
+
+        var accumulated = ""
+        for (i, word) in words.enumerated() {
+            if Task.isCancelled { return }
+            accumulated += (i > 0 ? " " : "") + word
+            updateMessageContent(userMsg.id, content: accumulated)
+            try? await Task.sleep(for: .milliseconds(Int.random(in: 180...350)))
+        }
+
+        if Task.isCancelled { return }
+        finalizeMessage(userMsg.id)
+        voiceTranscriptMessageId = nil
+
+        try? await Task.sleep(for: .milliseconds(600))
+        if Task.isCancelled { return }
+
+        isVoiceModeActive = false
+        isVoiceMuted = false
+
+        streamTask?.cancel()
+        streamTask = Task { await generateResponse(for: phrase) }
     }
 
     func stopStreaming() {
