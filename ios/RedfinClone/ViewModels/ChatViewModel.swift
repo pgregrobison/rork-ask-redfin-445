@@ -168,9 +168,6 @@ class ChatViewModel {
         try? await Task.sleep(for: .milliseconds(600))
         if Task.isCancelled { return }
 
-        isVoiceModeActive = false
-        isVoiceMuted = false
-
         streamTask?.cancel()
         streamTask = Task { await generateResponse(for: phrase) }
     }

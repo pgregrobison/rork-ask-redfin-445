@@ -1,9 +1,8 @@
-# Prevent Ask Redfin header from collapsing into overflow menu
+# Voice mode: stay active, fix mute icon color, remove "Listening" text
 
-**Problem**
-During certain interactions in the Ask Redfin chat (keyboard appearing, scrolling, voice mode), iOS automatically consolidates the toolbar items (thread dropdown + close button) into a single overflow "more" menu in the upper right.
+Three targeted changes to the voice mode experience:
 
-**Fix**
-- Force the navigation bar to always remain visible and stable by adding explicit toolbar visibility control
-- Ensure the toolbar items maintain their placement regardless of keyboard state, scroll position, or voice mode transitions
-- The dropdown menu on the left and close button on the right will always stay in place
+**Features**
+- [x] Voice mode stays active after the simulated speech finishes — it only exits when you tap the X button
+- [x] The mute icon uses a neutral system color instead of the app's accent color
+- [x] The "Listening…" / "Muted" text label beneath the orb is removed for a cleaner look

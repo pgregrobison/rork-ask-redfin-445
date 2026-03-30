@@ -73,11 +73,6 @@ struct InlineVoiceOrb: View {
             }
             .scaleEffect(appeared ? 1 : 0.3)
             .opacity(appeared ? 1 : 0)
-
-            Text(isListening ? "Listening…" : "Muted")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .opacity(appeared ? 1 : 0)
         }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
