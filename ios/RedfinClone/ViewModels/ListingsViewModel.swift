@@ -192,7 +192,7 @@ class ListingsViewModel {
         }
     }
 
-    private func fitUserAndListing(_ listing: Listing) {
+    func fitUserAndListing(_ listing: Listing) {
         guard let userCoord = locationService.userLocation?.coordinate else {
             panToListing(listing)
             return

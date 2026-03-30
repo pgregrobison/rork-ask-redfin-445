@@ -94,7 +94,9 @@ struct ContentView: View {
             Task {
                 try? await Task.sleep(for: .milliseconds(300))
                 if let listing = viewModel.listings.first(where: { $0.id == listingID }) {
-                    viewModel.selectListing(listing)
+                    viewModel.selectedListing = listing
+                    viewModel.markSeen(listing)
+                    viewModel.fitUserAndListing(listing)
                 } else {
                     viewModel.selectNearestCompassListing(to: nil)
                 }
