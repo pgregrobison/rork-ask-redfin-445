@@ -202,11 +202,13 @@ class ListingsViewModel {
         let maxLat = max(userCoord.latitude, listingCoord.latitude)
         let minLon = min(userCoord.longitude, listingCoord.longitude)
         let maxLon = max(userCoord.longitude, listingCoord.longitude)
-        let padding = 1.6
-        let latDelta = max((maxLat - minLat) * padding, 0.01)
-        let lonDelta = max((maxLon - minLon) * padding, 0.01)
+        let horizontalPadding = 1.4
+        let verticalPadding = 1.3
+        let latDelta = max((maxLat - minLat) * verticalPadding, 0.005)
+        let lonDelta = max((maxLon - minLon) * horizontalPadding, 0.005)
+        let cardOffsetRatio = 0.15
         let center = CLLocationCoordinate2D(
-            latitude: (minLat + maxLat) / 2,
+            latitude: (minLat + maxLat) / 2 + latDelta * cardOffsetRatio,
             longitude: (minLon + maxLon) / 2
         )
         let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)

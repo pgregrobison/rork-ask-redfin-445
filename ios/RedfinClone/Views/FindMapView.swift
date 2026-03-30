@@ -37,16 +37,7 @@ struct FindMapView: View {
                 viewModel.updateLocationName(for: context.region)
             }
             .ignoresSafeArea()
-            .overlay {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if viewModel.selectedListing != nil {
-                            viewModel.dismissOverlay()
-                        }
-                    }
-                    .allowsHitTesting(viewModel.selectedListing != nil)
-            }
+
             .overlay(alignment: .topTrailing) {
                 MapActionButtons(viewModel: viewModel)
             }
