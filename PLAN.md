@@ -1,7 +1,8 @@
-# Reduce map shift and remove "Ask me about homes" nudge
+# Fix user location dot jittering on map
 
-**Changes:**
+**Problem**
+The blue location dot on the map jitters because every tiny GPS coordinate change (even fractions of a meter) causes the dot's position to update and the map to potentially re-pan.
 
-1. **Reduce the upward map shift** when zooming to show user location + Compass listing — the current offset pushes the pins too far up. Will reduce the card offset ratio from `0.4` to `0.2` so the map centers more naturally while still accounting for the bottom card.
-
-2. **Remove the "Ask me about homes in NYC!" nudge bubble** — delete the nudge text, timer, bubble view, and all related state so it no longer appears.
+**Fix**
+- Only update the stored user location when the new reading is more than ~10 meters away from the current one — this filters out GPS noise/drift
+- This stabilizes both the dot position and prevents unnecessary map camera changes from the location watcher

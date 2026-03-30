@@ -30,6 +30,7 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         Task { @MainActor in
             guard let location = locations.last else { return }
+            if let existing = userLocation, existing.distance(from: location) < 10 { return }
             userLocation = location
         }
     }
