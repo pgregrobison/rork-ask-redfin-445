@@ -1,16 +1,11 @@
-# Fix Ask Redfin header so it never collapses
+# Restyle custom header to match native navigation bar
 
-**Problem**
-SwiftUI's built-in toolbar sometimes auto-collapses the dropdown and close button into a single "more" menu. This is unpredictable and breaks the expected layout.
+**What changes**
 
-**Fix**
-Replace the system toolbar with a custom, hand-built header bar that sits at the top of the sheet. Since it's just a regular view (not a toolbar), it can never be collapsed or rearranged by the system.
+The custom header bar in Ask Redfin will be restyled to perfectly match the native iOS navigation bar appearance:
 
-**What the header will always show**
-- **Left side:** Thread switcher dropdown — shows current thread title with a chevron; tapping opens a menu listing all chat threads (with a checkmark on the active one) and a "New Chat" action
-- **Right side:** Close button (X icon) — always visible, always tappable, always in the same spot
-
-**How it works**
-- Remove the `NavigationStack` wrapper and `.toolbar` from Ask Redfin entirely — this eliminates the system navigation bar that causes the collapsing
-- Add a fixed custom header row at the top of the view instead
-- The rest of the layout (messages, input bar) stays exactly as it is today
+- **Height**: Match the standard 44pt navigation bar content height, with proper top safe-area respect
+- **Close button**: Wrapped in a glass effect circle (matching the `GlassActionButton` style used elsewhere in the app) — liquid glass on iOS 26, ultra-thin material fallback on older iOS
+- **Thread switcher dropdown**: Wrapped in a glass effect capsule/pill background — same liquid glass treatment, giving it the native toolbar-item feel
+- **Padding**: Standard 16pt horizontal padding, vertically centered content matching native nav bar spacing
+- **No separator line** at the bottom — clean look as requested

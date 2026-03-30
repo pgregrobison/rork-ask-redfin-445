@@ -32,17 +32,24 @@ struct AskRedfinView: View {
         HStack {
             threadSwitcherMenu
             Spacer()
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    .foregroundStyle(.primary)
-            }
+            GlassActionButton(icon: "xmark", action: onDismiss)
         }
+        .frame(height: 44)
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 
+    @ViewBuilder
     private var threadSwitcherMenu: some View {
+        if #available(iOS 26.0, *) {
+            threadSwitcherMenuContent
+                .glassEffect(in: .capsule)
+        } else {
+            threadSwitcherMenuContent
+                .background(.ultraThinMaterial, in: Capsule())
+        }
+    }
+
+    private var threadSwitcherMenuContent: some View {
         Menu {
             Button {
                 chatViewModel.createNewThread()
@@ -78,6 +85,8 @@ struct AskRedfinView: View {
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
         }
     }
 
