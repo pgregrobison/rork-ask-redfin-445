@@ -1,11 +1,8 @@
-# Restyle custom header to match native navigation bar
+# Update Ask Redfin Sheet Header Styling
 
-**What changes**
+**Changes to the Ask Redfin sheet header:**
 
-The custom header bar in Ask Redfin will be restyled to perfectly match the native iOS navigation bar appearance:
-
-- **Height**: Match the standard 44pt navigation bar content height, with proper top safe-area respect
-- **Close button**: Wrapped in a glass effect circle (matching the `GlassActionButton` style used elsewhere in the app) — liquid glass on iOS 26, ultra-thin material fallback on older iOS
-- **Thread switcher dropdown**: Wrapped in a glass effect capsule/pill background — same liquid glass treatment, giving it the native toolbar-item feel
-- **Padding**: Standard 16pt horizontal padding, vertically centered content matching native nav bar spacing
-- **No separator line** at the bottom — clean look as requested
+- Add 16pt vertical padding (top and bottom) to the header bar
+- Change the dropdown text and chevron icon color to system color (matching the close button icon) instead of the current default/accent styling
+- Increase the dropdown's vertical padding so the tappable area is 44pt tall
+- Truncate the dropdown label text after 15 characters (with ellipsis)

@@ -34,8 +34,8 @@ struct AskRedfinView: View {
             Spacer()
             GlassActionButton(icon: "xmark", action: onDismiss)
         }
-        .frame(height: 44)
         .padding(.horizontal, 16)
+        .padding(.vertical, 16)
     }
 
     @ViewBuilder
@@ -78,15 +78,15 @@ struct AskRedfinView: View {
                     Image(systemName: "car")
                         .font(.system(size: 12, weight: .semibold))
                 }
-                Text(chatViewModel.activeThread?.title ?? "Ask Redfin")
+                Text(truncatedTitle)
                     .font(.subheadline.bold())
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
             }
+            .foregroundStyle(.primary)
+            .frame(height: 44)
             .padding(.horizontal, 14)
-            .padding(.vertical, 10)
         }
     }
 
@@ -301,6 +301,14 @@ struct AskRedfinView: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(.ultraThinMaterial)
         }
+    }
+
+    private var truncatedTitle: String {
+        let title = chatViewModel.activeThread?.title ?? "Ask Redfin"
+        if title.count > 15 {
+            return String(title.prefix(15)) + "…"
+        }
+        return title
     }
 
     private var currentBottomSpacerHeight: CGFloat {
