@@ -36,6 +36,7 @@ struct AskRedfinView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
+        .background(Color.clear)
     }
 
     @ViewBuilder
@@ -88,6 +89,7 @@ struct AskRedfinView: View {
             .frame(height: 44)
             .padding(.horizontal, 14)
         }
+        .tint(.primary)
     }
 
     private var messageList: some View {
