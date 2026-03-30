@@ -97,6 +97,42 @@ class ListingsViewModel {
         panToListing(listing)
     }
 
+    func fitListings(_ listings: [Listing]) {
+        guard !listings.isEmpty else { return }
+        if listings.count == 1, let only = listings.first {
+            panToListing(only)
+            return
+        }
+        var minLat = Double.greatestFiniteMagnitude
+        var maxLat = -Double.greatestFiniteMagnitude
+        var minLon = Double.greatestFiniteMagnitude
+        var maxLon = -Double.greatestFiniteMagnitude
+        for listing in listings {
+            let coord = listing.coordinate
+            minLat = min(minLat, coord.latitude)
+            maxLat = max(maxLat, coord.latitude)
+            minLon = min(minLon, coord.longitude)
+            maxLon = max(maxLon, coord.longitude)
+        }
+        let padding = 1.3
+        let latDelta = max((maxLat - minLat) * padding, 0.01)
+        let lonDelta = max((maxLon - minLon) * padding, 0.01)
+        let center = CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLon + maxLon) / 2
+        )
+        let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
+        isPanning = true
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+            mapPosition = .region(MKCoordinateRegion(center: center, span: span))
+        }
+        currentSpan = span
+        Task {
+            try? await Task.sleep(for: .milliseconds(550))
+            isPanning = false
+        }
+    }
+
     func panToListing(_ listing: Listing) {
         isPanning = true
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {

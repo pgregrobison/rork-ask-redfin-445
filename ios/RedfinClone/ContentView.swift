@@ -65,9 +65,8 @@ struct ContentView: View {
                     viewModel.showChat = false
                     selectedTab = .find
                     viewModel.showListView = false
-                    if let first = listings.first {
-                        viewModel.selectListing(first)
-                    }
+                    viewModel.dismissOverlay()
+                    viewModel.fitListings(listings)
                 },
                 onListingTap: { listing in
                     viewModel.showChat = false
