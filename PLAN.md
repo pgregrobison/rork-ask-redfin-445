@@ -1,7 +1,8 @@
-# Smooth "Show on Map" transition
+# Remove delay between sheet close and map pan
 
 **What changes:**
 
-- When you tap "Show on Map" in Ask Redfin, the sheet will close first with its natural dismiss animation
-- After the sheet finishes closing, the map will smoothly pan and zoom to frame all the listed homes
-- This creates a sequential, fluid two-step transition instead of everything happening at once
+- Remove the 100ms wait after the Ask Redfin sheet closes before the map starts panning
+- Start the map pan immediately as soon as the sheet finishes dismissing, so the two motions feel connected rather than sequential
+
+This is a single-line change — removing the `Task.sleep` in the sheet's `onDismiss` callback so `fitListings` fires instantly.

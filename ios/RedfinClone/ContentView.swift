@@ -56,10 +56,7 @@ struct ContentView: View {
         .sheet(isPresented: $viewModel.showChat, onDismiss: {
             if let listings = pendingMapListings {
                 pendingMapListings = nil
-                Task {
-                    try? await Task.sleep(for: .milliseconds(100))
-                    viewModel.fitListings(listings)
-                }
+                viewModel.fitListings(listings)
             }
         }) {
             AskRedfinView(
