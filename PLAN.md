@@ -1,7 +1,6 @@
-# Allow map panning with selected home & fix zoom framing
+# Fix zoom level when selecting Compass Coming Soon listing
 
-**Two targeted fixes:**
+**What's changing:**
 
-1. **Allow map panning while a home card is shown** — Currently, a full-screen invisible overlay blocks all map gestures (pan, pinch, zoom) when a home is selected. This will be removed so you can freely interact with the map even with the card visible. Tapping the map background will still dismiss the card.
-
-2. **Fix zoom to tightly frame user location + selected Compass listing** — The current zoom padding is too generous (1.6×), making both points appear far apart. This will be tightened and the center will be shifted slightly upward to account for the card at the bottom, ensuring both your location dot and the selected home pin are clearly visible in the map area above the card.
+- When a Compass Coming Soon listing is selected (via notification or locate), the map will now zoom in tightly to show just your current location and the selected home pin — matching the same tight zoom behavior used by the "Show on Map" feature in Ask Redfin.
+- The map will no longer stay zoomed out and just pan — it will actually zoom in so both points are clearly visible with comfortable padding around them.
