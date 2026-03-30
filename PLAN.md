@@ -1,8 +1,10 @@
-# Fix user location dot jittering on map
+# Fix sluggish map panning and zooming
 
 **Problem**
-The blue location dot on the map jitters because every tiny GPS coordinate change (even fractions of a meter) causes the dot's position to update and the map to potentially re-pan.
+- Every time you finish panning/zooming the map, the app redundantly re-sets the map position to the exact same spot, causing an extra render cycle that makes the map feel laggy and unresponsive.
+- The user location tracker can also fight with manual panning, adding to the sluggishness.
 
-**Fix**
-- Only update the stored user location when the new reading is more than ~10 meters away from the current one — this filters out GPS noise/drift
-- This stabilizes both the dot position and prevents unnecessary map camera changes from the location watcher
+**Changes**
+1. **Stop re-assigning the map position after every pan** — Only save the current zoom level (span) when the map stops moving, without forcing the map to re-render to the same spot it's already at.
+2. **Disable user-location tracking as soon as the user manually pans** — Prevent the location tracker from overriding user gestures and snapping the map back.
+3. **Result**: Panning, zooming, and all map interactions will feel smooth and immediate with no delays or blocked actions.

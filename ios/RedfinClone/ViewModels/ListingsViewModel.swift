@@ -157,7 +157,6 @@ class ListingsViewModel {
     func persistMapRegion(_ region: MKCoordinateRegion) {
         guard !isPanning else { return }
         currentSpan = region.span
-        mapPosition = .region(region)
         locationService.isTrackingUser = false
     }
 
