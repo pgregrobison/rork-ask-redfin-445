@@ -251,11 +251,12 @@ struct AskRedfinView: View {
                 } label: {
                     Image(systemName: chatViewModel.isVoiceMuted ? "mic.slash.fill" : "mic.fill")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(chatViewModel.isVoiceMuted ? .white : .primary)
                         .frame(width: 44, height: 44)
-                        .background(Color(.tertiarySystemFill))
+                        .background(chatViewModel.isVoiceMuted ? Color.red : Color(.tertiarySystemFill))
                         .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
                 .transition(.scale.combined(with: .opacity))
 
                 Button {

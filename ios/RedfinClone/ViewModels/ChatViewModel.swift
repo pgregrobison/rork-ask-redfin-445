@@ -137,8 +137,18 @@ class ChatViewModel {
     }
 
     private func simulateVoiceInput() async {
+        while isVoiceMuted {
+            if Task.isCancelled { return }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+
         try? await Task.sleep(for: .seconds(1.5))
         if Task.isCancelled { return }
+
+        while isVoiceMuted {
+            if Task.isCancelled { return }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
 
         let phrase = voiceSimPhrases[0]
         let words = phrase.split(separator: " ").map(String.init)
@@ -156,6 +166,10 @@ class ChatViewModel {
         var accumulated = ""
         for (i, word) in words.enumerated() {
             if Task.isCancelled { return }
+            while isVoiceMuted {
+                if Task.isCancelled { return }
+                try? await Task.sleep(for: .milliseconds(100))
+            }
             accumulated += (i > 0 ? " " : "") + word
             updateMessageContent(userMsg.id, content: accumulated)
             try? await Task.sleep(for: .milliseconds(Int.random(in: 180...350)))
