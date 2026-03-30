@@ -131,6 +131,15 @@ struct AskRedfinView: View {
                     }
                 }
             }
+            .onChange(of: chatViewModel.voiceScrollToTopId) { _, targetId in
+                guard let targetId else { return }
+                chatViewModel.voiceScrollToTopId = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.easeOut(duration: 0.4)) {
+                        proxy.scrollTo(targetId, anchor: .top)
+                    }
+                }
+            }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
                     chatViewModel.scrollPositions[oldId] = lastVisible

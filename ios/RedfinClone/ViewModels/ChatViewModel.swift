@@ -29,6 +29,7 @@ class ChatViewModel {
     var isVoiceModeActive: Bool = false
     var isVoiceMuted: Bool = false
     var voiceTranscriptMessageId: String?
+    var voiceScrollToTopId: String?
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
@@ -146,6 +147,11 @@ class ChatViewModel {
         appendMessage(userMsg)
         voiceTranscriptMessageId = userMsg.id
         updateThreadTitle(from: phrase)
+
+        if let threadId = activeThreadId {
+            bottomSpacerHeights[threadId] = UIScreen.main.bounds.height
+        }
+        voiceScrollToTopId = userMsg.id
 
         var accumulated = ""
         for (i, word) in words.enumerated() {
