@@ -131,6 +131,7 @@ class ChatViewModel {
         let responseText: String
         var searchFilters: SearchFilters?
         var tourReq: TourRequest?
+        var mortgageReq: MortgageRequest?
 
         switch response {
         case .listings(let text, let filters):
@@ -145,6 +146,11 @@ class ChatViewModel {
             thinkingState = .none
             responseText = text
             tourReq = request
+
+        case .mortgage(let text, let request):
+            thinkingState = .none
+            responseText = text
+            mortgageReq = request
 
         case .fallback(let text):
             thinkingState = .none
@@ -165,6 +171,10 @@ class ChatViewModel {
 
         if let tourReq {
             threads[ti].messages[mi].tourRequest = tourReq
+        }
+
+        if let mortgageReq {
+            threads[ti].messages[mi].mortgageRequest = mortgageReq
         }
 
         finalizeMessage(msgId)

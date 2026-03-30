@@ -3,6 +3,7 @@ import Foundation
 nonisolated enum DemoResponseType: Sendable {
     case listings(text: String, filters: SearchFilters)
     case tour(text: String, request: TourRequest)
+    case mortgage(text: String, request: MortgageRequest)
     case fallback(text: String)
 }
 
@@ -16,6 +17,13 @@ class ChatService {
             let filters = extractFilters(from: lower)
             let text = buildListingsResponse(from: lower, filters: filters)
             return .listings(text: text, filters: filters)
+        }
+
+        if lower.containsAny(["mortgage", "prequalified", "prequalify", "pre-qualified", "afford", "loan", "financing"]) {
+            let listingId = extractListingId(from: lower)
+            let text = "Let's get you prequalified! I just need a few details to estimate what you can afford."
+            let request = MortgageRequest(listingId: listingId)
+            return .mortgage(text: text, request: request)
         }
 
         if lower.containsAny(["tour", "schedule a tour", "tour a home", "tour this", "visit", "showing", "see the"]) {

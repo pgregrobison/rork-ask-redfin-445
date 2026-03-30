@@ -1,21 +1,30 @@
-# Chat input glass effect, adaptive buttons, tour scheduler spacing & input focus
+# Rebuild Mortgage Prequalification as a Stepped Flow
 
-## Changes
+Rebuild the existing mortgage prequalification widget to match the tour scheduler's stepped pattern, and wire it into the chat trigger system.
 
-### 1. Floating glass chat input
-- Remove the solid background behind the chat input bar
-- Apply a liquid glass effect to the input field so it floats transparently over the chat messages
-- On older devices, fall back to a frosted material background
-- The message list will extend behind the input area for the floating effect
+**Trigger**
+- Typing anything containing "mortgage", "prequalified", "prequalify", "pre-qualified", "afford", "loan", or "financing" in Ask Redfin will launch the mortgage flow inline
 
-### 2. Adaptive button style
-- "Continue" and "Request Tour" buttons in the tour scheduler will use **black background with white text** in light mode, and **white background with black text** in dark mode
-- This replaces the current always-dark button style
+**Steps (matching tour scheduler pattern)**
+1. **Annual household income** — currency text field with dollar sign prefix
+2. **Down payment** — currency text field with dollar sign prefix
+3. **Loan details** — loan type picker (segmented: 30-yr fixed, 15-yr fixed, ARM 5/1, ARM 7/1) + credit score picker (menu dropdown)
 
-### 3. Tour scheduler step spacing
-- Add visible vertical gaps between each step in the tour scheduler (day → time → info) so the sections feel less cramped and each step has more breathing room
+Each step has:
+- Numbered circle indicator (filled current, checked completed, outlined future)
+- Tappable completed steps to go back and edit
+- Summary text shown for completed steps
+- Dividers between steps
+- Capsule-shaped "Continue" / "Get Prequalified" buttons using the same dark/light adaptive style as tour scheduler
 
-### 4. Tour scheduler input improvements
-- When selecting an autofill suggestion in the Full Name field, automatically focus the Phone Number field
-- The keyboard shows a blue **Next** arrow on the Full Name field to jump to Phone Number
-- The Phone Number field shows a **Done** key to dismiss the keyboard
+**Confirmation**
+- Green checkmark with "Prequalification Complete!" header
+- Summary of all entered values (income, down payment, loan type, credit score)
+- Estimated budget calculation (income × 4 + down payment) highlighted in green
+- "A Redfin loan officer will reach out to finalize your prequalification." note
+
+**Design**
+- Same card background, corner radius, header layout, and spacing as the tour scheduler
+- Header icon: banknote symbol with "Mortgage Prequalification" title and "See what you can afford" subtitle
+- Haptic feedback on step advance and submission
+- Smooth spring animations between steps

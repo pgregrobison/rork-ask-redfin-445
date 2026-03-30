@@ -2,7 +2,8 @@ import SwiftUI
 
 struct MortgagePrequalWidget: View {
     let mortgageRequest: MortgageRequest
-    @State private var step: Int = 0
+
+    @State private var currentStep: Int = 0
     @State private var annualIncome: String = ""
     @State private var downPayment: String = ""
     @State private var loanType: String = "30-year fixed"
@@ -18,13 +19,16 @@ struct MortgagePrequalWidget: View {
 
             if isSubmitted {
                 confirmationView
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             } else {
-                formContent
+                stepsView
             }
         }
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 16))
         .padding(.horizontal, 16)
+        .animation(.snappy(duration: 0.35), value: currentStep)
+        .animation(.snappy(duration: 0.35), value: isSubmitted)
     }
 
     private var headerView: some View {
@@ -40,30 +44,122 @@ struct MortgagePrequalWidget: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            Spacer()
         }
         .padding(16)
     }
 
-    private var formContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            incomeSection
+    private var stepsView: some View {
+        VStack(spacing: 8) {
+            stepRow(
+                index: 0,
+                title: "Annual household income",
+                summary: "$\(annualIncome)",
+                content: { incomeContent }
+            )
 
-            if step >= 1 {
-                downPaymentSection
-            }
+            Divider().padding(.leading, 48)
 
-            if step >= 2 {
-                loanDetailsSection
-            }
+            stepRow(
+                index: 1,
+                title: "Down payment",
+                summary: "$\(downPayment)",
+                content: { downPaymentContent }
+            )
+
+            Divider().padding(.leading, 48)
+
+            stepRow(
+                index: 2,
+                title: "Loan details",
+                summary: "\(loanType) · \(creditScore)",
+                content: { loanDetailsContent }
+            )
         }
-        .padding(16)
     }
 
-    private var incomeSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Annual household income")
-                .font(.subheadline.bold())
+    private func stepRow<Content: View>(
+        index: Int,
+        title: String,
+        summary: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                if index < currentStep {
+                    currentStep = index
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    stepIndicator(for: index)
 
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title)
+                            .font(.subheadline.weight(currentStep == index ? .semibold : .regular))
+                            .foregroundStyle(index <= currentStep ? .primary : .tertiary)
+
+                        if index < currentStep {
+                            Text(summary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    if index < currentStep {
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(index > currentStep)
+
+            if currentStep == index {
+                content()
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    private func stepIndicator(for index: Int) -> some View {
+        ZStack {
+            if index < currentStep {
+                Circle()
+                    .fill(Theme.redfinGreenColor)
+                    .frame(width: 24, height: 24)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white)
+            } else if index == currentStep {
+                Circle()
+                    .fill(Color.primary)
+                    .frame(width: 24, height: 24)
+                Text("\(index + 1)")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color(.systemBackground))
+            } else {
+                Circle()
+                    .strokeBorder(Color(.tertiaryLabel), lineWidth: 1.5)
+                    .frame(width: 24, height: 24)
+                Text("\(index + 1)")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    private var incomeContent: some View {
+        VStack(spacing: 12) {
             HStack {
                 Text("$")
                     .foregroundStyle(.secondary)
@@ -75,23 +171,14 @@ struct MortgagePrequalWidget: View {
             .background(Color(.tertiarySystemBackground))
             .clipShape(.rect(cornerRadius: 10))
 
-            if !annualIncome.isEmpty && step < 1 {
-                Button {
-                    withAnimation(.snappy(duration: 0.2)) { step = 1 }
-                } label: {
-                    Text("Continue")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.primary)
-                }
+            continueButton(enabled: !annualIncome.trimmingCharacters(in: .whitespaces).isEmpty) {
+                advanceStep()
             }
         }
     }
 
-    private var downPaymentSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Down payment")
-                .font(.subheadline.bold())
-
+    private var downPaymentContent: some View {
+        VStack(spacing: 12) {
             HStack {
                 Text("$")
                     .foregroundStyle(.secondary)
@@ -103,21 +190,14 @@ struct MortgagePrequalWidget: View {
             .background(Color(.tertiarySystemBackground))
             .clipShape(.rect(cornerRadius: 10))
 
-            if !downPayment.isEmpty && step < 2 {
-                Button {
-                    withAnimation(.snappy(duration: 0.2)) { step = 2 }
-                } label: {
-                    Text("Continue")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.primary)
-                }
+            continueButton(enabled: !downPayment.trimmingCharacters(in: .whitespaces).isEmpty) {
+                advanceStep()
             }
         }
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
-    private var loanDetailsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+    private var loanDetailsContent: some View {
+        VStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Loan type")
                     .font(.subheadline.bold())
@@ -147,30 +227,31 @@ struct MortgagePrequalWidget: View {
             }
 
             Button {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    isSubmitted = true
-                }
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                isSubmitted = true
             } label: {
                 Text("Get Prequalified")
                     .font(.subheadline.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(canSubmit ? Color(white: 0.15) : Color.gray, in: .rect(cornerRadius: 10))
+                    .background(canSubmit ? Color.primary : Color.gray, in: Capsule())
             }
             .disabled(!canSubmit)
         }
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
     private var confirmationView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                Image(systemName: "checkmark.circle")
-                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 28, weight: .medium))
                     .foregroundStyle(Theme.redfinGreenColor)
-                Text("Prequalification Complete!")
-                    .font(.headline)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Prequalification Complete!")
+                        .font(.subheadline.bold())
+                }
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -197,8 +278,8 @@ struct MortgagePrequalWidget: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
-        .padding(16)
-        .transition(.scale.combined(with: .opacity))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 
     private func summaryRow(label: String, value: String) -> some View {
@@ -210,6 +291,23 @@ struct MortgagePrequalWidget: View {
             Text(value)
                 .font(.caption.bold())
         }
+    }
+
+    private func continueButton(enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text("Continue")
+                .font(.subheadline.bold())
+                .foregroundStyle(Color(.systemBackground))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(enabled ? Color.primary : Color.gray, in: Capsule())
+        }
+        .disabled(!enabled)
+    }
+
+    private func advanceStep() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        currentStep += 1
     }
 
     private var estimatedBudget: Int {
