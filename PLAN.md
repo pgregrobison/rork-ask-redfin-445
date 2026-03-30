@@ -1,11 +1,6 @@
-# Fix zoom on Compass Coming Soon notification tap
+# Tighter zoom and shift map up for home card
 
-**Problem**
-When tapping the Compass Coming Soon notification, the map pans to the listing but stays at the current zoom level (very zoomed out). It should zoom in tightly to show both your location and the selected listing.
+Two small tweaks to the map zoom when tapping the Compass coming soon notification:
 
-**Root cause**
-The notification handler finds the listing and calls a "select" action that only pans without changing zoom. The zoom-to-fit logic exists but isn't being used in this path.
-
-**Fix**
-- When the notification is tapped and the listing is found, use the zoom-to-fit behavior (same as the "show on map" feature) that tightly frames both your current location and the selected listing
-- The listing will still be selected and the card will appear as before — just with proper zooming
+- **Tighter zoom**: Reduce the padding around the user location and selected pin so the map zooms in closer
+- **Account for home card**: Shift the map view upward more so both pins are visible above the selected listing card at the bottom of the screen
