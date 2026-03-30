@@ -12,32 +12,33 @@ struct AskRedfinView: View {
     @State private var scrollToTopTrigger: String?
     @State private var hasRestoredScroll: Bool = false
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+
     var body: some View {
-        VStack(spacing: 0) {
-            customHeader
-            Divider()
+        NavigationStack {
             ZStack(alignment: .bottom) {
                 messageList
                 inputFooter
             }
+            .background(Color(.systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    threadSwitcherMenu
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
+                }
+            }
+            .environment(\.horizontalSizeClass, hSizeClass)
         }
-        .background(Color(.systemBackground))
+        .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])
-    }
-
-    private var customHeader: some View {
-        HStack {
-            threadSwitcherMenu
-            Spacer()
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    .foregroundStyle(.primary)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
     }
 
     private var threadSwitcherMenu: some View {

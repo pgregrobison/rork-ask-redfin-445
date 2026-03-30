@@ -1,10 +1,10 @@
-# Replace system toolbar with custom header to prevent collapse
+# Restore original NavigationStack header and prevent toolbar collapse
 
 **Problem**
-The Ask Redfin sheet header sometimes collapses the dropdown and close button into a system "more" menu. This is an iOS behavior that can't be reliably prevented with system toolbar modifiers.
+The current custom VStack header doesn't look right. You want the original system NavigationStack toolbar header back (dropdown on the left, close on the right), but it needs to never collapse into a "more" overflow menu.
 
 **Fix**
-- Remove the system navigation bar and toolbar entirely from the Ask Redfin sheet
-- Build a custom header row at the top of the view with the thread switcher dropdown on the left and the X close button on the right
-- This custom header is just a regular view — iOS cannot collapse or rearrange it
-- The look and feel will remain identical (same fonts, icons, spacing)
+- Restore the original `NavigationStack` with system toolbar items (thread switcher dropdown on the left, X close button on the right)
+- Prevent the toolbar collapse by overriding the horizontal size class to `.regular` on the NavigationStack — this tells iOS there's enough room to always show all toolbar items, stopping the automatic collapse into a "more" menu
+- The size class override is scoped only to the toolbar layout calculation, so the rest of the sheet content behaves normally
+- The header will always show the dropdown and close button in their original positions
