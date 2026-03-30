@@ -2,13 +2,18 @@ import SwiftUI
 
 struct VoiceModeView: View {
     let onDismiss: () -> Void
-    @State private var isListening: Bool = false
-    @State private var pulseScale: CGFloat = 1.0
-    @State private var glowOpacity: Double = 0.4
-    @State private var outerRingScale: CGFloat = 1.0
-    @State private var outerRingOpacity: Double = 0.3
+    @State private var isListening: Bool = true
+    @State private var coreScale: CGFloat = 1.0
+    @State private var coreGlow: Double = 0.5
+    @State private var ring1Scale: CGFloat = 1.0
+    @State private var ring1Opacity: Double = 0.25
+    @State private var ring2Scale: CGFloat = 1.0
+    @State private var ring2Opacity: Double = 0.15
+    @State private var ring3Scale: CGFloat = 1.0
+    @State private var ring3Opacity: Double = 0.08
     @State private var currentPromptIndex: Int = 0
     @State private var promptOpacity: Double = 1.0
+    @State private var appeared: Bool = false
 
     private let prompts = [
         "Tell me what you thought of that first home",
@@ -23,60 +28,106 @@ struct VoiceModeView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.92)
+            Color.black
                 .ignoresSafeArea()
+                .opacity(appeared ? 1 : 0)
 
             VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button {
+                        onDismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.5))
+                            .frame(width: 36, height: 36)
+                            .background(.white.opacity(0.08), in: Circle())
+                    }
+                    .padding(.trailing, 20)
+                    .padding(.top, 8)
+                }
+
                 Spacer()
 
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.04))
+                        .fill(.white.opacity(0.02))
+                        .frame(width: 280, height: 280)
+                        .scaleEffect(ring3Scale)
+                        .opacity(ring3Opacity)
+
+                    Circle()
+                        .stroke(.white.opacity(0.06), lineWidth: 1)
+                        .frame(width: 240, height: 240)
+                        .scaleEffect(ring2Scale)
+                        .opacity(ring2Opacity)
+
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.06), .white.opacity(0.02), .clear],
+                                center: .center,
+                                startRadius: 70,
+                                endRadius: 120
+                            )
+                        )
                         .frame(width: 220, height: 220)
-                        .scaleEffect(outerRingScale)
-                        .opacity(outerRingOpacity)
+                        .scaleEffect(ring2Scale)
+                        .opacity(ring2Opacity)
+
+                    Circle()
+                        .stroke(.white.opacity(0.12), lineWidth: 1.5)
+                        .frame(width: 180, height: 180)
+                        .scaleEffect(ring1Scale)
+                        .opacity(ring1Opacity)
+
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.08), .white.opacity(0.03), .clear],
+                                center: .center,
+                                startRadius: 50,
+                                endRadius: 95
+                            )
+                        )
+                        .frame(width: 180, height: 180)
+                        .scaleEffect(ring1Scale)
+                        .opacity(ring1Opacity)
 
                     Circle()
                         .fill(
                             RadialGradient(
                                 colors: [
-                                    Color.white.opacity(0.1),
-                                    Color.white.opacity(0.03),
-                                    .clear
+                                    Color(white: 0.42),
+                                    Color(white: 0.28),
+                                    Color(white: 0.16)
                                 ],
                                 center: .center,
-                                startRadius: 60,
-                                endRadius: 110
+                                startRadius: 5,
+                                endRadius: 65
                             )
                         )
-                        .frame(width: 200, height: 200)
-                        .scaleEffect(pulseScale)
-                        .opacity(glowOpacity)
-
-                    Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
-                        .frame(width: 160, height: 160)
-                        .scaleEffect(pulseScale * 0.95)
+                        .frame(width: 130, height: 130)
+                        .shadow(color: .white.opacity(coreGlow * 0.4), radius: 40)
+                        .shadow(color: .white.opacity(coreGlow * 0.15), radius: 80)
+                        .scaleEffect(coreScale)
 
                     Circle()
                         .fill(
                             RadialGradient(
-                                colors: [
-                                    Color(white: 0.35),
-                                    Color(white: 0.2),
-                                    Color(white: 0.12)
-                                ],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 70
+                                colors: [.white.opacity(0.3), .clear],
+                                center: UnitPoint(x: 0.35, y: 0.3),
+                                startRadius: 0,
+                                endRadius: 50
                             )
                         )
-                        .frame(width: 140, height: 140)
-                        .shadow(color: Color.white.opacity(0.15), radius: 30)
-                        .scaleEffect(isListening ? 1.08 : 1.0)
+                        .frame(width: 130, height: 130)
+                        .scaleEffect(coreScale)
+                        .blendMode(.overlay)
                 }
                 .onTapGesture {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.65)) {
                         isListening.toggle()
                     }
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -84,70 +135,84 @@ struct VoiceModeView: View {
 
                 Text(isListening ? "Listening…" : "Tap to speak")
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.5))
-                    .padding(.top, 24)
+                    .foregroundStyle(.white.opacity(0.4))
+                    .padding(.top, 28)
 
                 Text(prompts[currentPromptIndex])
                     .font(.title3)
                     .fontWeight(.medium)
-                    .foregroundStyle(.white.opacity(0.85))
+                    .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
-                    .padding(.top, 28)
+                    .padding(.top, 20)
                     .opacity(promptOpacity)
                     .frame(height: 60)
 
                 Spacer()
 
-                if #available(iOS 26.0, *) {
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Text("End Voice Mode")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 40)
-                            .padding(.vertical, 16)
-                    }
-                    .buttonStyle(.glass)
+                endButton
                     .padding(.bottom, 60)
-                } else {
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Text("End Voice Mode")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 40)
-                            .padding(.vertical, 16)
-                            .background(.ultraThinMaterial, in: Capsule())
-                    }
-                    .padding(.bottom, 60)
-                }
             }
         }
         .onAppear {
-            startPulse()
-            startOuterRing()
+            withAnimation(.easeIn(duration: 0.3)) { appeared = true }
+            startAnimations()
             startPromptCycling()
         }
-        .onChange(of: isListening) { _, newValue in
-            startPulse()
+        .onChange(of: isListening) { _, _ in
+            startAnimations()
         }
     }
 
-    private func startPulse() {
-        let duration = isListening ? 0.6 : 1.4
-        withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
-            pulseScale = isListening ? 1.15 : 1.06
-            glowOpacity = isListening ? 0.6 : 0.35
+    @ViewBuilder
+    private var endButton: some View {
+        if #available(iOS 26.0, *) {
+            Button {
+                onDismiss()
+            } label: {
+                Text("End")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 48)
+                    .padding(.vertical, 14)
+            }
+            .buttonStyle(.glass)
+        } else {
+            Button {
+                onDismiss()
+            } label: {
+                Text("End")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 48)
+                    .padding(.vertical, 14)
+                    .background(.white.opacity(0.1), in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+            }
         }
     }
 
-    private func startOuterRing() {
-        withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-            outerRingScale = 1.2
-            outerRingOpacity = 0.1
+    private func startAnimations() {
+        let listening = isListening
+
+        withAnimation(.easeInOut(duration: listening ? 0.8 : 2.0).repeatForever(autoreverses: true)) {
+            coreScale = listening ? 1.12 : 1.03
+            coreGlow = listening ? 0.7 : 0.35
+        }
+
+        withAnimation(.easeInOut(duration: listening ? 1.0 : 2.4).repeatForever(autoreverses: true).delay(0.1)) {
+            ring1Scale = listening ? 1.18 : 1.05
+            ring1Opacity = listening ? 0.35 : 0.2
+        }
+
+        withAnimation(.easeInOut(duration: listening ? 1.3 : 2.8).repeatForever(autoreverses: true).delay(0.25)) {
+            ring2Scale = listening ? 1.22 : 1.08
+            ring2Opacity = listening ? 0.2 : 0.1
+        }
+
+        withAnimation(.easeInOut(duration: listening ? 1.6 : 3.2).repeatForever(autoreverses: true).delay(0.4)) {
+            ring3Scale = listening ? 1.3 : 1.1
+            ring3Opacity = listening ? 0.12 : 0.05
         }
     }
 

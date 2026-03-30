@@ -159,7 +159,7 @@ struct AskRedfinView: View {
     }
 
     private var hasActionButton: Bool {
-        chatViewModel.thinkingState != .none || (chatViewModel.isTourDayThread && !canSend) || canSend
+        true
     }
 
     private var inputBar: some View {
@@ -192,15 +192,6 @@ struct AskRedfinView: View {
                                 .clipShape(Circle())
                         }
                         .transition(.scale.combined(with: .opacity))
-                    } else if chatViewModel.isTourDayThread && !canSend {
-                        Button { showVoiceMode = true } label: {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Circle())
-                        }
-                        .transition(.scale.combined(with: .opacity))
                     } else if canSend {
                         Button {
                             sendAndScroll()
@@ -211,6 +202,15 @@ struct AskRedfinView: View {
                                 .frame(width: 44, height: 44)
                                 .background(Color.primary)
                                 .clipShape(Circle())
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    } else {
+                        Button { showVoiceMode = true } label: {
+                            Image(systemName: "waveform")
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Circle())
                         }
                         .transition(.scale.combined(with: .opacity))
                     }

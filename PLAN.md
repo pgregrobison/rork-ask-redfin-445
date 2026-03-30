@@ -1,30 +1,17 @@
-# Rebuild Mortgage Prequalification as a Stepped Flow
+# Voice Mode with Audio Waves Icon & Refined Pulsating Orb
 
-Rebuild the existing mortgage prequalification widget to match the tour scheduler's stepped pattern, and wire it into the chat trigger system.
+## Features
 
-**Trigger**
-- Typing anything containing "mortgage", "prequalified", "prequalify", "pre-qualified", "afford", "loan", or "financing" in Ask Redfin will launch the mortgage flow inline
+- **Voice mode button in chat input** — A waveform (audio waves) icon appears in place of the send button whenever the text input is empty, across all chat threads
+- **Tap to enter voice mode** — Tapping the waveform icon opens a full-screen voice mode overlay
+- **Auto-listen on open** — Voice mode automatically starts in the "listening" state with the orb pulsating immediately — no tap required
+- **Refined pulsating orb** — A more polished, distinctive orb with layered animated rings, subtle color shifts, and smoother breathing animations for a premium feel
+- **Dismiss voice mode** — An "End" button at the bottom lets you close voice mode and return to the chat
 
-**Steps (matching tour scheduler pattern)**
-1. **Annual household income** — currency text field with dollar sign prefix
-2. **Down payment** — currency text field with dollar sign prefix
-3. **Loan details** — loan type picker (segmented: 30-yr fixed, 15-yr fixed, ARM 5/1, ARM 7/1) + credit score picker (menu dropdown)
+## Design
 
-Each step has:
-- Numbered circle indicator (filled current, checked completed, outlined future)
-- Tappable completed steps to go back and edit
-- Summary text shown for completed steps
-- Dividers between steps
-- Capsule-shaped "Continue" / "Get Prequalified" buttons using the same dark/light adaptive style as tour scheduler
-
-**Confirmation**
-- Green checkmark with "Prequalification Complete!" header
-- Summary of all entered values (income, down payment, loan type, credit score)
-- Estimated budget calculation (income × 4 + down payment) highlighted in green
-- "A Redfin loan officer will reach out to finalize your prequalification." note
-
-**Design**
-- Same card background, corner radius, header layout, and spacing as the tour scheduler
-- Header icon: banknote symbol with "Mortgage Prequalification" title and "See what you can afford" subtitle
-- Haptic feedback on step advance and submission
-- Smooth spring animations between steps
+- **Waveform icon** — Replaces the current mic icon; uses the same circular button style as the send button but with a secondary color to indicate it's a passive action
+- **Orb redesign** — Multiple concentric rings with staggered animation timing, a soft white-to-cool-gray gradient core, and a subtle outer glow that pulses more dramatically when listening. The overall effect is more organic and alive
+- **Prompt cycling** — Rotating suggestion prompts continue to appear below the orb for conversational guidance
+- **Dark immersive background** — The full-screen overlay keeps the dark cinematic backdrop, drawing focus to the orb
+- **Smooth transitions** — The waveform icon animates in/out as you type, matching the existing send button transition style
