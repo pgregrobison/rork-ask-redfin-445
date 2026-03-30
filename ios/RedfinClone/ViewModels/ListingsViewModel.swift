@@ -186,7 +186,38 @@ class ListingsViewModel {
             .map { (listing: $0, dist: CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: ref)) }
             .min { $0.dist < $1.dist }
         if let nearest {
-            selectListing(nearest.listing)
+            selectedListing = nearest.listing
+            markSeen(nearest.listing)
+            fitUserAndListing(nearest.listing)
+        }
+    }
+
+    private func fitUserAndListing(_ listing: Listing) {
+        guard let userCoord = locationService.userLocation?.coordinate else {
+            panToListing(listing)
+            return
+        }
+        let listingCoord = listing.coordinate
+        let minLat = min(userCoord.latitude, listingCoord.latitude)
+        let maxLat = max(userCoord.latitude, listingCoord.latitude)
+        let minLon = min(userCoord.longitude, listingCoord.longitude)
+        let maxLon = max(userCoord.longitude, listingCoord.longitude)
+        let padding = 1.6
+        let latDelta = max((maxLat - minLat) * padding, 0.01)
+        let lonDelta = max((maxLon - minLon) * padding, 0.01)
+        let center = CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLon + maxLon) / 2
+        )
+        let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
+        isPanning = true
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+            mapPosition = .region(MKCoordinateRegion(center: center, span: span))
+        }
+        currentSpan = span
+        Task {
+            try? await Task.sleep(for: .milliseconds(550))
+            isPanning = false
         }
     }
 
