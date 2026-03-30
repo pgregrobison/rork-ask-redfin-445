@@ -32,6 +32,8 @@ struct AskRedfinView: View {
                     }
                 }
             }
+            .toolbarRole(.navigationStack)
+            .toolbar(.visible, for: .navigationBar)
         }
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])

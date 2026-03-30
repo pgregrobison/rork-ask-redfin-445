@@ -1,8 +1,9 @@
-# Shrink text input in voice mode with external controls
+# Prevent Ask Redfin header from collapsing into overflow menu
 
-**What changes:**
+**Problem**
+During certain interactions in the Ask Redfin chat (keyboard appearing, scrolling, voice mode), iOS automatically consolidates the toolbar items (thread dropdown + close button) into a single overflow "more" menu in the upper right.
 
-- When voice mode is active, the text input field shrinks horizontally to make room for the mute toggle and X (close) buttons, which sit **outside** the input to its right
-- The mute and X buttons are no longer overlaid on top of the input — they become standalone elements in a horizontal row beside it
-- When voice mode is off, the input returns to full width with the send/waveform button overlaid as it is today
-- Smooth spring animation on the width transition for a polished feel
+**Fix**
+- Force the navigation bar to always remain visible and stable by adding explicit toolbar visibility control
+- Ensure the toolbar items maintain their placement regardless of keyboard state, scroll position, or voice mode transitions
+- The dropdown menu on the left and close button on the right will always stay in place
