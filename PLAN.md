@@ -1,10 +1,16 @@
-# Restore original NavigationStack header and prevent toolbar collapse
+# Fix Ask Redfin header so it never collapses
 
 **Problem**
-The current custom VStack header doesn't look right. You want the original system NavigationStack toolbar header back (dropdown on the left, close on the right), but it needs to never collapse into a "more" overflow menu.
+SwiftUI's built-in toolbar sometimes auto-collapses the dropdown and close button into a single "more" menu. This is unpredictable and breaks the expected layout.
 
 **Fix**
-- Restore the original `NavigationStack` with system toolbar items (thread switcher dropdown on the left, X close button on the right)
-- Prevent the toolbar collapse by overriding the horizontal size class to `.regular` on the NavigationStack — this tells iOS there's enough room to always show all toolbar items, stopping the automatic collapse into a "more" menu
-- The size class override is scoped only to the toolbar layout calculation, so the rest of the sheet content behaves normally
-- The header will always show the dropdown and close button in their original positions
+Replace the system toolbar with a custom, hand-built header bar that sits at the top of the sheet. Since it's just a regular view (not a toolbar), it can never be collapsed or rearranged by the system.
+
+**What the header will always show**
+- **Left side:** Thread switcher dropdown — shows current thread title with a chevron; tapping opens a menu listing all chat threads (with a checkmark on the active one) and a "New Chat" action
+- **Right side:** Close button (X icon) — always visible, always tappable, always in the same spot
+
+**How it works**
+- Remove the `NavigationStack` wrapper and `.toolbar` from Ask Redfin entirely — this eliminates the system navigation bar that causes the collapsing
+- Add a fixed custom header row at the top of the view instead
+- The rest of the layout (messages, input bar) stays exactly as it is today
