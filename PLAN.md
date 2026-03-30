@@ -1,10 +1,7 @@
-# Fix map shift direction and zoom in closer
-
-**What's wrong:**
-- The map center is shifted upward (north) instead of downward (south), causing pins to land underneath the home card instead of above it
-- The zoom level isn't tight enough
+# Reduce map shift and remove "Ask me about homes" nudge
 
 **Changes:**
-- Reverse the center offset so the map shifts **down**, pushing the pins into the visible area **above** the card
-- Increase zoom by reducing the padding multiplier so pins fill more of the screen
-- Slightly increase the offset ratio to better account for the card height
+
+1. **Reduce the upward map shift** when zooming to show user location + Compass listing — the current offset pushes the pins too far up. Will reduce the card offset ratio from `0.4` to `0.2` so the map centers more naturally while still accounting for the bottom card.
+
+2. **Remove the "Ask me about homes in NYC!" nudge bubble** — delete the nudge text, timer, bubble view, and all related state so it no longer appears.

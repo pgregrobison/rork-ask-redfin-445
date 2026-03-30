@@ -205,7 +205,7 @@ class ListingsViewModel {
         let padding = 1.05
         let latDelta = max((maxLat - minLat) * padding, 0.004)
         let lonDelta = max((maxLon - minLon) * padding, 0.004)
-        let cardOffsetRatio = 0.4
+        let cardOffsetRatio = 0.2
         let center = CLLocationCoordinate2D(
             latitude: (minLat + maxLat) / 2 - latDelta * cardOffsetRatio,
             longitude: (minLon + maxLon) / 2
