@@ -1,6 +1,10 @@
-# Tighter zoom and shift map up for home card
+# Fix map shift direction and zoom in closer
 
-Two small tweaks to the map zoom when tapping the Compass coming soon notification:
+**What's wrong:**
+- The map center is shifted upward (north) instead of downward (south), causing pins to land underneath the home card instead of above it
+- The zoom level isn't tight enough
 
-- **Tighter zoom**: Reduce the padding around the user location and selected pin so the map zooms in closer
-- **Account for home card**: Shift the map view upward more so both pins are visible above the selected listing card at the bottom of the screen
+**Changes:**
+- Reverse the center offset so the map shifts **down**, pushing the pins into the visible area **above** the card
+- Increase zoom by reducing the padding multiplier so pins fill more of the screen
+- Slightly increase the offset ratio to better account for the card height
