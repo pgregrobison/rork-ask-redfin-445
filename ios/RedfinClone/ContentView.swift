@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var showNudge: Bool = false
     @State private var nudgeShownThisSession: Bool = false
     @State private var nudgeText: String = ""
+    @State private var pendingMapListings: [Listing]?
     private let nudgeFullText = "Ask me about homes in NYC!"
 
     var body: some View {
@@ -52,7 +53,15 @@ struct ContentView: View {
             }
         }
         .tint(.primary)
-        .sheet(isPresented: $viewModel.showChat) {
+        .sheet(isPresented: $viewModel.showChat, onDismiss: {
+            if let listings = pendingMapListings {
+                pendingMapListings = nil
+                Task {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    viewModel.fitListings(listings)
+                }
+            }
+        }) {
             AskRedfinView(
                 chatViewModel: chatViewModel,
                 allListings: viewModel.listings,
@@ -62,11 +71,11 @@ struct ContentView: View {
                     viewModel.showChat = false
                 },
                 onShowOnMap: { listings in
-                    viewModel.showChat = false
+                    pendingMapListings = listings
                     selectedTab = .find
                     viewModel.showListView = false
                     viewModel.dismissOverlay()
-                    viewModel.fitListings(listings)
+                    viewModel.showChat = false
                 },
                 onListingTap: { listing in
                     viewModel.showChat = false
