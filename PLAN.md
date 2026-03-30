@@ -1,11 +1,8 @@
-# Anchor voice transcript to top of viewport
+# Shrink text input in voice mode with external controls
 
-**What changes**
+**What changes:**
 
-When voice mode starts transcribing the user's message, it will scroll up so the message anchors to the top of the chat viewport — matching the same behavior that already happens when you send a regular typed message.
-
-**How it will work**
-
-- As soon as the first word of the transcript appears, the chat scrolls so the user's message sits at the top of the screen
-- The large bottom spacer pushes content up, keeping the message pinned at the top while more words stream in
-- This reuses the exact same scroll-to-top mechanism already used for sent messages
+- When voice mode is active, the text input field shrinks horizontally to make room for the mute toggle and X (close) buttons, which sit **outside** the input to its right
+- The mute and X buttons are no longer overlaid on top of the input — they become standalone elements in a horizontal row beside it
+- When voice mode is off, the input returns to full width with the send/waveform button overlaid as it is today
+- Smooth spring animation on the width transition for a polished feel

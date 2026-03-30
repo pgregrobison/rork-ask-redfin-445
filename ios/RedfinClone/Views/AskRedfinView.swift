@@ -174,102 +174,106 @@ struct AskRedfinView: View {
     }
 
     private var inputBar: some View {
-        TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
-            .font(.body)
-            .lineSpacing(7)
-            .frame(minHeight: 24)
-            .lineLimit(1...4)
-            .focused($isInputFocused)
-            .disabled(chatViewModel.isVoiceModeActive)
-            .opacity(chatViewModel.isVoiceModeActive ? 0.4 : 1)
-            .onSubmit {
-                sendAndScroll()
-            }
-            .padding(.leading, 16)
-            .padding(.trailing, chatViewModel.isVoiceModeActive ? 98 : 54)
-            .padding(.vertical, 12)
-            .background(
-                inputBackground
-            )
-            .overlay(alignment: .bottomTrailing) {
-                HStack(spacing: 4) {
-                    if chatViewModel.isVoiceModeActive {
-                        Button {
-                            chatViewModel.toggleVoiceMute()
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        } label: {
-                            Image(systemName: chatViewModel.isVoiceMuted ? "mic.slash.fill" : "mic.fill")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.primary)
-                                .frame(width: 44, height: 44)
-                                .background(Color(.tertiarySystemFill))
-                                .clipShape(Circle())
+        HStack(spacing: 8) {
+            TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
+                .font(.body)
+                .lineSpacing(7)
+                .frame(minHeight: 24)
+                .lineLimit(1...4)
+                .focused($isInputFocused)
+                .disabled(chatViewModel.isVoiceModeActive)
+                .opacity(chatViewModel.isVoiceModeActive ? 0.4 : 1)
+                .onSubmit {
+                    sendAndScroll()
+                }
+                .padding(.leading, 16)
+                .padding(.trailing, chatViewModel.isVoiceModeActive ? 12 : 54)
+                .padding(.vertical, 12)
+                .background(
+                    inputBackground
+                )
+                .overlay(alignment: .bottomTrailing) {
+                    if !chatViewModel.isVoiceModeActive {
+                        HStack(spacing: 4) {
+                            if chatViewModel.thinkingState != .none {
+                                Button {
+                                    chatViewModel.stopStreaming()
+                                } label: {
+                                    Image(systemName: "stop.fill")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundStyle(Color(.systemBackground))
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.primary)
+                                        .clipShape(Circle())
+                                }
+                                .transition(.scale.combined(with: .opacity))
+                            } else if canSend {
+                                Button {
+                                    sendAndScroll()
+                                } label: {
+                                    Image(systemName: "arrow.up")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundStyle(Color(.systemBackground))
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.primary)
+                                        .clipShape(Circle())
+                                }
+                                .transition(.scale.combined(with: .opacity))
+                            } else {
+                                Button {
+                                    isInputFocused = false
+                                    chatViewModel.activateVoiceMode()
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                } label: {
+                                    Image(systemName: "waveform")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundStyle(Color(.systemBackground))
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.primary)
+                                        .clipShape(Circle())
+                                }
+                                .transition(.scale.combined(with: .opacity))
+                            }
                         }
-                        .transition(.scale.combined(with: .opacity))
-                    }
-
-                    if chatViewModel.thinkingState != .none && !chatViewModel.isVoiceModeActive {
-                        Button {
-                            chatViewModel.stopStreaming()
-                        } label: {
-                            Image(systemName: "stop.fill")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(Color(.systemBackground))
-                                .frame(width: 44, height: 44)
-                                .background(Color.primary)
-                                .clipShape(Circle())
-                        }
-                        .transition(.scale.combined(with: .opacity))
-                    } else if chatViewModel.isVoiceModeActive {
-                        Button {
-                            chatViewModel.deactivateVoiceMode()
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(Color(.systemBackground))
-                                .frame(width: 44, height: 44)
-                                .background(Color.primary)
-                                .clipShape(Circle())
-                        }
-                        .transition(.scale.combined(with: .opacity))
-                    } else if canSend {
-                        Button {
-                            sendAndScroll()
-                        } label: {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(Color(.systemBackground))
-                                .frame(width: 44, height: 44)
-                                .background(Color.primary)
-                                .clipShape(Circle())
-                        }
-                        .transition(.scale.combined(with: .opacity))
-                    } else {
-                        Button {
-                            isInputFocused = false
-                            chatViewModel.activateVoiceMode()
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        } label: {
-                            Image(systemName: "waveform")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(Color(.systemBackground))
-                                .frame(width: 44, height: 44)
-                                .background(Color.primary)
-                                .clipShape(Circle())
-                        }
-                        .transition(.scale.combined(with: .opacity))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: canSend)
+                        .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
+                        .padding(.trailing, 2)
+                        .padding(.bottom, 2)
                     }
                 }
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: canSend)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: chatViewModel.isVoiceModeActive)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: chatViewModel.isVoiceMuted)
-                .animation(.easeInOut(duration: 0.15), value: chatViewModel.thinkingState != .none)
-                .padding(.trailing, 2)
-                .padding(.bottom, 2)
+
+            if chatViewModel.isVoiceModeActive {
+                Button {
+                    chatViewModel.toggleVoiceMute()
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Image(systemName: chatViewModel.isVoiceMuted ? "mic.slash.fill" : "mic.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 44, height: 44)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Circle())
+                }
+                .transition(.scale.combined(with: .opacity))
+
+                Button {
+                    chatViewModel.deactivateVoiceMode()
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color(.systemBackground))
+                        .frame(width: 44, height: 44)
+                        .background(Color.primary)
+                        .clipShape(Circle())
+                }
+                .transition(.scale.combined(with: .opacity))
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: chatViewModel.isVoiceModeActive)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: chatViewModel.isVoiceMuted)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
     }
 
     @ViewBuilder
