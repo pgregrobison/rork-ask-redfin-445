@@ -130,12 +130,14 @@ struct HomeCard: View {
 enum HomeCardBadge {
     case hot
     case listedByRedfin
+    case compassComingSoon
     case daysAgo(Int)
 
     var text: String {
         switch self {
         case .hot: "HOT HOME"
         case .listedByRedfin: "LISTED BY REDFIN"
+        case .compassComingSoon: "COMPASS COMING SOON"
         case .daysAgo(let days): "\(days)d ago"
         }
     }
@@ -144,6 +146,7 @@ enum HomeCardBadge {
         switch self {
         case .hot: Color(white: 0.15)
         case .listedByRedfin: Color(red: 0.78, green: 0.13, blue: 0.13)
+        case .compassComingSoon: .black
         case .daysAgo: Theme.redfinGreenColor
         }
     }

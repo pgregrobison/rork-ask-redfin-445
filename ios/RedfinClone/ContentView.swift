@@ -84,6 +84,22 @@ struct ContentView: View {
         .onAppear {
             startNudgeTimer()
         }
+        .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in
+            guard let listingID = newID else { return }
+            viewModel.notificationService.pendingCompassListingID = nil
+            viewModel.showChat = false
+            navigationPath = NavigationPath()
+            selectedTab = .find
+            viewModel.showListView = false
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                if let listing = viewModel.listings.first(where: { $0.id == listingID }) {
+                    viewModel.selectListing(listing)
+                } else {
+                    viewModel.selectNearestCompassListing(to: nil)
+                }
+            }
+        }
     }
 
     @ViewBuilder

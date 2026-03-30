@@ -25,6 +25,7 @@ class ListingsViewModel {
     private var geocodeTask: Task<Void, Never>?
     private let geocoder = CLGeocoder()
     let locationService = LocationService()
+    let notificationService = NotificationService()
     private var currentSpan = MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
     private var isPanning: Bool = false
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
@@ -160,8 +161,33 @@ class ListingsViewModel {
         locationService.isTrackingUser = false
     }
 
+    var compassListings: [Listing] {
+        listings.filter { $0.isCompassComingSoon }
+    }
+
     func locateUser() {
         locationService.locateUser()
+    }
+
+    func triggerCompassNotificationIfNeeded() {
+        guard let userLocation = locationService.userLocation else { return }
+        let nearest = compassListings
+            .map { (listing: $0, dist: CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: userLocation)) }
+            .min { $0.dist < $1.dist }
+        if let nearest {
+            notificationService.scheduleCompassNotification(nearestListing: nearest.listing)
+        }
+    }
+
+    func selectNearestCompassListing(to location: CLLocation?) {
+        let ref = location ?? locationService.userLocation
+        guard let ref else { return }
+        let nearest = compassListings
+            .map { (listing: $0, dist: CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: ref)) }
+            .min { $0.dist < $1.dist }
+        if let nearest {
+            selectListing(nearest.listing)
+        }
     }
 
     func panToUserLocation() {

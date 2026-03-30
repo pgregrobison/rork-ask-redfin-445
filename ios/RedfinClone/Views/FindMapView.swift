@@ -23,6 +23,13 @@ struct FindMapView: View {
                     }
                     .annotationTitles(.hidden)
                 }
+
+                if let userCoord = viewModel.locationService.userLocation?.coordinate {
+                    Annotation("My Location", coordinate: userCoord) {
+                        UserLocationDot()
+                    }
+                    .annotationTitles(.hidden)
+                }
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .onMapCameraChange(frequency: .onEnd) { context in
@@ -66,6 +73,7 @@ struct FindMapView: View {
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()
+                viewModel.triggerCompassNotificationIfNeeded()
             }
         }
     }
