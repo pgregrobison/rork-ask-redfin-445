@@ -1,9 +1,19 @@
-# Fix unresponsive locate button
+# Add Compass Coming Soon listings in Eastlake, Seattle
 
-**Problem**
-The tap gesture used to dismiss the listing card overlay is applied directly to the Map, which intercepts taps on the action buttons (locate, layers, draw) in the overlay — making them unresponsive.
+**What's changing**
 
-**Fix**
-- Move the dismiss-on-tap behavior so it only covers the map area without blocking the action buttons
-- The action buttons will respond to taps normally again
-- All existing behavior (dismissing the card by tapping the map, locate, etc.) continues to work as before
+Adding 3 Compass Coming Soon listings located in the Eastlake neighborhood of Seattle, WA so that when you use the "locate" action, the nearest Compass listing is close by instead of jumping all the way to New York.
+
+**New listings (mock data)**
+
+- A modern waterfront condo on Eastlake Ave E (~$875K, 2 bed / 2 bath)
+- A craftsman-style townhouse on Minor Ave E (~$1.1M, 3 bed / 2.5 bath)
+- A contemporary loft on Fairview Ave E (~$725K, 1 bed / 1 bath)
+
+All three will:
+- Be tagged as "Compass Coming Soon" (black badge)
+- Appear as pins on the map in the Eastlake area
+- Be eligible for the nearby notification when you tap "locate"
+- Have 0 days on market (pre-market style)
+
+**No other changes** — the notification, map, and locate behavior stay exactly the same. The notification will now reference a nearby Seattle listing instead of one in New York.
