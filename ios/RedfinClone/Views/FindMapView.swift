@@ -4,7 +4,7 @@ import MapKit
 struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
     let onListingTap: (Listing) -> Void
-    @State private var isCardVisible: Bool = false
+
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -42,29 +42,20 @@ struct FindMapView: View {
                 MapActionButtons(viewModel: viewModel)
             }
 
-            if let listing = viewModel.selectedListing {
-                ListingCardOverlay(
-                    listing: listing,
-                    isSaved: viewModel.isSaved(listing),
-                    onDismiss: { viewModel.dismissOverlay() },
-                    onToggleSave: { viewModel.toggleSaved(listing) },
-                    onTap: { onListingTap(listing) }
-                )
-                .id(listing.id)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .animation(isCardVisible ? nil : .spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
-        .onChange(of: viewModel.selectedListing?.id) { oldValue, newValue in
-            if oldValue == nil && newValue != nil {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    isCardVisible = true
-                }
-            } else if newValue == nil {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    isCardVisible = false
+            Group {
+                if let listing = viewModel.selectedListing {
+                    ListingCardOverlay(
+                        listing: listing,
+                        isSaved: viewModel.isSaved(listing),
+                        onDismiss: { viewModel.dismissOverlay() },
+                        onToggleSave: { viewModel.toggleSaved(listing) },
+                        onTap: { onListingTap(listing) }
+                    )
+                    .id(listing.id)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
         }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {

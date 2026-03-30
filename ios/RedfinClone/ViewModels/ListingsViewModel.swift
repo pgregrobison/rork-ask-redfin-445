@@ -27,7 +27,7 @@ class ListingsViewModel {
     let locationService = LocationService()
     let notificationService = NotificationService()
     private var currentSpan = MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
-    private var isPanning: Bool = false
+    private var isAnimatingCamera: Bool = false
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
@@ -123,20 +123,20 @@ class ListingsViewModel {
             longitude: (minLon + maxLon) / 2
         )
         let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
-        isPanning = true
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+        isAnimatingCamera = true
+        withAnimation(.easeInOut(duration: 0.5)) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
         currentSpan = span
         Task {
             try? await Task.sleep(for: .milliseconds(550))
-            isPanning = false
+            isAnimatingCamera = false
         }
     }
 
     func panToListing(_ listing: Listing) {
-        isPanning = true
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+        isAnimatingCamera = true
+        withAnimation(.easeInOut(duration: 0.35)) {
             mapPosition = .region(MKCoordinateRegion(
                 center: listing.coordinate,
                 span: currentSpan
@@ -144,7 +144,7 @@ class ListingsViewModel {
         }
         Task {
             try? await Task.sleep(for: .milliseconds(400))
-            isPanning = false
+            isAnimatingCamera = false
         }
     }
 
@@ -155,8 +155,9 @@ class ListingsViewModel {
     }
 
     func persistMapRegion(_ region: MKCoordinateRegion) {
-        guard !isPanning else { return }
-        currentSpan = region.span
+        if !isAnimatingCamera {
+            currentSpan = region.span
+        }
         locationService.isTrackingUser = false
     }
 
@@ -210,14 +211,14 @@ class ListingsViewModel {
             longitude: (minLon + maxLon) / 2
         )
         let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
-        isPanning = true
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+        isAnimatingCamera = true
+        withAnimation(.easeInOut(duration: 1.0)) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
         currentSpan = span
         Task {
-            try? await Task.sleep(for: .milliseconds(600))
-            isPanning = false
+            try? await Task.sleep(for: .milliseconds(1100))
+            isAnimatingCamera = false
         }
     }
 

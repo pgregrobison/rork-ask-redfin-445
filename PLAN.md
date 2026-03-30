@@ -1,10 +1,13 @@
-# Fix sluggish map panning and zooming
+# Fix map responsiveness and smooth compass zoom animation
 
-**Problem**
-- Every time you finish panning/zooming the map, the app redundantly re-sets the map position to the exact same spot, causing an extra render cycle that makes the map feel laggy and unresponsive.
-- The user location tracker can also fight with manual panning, adding to the sluggishness.
+## What's changing
 
-**Changes**
-1. **Stop re-assigning the map position after every pan** — Only save the current zoom level (span) when the map stops moving, without forcing the map to re-render to the same spot it's already at.
-2. **Disable user-location tracking as soon as the user manually pans** — Prevent the location tracker from overriding user gestures and snapping the map back.
-3. **Result**: Panning, zooming, and all map interactions will feel smooth and immediate with no delays or blocked actions.
+### Fix 1: Unblock map interaction during pin selection
+- Remove the broad animation modifier wrapping the entire map area — this is what freezes panning, zooming, and pin tapping during the camera move
+- Only animate the home card overlay appearing/disappearing, not the map itself
+- Remove the `isPanning` flag and sleep-based timer that artificially blocks region updates — instead, use a simpler approach that lets the map stay interactive at all times
+- Pin taps, panning, and zooming will work immediately even while the map is moving to a selected pin
+
+### Fix 2: Smooth compass coming soon zoom
+- Instead of jumping instantly to the final zoomed-in position, animate the map camera smoothly over a longer duration so it feels like a fly-in
+- Use a slower, more gentle spring animation for the compass zoom so the transition from a wide view to a tight view feels natural and cinematic rather than jarring
