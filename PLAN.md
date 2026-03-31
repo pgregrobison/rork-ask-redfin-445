@@ -1,13 +1,9 @@
-# Persist horizontal home carousel scroll positions in Ask Redfin
+# Skip photo focus view when navigating back
 
-**What changes**
+**Problem**
+When you navigate away from a home detail while the photo viewer is open, then press back, you land on the photo viewer instead of the home detail — adding an extra "back" tap.
 
-- Each horizontal home carousel in the chat will remember which listing card you scrolled to
-- When you close and reopen Ask Redfin, every carousel will be at the same position you left it — so you can pick up right where you left off and swipe to the next home
-- Scroll positions are stored per message, so switching between chat threads also preserves each carousel's position
-
-**How it works**
-
-- The app tracks which listing card is currently visible in each carousel (keyed by the chat message it belongs to)
-- When Ask Redfin is dismissed or a thread is switched, those positions are saved
-- When Ask Redfin is reopened or a thread is restored, each carousel scrolls back to the saved listing
+**Fix**
+- Automatically close the photo focus overlay whenever you leave a home's detail page
+- This way, pressing back always returns to the home detail (with the info sheet), never the photo viewer
+- No change to how the photo viewer works when you're actively using it

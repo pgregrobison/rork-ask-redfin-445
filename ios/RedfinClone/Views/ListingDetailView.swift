@@ -97,6 +97,10 @@ struct ListingDetailView: View {
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
         .navigationBarBackButtonHidden(focusedPhotoIndex != nil)
+        .onDisappear {
+            focusedPhotoIndex = nil
+            focusVisible = false
+        }
     }
 
     // MARK: - Photo Scroll
