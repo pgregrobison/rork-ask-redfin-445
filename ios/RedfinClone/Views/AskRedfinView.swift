@@ -12,7 +12,9 @@ struct AskRedfinView: View {
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
     @State private var hasRestoredScroll: Bool = false
-
+    @State private var scrollViewHeight: CGFloat = 0
+    @State private var contentHeight: CGFloat = 0
+    @State private var lastScrollEndedInMargin: Bool = false
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -137,9 +139,31 @@ struct AskRedfinView: View {
                 .padding(.bottom, 16)
             }
             .contentMargins(.top, 0)
-            .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
+            .contentMargins(.bottom, bottomMargin)
             .safeAreaInset(edge: .top, spacing: 0) {
                 headerBar
+            }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.visibleRect.height
+            } action: { _, newHeight in
+                scrollViewHeight = newHeight
+            }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentSize.height
+            } action: { _, newHeight in
+                contentHeight = newHeight
+            }
+            .onScrollGeometryChange(for: Bool.self) { geo in
+                let contentBottom = geo.contentSize.height
+                let visibleBottom = geo.contentOffset.y + geo.visibleRect.height - geo.contentInsets.bottom
+                return visibleBottom > contentBottom + 20
+            } action: { _, inMargin in
+                lastScrollEndedInMargin = inMargin
+            }
+            .onScrollPhaseChange { _, newPhase in
+                if newPhase == .idle, lastScrollEndedInMargin {
+                    snapBackToLastMessage(proxy: proxy)
+                }
             }
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
@@ -345,6 +369,19 @@ struct AskRedfinView: View {
         guard let threadId = chatViewModel.activeThreadId,
               let lastMsgId = chatViewModel.activeMessages.last?.id else { return }
         chatViewModel.scrollPositions[threadId] = lastMsgId
+    }
+
+    private var bottomMargin: CGFloat {
+        let inputBarHeight: CGFloat = chatViewModel.isVoiceModeActive ? 220 : 72
+        let extraForTopAnchor = max(0, scrollViewHeight - 100)
+        return max(inputBarHeight, extraForTopAnchor)
+    }
+
+    private func snapBackToLastMessage(proxy: ScrollViewProxy) {
+        guard let lastId = chatViewModel.activeMessages.last?.id else { return }
+        withAnimation(.easeOut(duration: 0.3)) {
+            proxy.scrollTo(lastId, anchor: .bottom)
+        }
     }
 
     private func sendAndScroll() {
