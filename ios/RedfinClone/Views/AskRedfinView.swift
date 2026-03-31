@@ -16,12 +16,12 @@ struct AskRedfinView: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     var body: some View {
-        ZStack(alignment: .top) {
+        VStack(spacing: 0) {
+            headerBar
             ZStack(alignment: .bottom) {
                 messageList
                 inputFooter
             }
-            headerBar
         }
         .background(Color(.systemBackground))
         .environment(\.horizontalSizeClass, .regular)
@@ -30,28 +30,27 @@ struct AskRedfinView: View {
     }
 
     private var headerBar: some View {
-        VStack(spacing: 0) {
-            HStack {
-                threadSwitcherMenu
-                Spacer()
-                GlassActionButton(icon: "xmark", action: onDismiss)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-
+        HStack {
+            threadSwitcherMenu
+            Spacer()
+            GlassActionButton(icon: "xmark", action: onDismiss)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+        .background(
             LinearGradient(
                 stops: [
                     .init(color: Color(.systemBackground), location: 0),
-                    .init(color: Color(.systemBackground).opacity(0.6), location: 0.5),
-                    .init(color: .clear, location: 1)
+                    .init(color: Color(.systemBackground), location: 0.55),
+                    .init(color: Color(.systemBackground).opacity(0), location: 1)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(height: 40)
-            .allowsHitTesting(false)
-        }
-        .allowsHitTesting(true)
+            .padding(.bottom, -24)
+            .allowsHitTesting(false),
+            alignment: .top
+        )
     }
 
     @ViewBuilder
@@ -139,7 +138,7 @@ struct AskRedfinView: View {
                         .frame(height: currentBottomSpacerHeight)
                         .id("bottom-spacer")
                 }
-                .padding(.top, 76)
+                .padding(.top, 8)
                 .padding(.bottom, 16)
             }
             .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
