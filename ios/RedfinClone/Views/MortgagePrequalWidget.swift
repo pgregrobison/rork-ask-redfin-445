@@ -10,6 +10,10 @@ struct MortgagePrequalWidget: View {
     @State private var creditScore: String = "740+"
     @State private var isSubmitted: Bool = false
 
+    nonisolated private enum Field { case income, downPayment }
+    @FocusState private var focusedField: Field?
+    @Environment(\.chatWidgetMessageID) private var messageID
+
     private let loanTypes = ["30-year fixed", "15-year fixed", "ARM 5/1", "ARM 7/1"]
     private let creditRanges = ["740+", "700-739", "660-699", "620-659", "Below 620"]
 
@@ -29,6 +33,10 @@ struct MortgagePrequalWidget: View {
         .padding(.horizontal, 16)
         .animation(.snappy(duration: 0.35), value: currentStep)
         .animation(.snappy(duration: 0.35), value: isSubmitted)
+        .onChange(of: focusedField) { _, newField in
+            guard newField != nil, let messageID else { return }
+            NotificationCenter.default.post(name: .chatWidgetFieldFocused, object: nil, userInfo: ["messageID": messageID])
+        }
     }
 
     private var headerView: some View {
@@ -51,7 +59,7 @@ struct MortgagePrequalWidget: View {
     }
 
     private var stepsView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             stepRow(
                 index: 0,
                 title: "Annual household income",
@@ -166,8 +174,10 @@ struct MortgagePrequalWidget: View {
                 TextField("e.g. 250,000", text: $annualIncome)
                     .keyboardType(.numberPad)
                     .font(.subheadline)
+                    .focused($focusedField, equals: .income)
             }
-            .padding(12)
+            .frame(minHeight: 44)
+            .padding(.horizontal, 12)
             .background(Color(.tertiarySystemBackground))
             .clipShape(.rect(cornerRadius: 10))
 
@@ -185,8 +195,10 @@ struct MortgagePrequalWidget: View {
                 TextField("e.g. 100,000", text: $downPayment)
                     .keyboardType(.numberPad)
                     .font(.subheadline)
+                    .focused($focusedField, equals: .downPayment)
             }
-            .padding(12)
+            .frame(minHeight: 44)
+            .padding(.horizontal, 12)
             .background(Color(.tertiarySystemBackground))
             .clipShape(.rect(cornerRadius: 10))
 
@@ -197,7 +209,7 @@ struct MortgagePrequalWidget: View {
     }
 
     private var loanDetailsContent: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Loan type")
                     .font(.subheadline.bold())
@@ -242,7 +254,7 @@ struct MortgagePrequalWidget: View {
     }
 
     private var confirmationView: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 28, weight: .medium))

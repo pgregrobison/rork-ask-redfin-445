@@ -10,6 +10,7 @@ struct AskRedfinView: View {
     let onListingTap: (Listing) -> Void
     @FocusState private var isInputFocused: Bool
     @State private var scrollToTopTrigger: String?
+    @State private var scrollToBottomTrigger: String?
     @State private var hasRestoredScroll: Bool = false
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
@@ -155,6 +156,19 @@ struct AskRedfinView: View {
                         proxy.scrollTo(targetId, anchor: .top)
                     }
                 }
+            }
+            .onChange(of: scrollToBottomTrigger) { _, targetId in
+                guard let targetId else { return }
+                scrollToBottomTrigger = nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    withAnimation(.easeOut(duration: 0.35)) {
+                        proxy.scrollTo(targetId, anchor: .bottom)
+                    }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .chatWidgetFieldFocused)) { notification in
+                guard let msgID = notification.userInfo?["messageID"] as? String else { return }
+                scrollToBottomTrigger = msgID
             }
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {

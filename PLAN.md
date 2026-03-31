@@ -1,9 +1,13 @@
-# Only animate map home card when going from no selection to a selection
+# Improve in-chat flow widget spacing and keyboard-aware scrolling
 
-**Problem**
-When tapping a new pin while a card is already showing, the card slides out and back in (the full enter/exit animation replays). It should only slide up when going from no pin selected → pin selected.
+**Changes**
 
-**Fix**
-- Remove the `.id(listing.id)` on the card overlay — this is what causes SwiftUI to treat each pin switch as a brand-new view, triggering the slide-in/slide-out transition every time
-- Without the forced identity swap, SwiftUI will keep the same card view and just update its content in place when switching between pins
-- The slide-up transition will still fire when going from nothing selected → a pin selected, and the slide-down will fire when dismissing
+- [x] **More breathing room between subsections**: Increase vertical spacing between steps, dividers, and content sections in the Tour Scheduler, Mortgage Prequalification, and Tour Route widgets to a minimum of 12pt
+- [x] **Taller text fields**: Make all text input fields (income, down payment, full name, phone number) 44pt tall for comfortable tapping, matching Apple's recommended touch target
+- [x] **Keyboard-aware scroll**: When a text field inside a chat widget gains focus, the chat automatically scrolls so the focused input sits comfortably above the keyboard — no content hidden behind it
+
+**Affected areas**
+
+- Tour Scheduler flow (date, time, contact info steps)
+- Mortgage Prequalification flow (income, down payment, loan details steps)
+- Chat message list scroll behavior when keyboard appears

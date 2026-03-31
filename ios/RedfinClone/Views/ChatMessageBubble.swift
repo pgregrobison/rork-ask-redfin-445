@@ -53,10 +53,12 @@ struct ChatMessageBubble: View {
 
             if let tourRequest = message.tourRequest {
                 TourSchedulerWidget(tourRequest: tourRequest)
+                    .environment(\.chatWidgetMessageID, message.id)
             }
 
             if let mortgageRequest = message.mortgageRequest {
                 MortgagePrequalWidget(mortgageRequest: mortgageRequest)
+                    .environment(\.chatWidgetMessageID, message.id)
             }
 
             if message.isTourRoute {

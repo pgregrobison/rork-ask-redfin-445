@@ -17,6 +17,7 @@ struct TourSchedulerWidget: View {
 
     nonisolated private enum Field { case name, phone }
     @FocusState private var focusedField: Field?
+    @Environment(\.chatWidgetMessageID) private var messageID
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,6 +35,10 @@ struct TourSchedulerWidget: View {
         .padding(.horizontal, 16)
         .animation(.snappy(duration: 0.35), value: currentStep)
         .animation(.snappy(duration: 0.35), value: isConfirmed)
+        .onChange(of: focusedField) { _, newField in
+            guard newField != nil, let messageID else { return }
+            NotificationCenter.default.post(name: .chatWidgetFieldFocused, object: nil, userInfo: ["messageID": messageID])
+        }
     }
 
     private var headerView: some View {
@@ -58,7 +63,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var stepsView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             stepRow(
                 index: 0,
                 title: "Pick a day",
@@ -196,9 +201,8 @@ struct TourSchedulerWidget: View {
     }
 
     private var contactContent: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             TextField("Full name", text: $fullName)
-                .textFieldStyle(.roundedBorder)
                 .font(.subheadline)
                 .textContentType(.name)
                 .submitLabel(.next)
@@ -209,15 +213,22 @@ struct TourSchedulerWidget: View {
                         focusedField = .phone
                     }
                 }
+                .frame(minHeight: 44)
+                .padding(.horizontal, 12)
+                .background(Color(.tertiarySystemBackground))
+                .clipShape(.rect(cornerRadius: 10))
 
             TextField("Phone number", text: $phone)
-                .textFieldStyle(.roundedBorder)
                 .font(.subheadline)
                 .keyboardType(.phonePad)
                 .textContentType(.telephoneNumber)
                 .submitLabel(.done)
                 .focused($focusedField, equals: .phone)
                 .onSubmit { focusedField = nil }
+                .frame(minHeight: 44)
+                .padding(.horizontal, 12)
+                .background(Color(.tertiarySystemBackground))
+                .clipShape(.rect(cornerRadius: 10))
 
             Button {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)

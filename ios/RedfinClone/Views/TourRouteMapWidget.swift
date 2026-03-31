@@ -58,7 +58,7 @@ struct TourRouteMapWidget: View {
             .frame(height: 200)
             .allowsHitTesting(false)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 ForEach(tourStops) { stop in
                     HStack(spacing: 10) {
                         ZStack {
