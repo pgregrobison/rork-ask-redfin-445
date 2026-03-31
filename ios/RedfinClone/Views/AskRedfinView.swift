@@ -12,8 +12,6 @@ struct AskRedfinView: View {
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
     @State private var hasRestoredScroll: Bool = false
-    @State private var sheetHeight: CGFloat = 0
-    @State private var lastScrollEndedInMargin: Bool = false
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -23,13 +21,6 @@ struct AskRedfinView: View {
             inputFooter
         }
         .background(Color(.systemBackground))
-        .onGeometryChange(for: CGFloat.self) { geo in
-            geo.size.height
-        } action: { newHeight in
-            if sheetHeight == 0 {
-                sheetHeight = newHeight
-            }
-        }
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])
@@ -140,26 +131,18 @@ struct AskRedfinView: View {
                         ThinkingIndicator(label: chatViewModel.thinkingState.label)
                             .id("thinking")
                     }
+
+                    Color.clear
+                        .frame(height: currentBottomSpacerHeight)
+                        .id("bottom-spacer")
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 16)
             }
             .contentMargins(.top, 0)
-            .contentMargins(.bottom, bottomMargin)
+            .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
             .safeAreaInset(edge: .top, spacing: 0) {
                 headerBar
-            }
-            .onScrollGeometryChange(for: Bool.self) { geo in
-                let contentBottom = geo.contentSize.height
-                let visibleBottom = geo.contentOffset.y + geo.visibleRect.height - geo.contentInsets.bottom
-                return visibleBottom > contentBottom + 20
-            } action: { _, inMargin in
-                lastScrollEndedInMargin = inMargin
-            }
-            .onScrollPhaseChange { _, newPhase in
-                if newPhase == .idle, lastScrollEndedInMargin {
-                    snapBackToLastMessage(proxy: proxy)
-                }
             }
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
@@ -210,6 +193,9 @@ struct AskRedfinView: View {
             .onChange(of: chatViewModel.activeThreadId) { oldId, _ in
                 if let oldId, let lastVisible = chatViewModel.threads.first(where: { $0.id == oldId })?.messages.last?.id {
                     chatViewModel.scrollPositions[oldId] = lastVisible
+                }
+                if let threadId = chatViewModel.activeThreadId {
+                    chatViewModel.bottomSpacerHeights[threadId] = 0
                 }
                 if let currentId = chatViewModel.activeThreadId, let savedId = chatViewModel.scrollPositions[currentId] {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
@@ -361,24 +347,15 @@ struct AskRedfinView: View {
         return title
     }
 
+    private var currentBottomSpacerHeight: CGFloat {
+        guard let threadId = chatViewModel.activeThreadId else { return 0 }
+        return chatViewModel.bottomSpacerHeights[threadId] ?? 0
+    }
+
     private func saveCurrentScrollPosition() {
         guard let threadId = chatViewModel.activeThreadId,
               let lastMsgId = chatViewModel.activeMessages.last?.id else { return }
         chatViewModel.scrollPositions[threadId] = lastMsgId
-    }
-
-    private var bottomMargin: CGFloat {
-        let inputBarHeight: CGFloat = chatViewModel.isVoiceModeActive ? 220 : 72
-        guard sheetHeight > 0 else { return inputBarHeight }
-        let extraForTopAnchor = sheetHeight - 100
-        return max(inputBarHeight, extraForTopAnchor)
-    }
-
-    private func snapBackToLastMessage(proxy: ScrollViewProxy) {
-        guard let lastId = chatViewModel.activeMessages.last?.id else { return }
-        withAnimation(.easeOut(duration: 0.3)) {
-            proxy.scrollTo(lastId, anchor: .bottom)
-        }
     }
 
     private func sendAndScroll() {
@@ -388,7 +365,10 @@ struct AskRedfinView: View {
         chatViewModel.sendMessage()
         guard let lastUserMsg = chatViewModel.activeMessages.last(where: { $0.role == .user }) else { return }
 
-        scrollToTopTrigger = lastUserMsg.id
+        let msgId = lastUserMsg.id
+        if let threadId = chatViewModel.activeThreadId {
+            chatViewModel.bottomSpacerHeights[threadId] = UIScreen.main.bounds.height
+        }
+        scrollToTopTrigger = msgId
     }
-
 }

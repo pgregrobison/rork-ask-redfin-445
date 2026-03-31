@@ -1,12 +1,10 @@
-# Fix chat freeze caused by layout feedback loop
+# Filter "Show on Map" to only New York area homes
 
-**Problem**
-Tapping "Ask Redfin" freezes the app because the bottom padding of the chat dynamically recalculates based on the scroll area height, which itself changes when the padding changes — creating an infinite loop.
+**What's happening now:**
+- The "Show on map" button in Ask Redfin fits ALL matched listings on the map, including homes in Seattle, WA
+- This causes the map to zoom out to country level to show both coasts
 
-**Fix**
-
-- Remove the dynamic bottom padding that depends on scroll measurements
-- Instead, calculate the extra space needed **once** when the view appears (using a one-time geometry measurement of the sheet height), and keep it stable
-- This breaks the feedback loop while preserving the scroll-to-top-of-viewport behavior for user messages
-- All other scroll behaviors (auto-scroll on send, snap-back from empty space, keyboard dismiss, thread switching) stay exactly the same
-
+**What will change:**
+- When "Show on map" is tapped, only New York area homes will be included
+- The map will stay zoomed in to the New York metro area instead of zooming out to the entire country
+- The filtering will happen in the listing cards view before passing listings to the map, so only NY-state homes are sent to the map fit function
