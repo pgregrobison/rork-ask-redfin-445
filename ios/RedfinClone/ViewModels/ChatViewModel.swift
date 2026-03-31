@@ -261,13 +261,6 @@ class ChatViewModel {
         }
 
         finalizeMessage(msgId)
-
-        if let threadId = activeThreadId {
-            withAnimation(.easeOut(duration: 0.3)) {
-                bottomSpacerHeights[threadId] = 0
-            }
-        }
-
         saveThreads()
     }
 

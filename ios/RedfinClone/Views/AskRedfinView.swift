@@ -12,6 +12,9 @@ struct AskRedfinView: View {
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
     @State private var hasRestoredScroll: Bool = false
+    @State private var spacerCollapsed: Bool = false
+    @State private var lastContentHeight: CGFloat = 0
+    @State private var lastViewportHeight: CGFloat = 0
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -143,6 +146,25 @@ struct AskRedfinView: View {
             .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
             .safeAreaInset(edge: .top, spacing: 0) {
                 headerBar
+            }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentSize.height
+            } action: { _, newContentHeight in
+                lastContentHeight = newContentHeight
+                checkSpacerCollapse()
+            }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.visibleRect.height
+            } action: { _, newViewportHeight in
+                lastViewportHeight = newViewportHeight
+                checkSpacerCollapse()
+            }
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentOffset.y + geo.contentInsets.top
+            } action: { oldOffset, newOffset in
+                if oldOffset > newOffset + 10, currentBottomSpacerHeight > 0 {
+                    collapseSpacerIfNeeded()
+                }
             }
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
@@ -367,8 +389,25 @@ struct AskRedfinView: View {
 
         let msgId = lastUserMsg.id
         if let threadId = chatViewModel.activeThreadId {
+            spacerCollapsed = false
             chatViewModel.bottomSpacerHeights[threadId] = UIScreen.main.bounds.height
         }
         scrollToTopTrigger = msgId
+    }
+
+    private func checkSpacerCollapse() {
+        guard !spacerCollapsed, currentBottomSpacerHeight > 0 else { return }
+        let contentWithoutSpacer = lastContentHeight - currentBottomSpacerHeight
+        if contentWithoutSpacer >= lastViewportHeight {
+            collapseSpacerIfNeeded()
+        }
+    }
+
+    private func collapseSpacerIfNeeded() {
+        guard !spacerCollapsed, let threadId = chatViewModel.activeThreadId else { return }
+        spacerCollapsed = true
+        withAnimation(.easeOut(duration: 0.3)) {
+            chatViewModel.bottomSpacerHeights[threadId] = 0
+        }
     }
 }
