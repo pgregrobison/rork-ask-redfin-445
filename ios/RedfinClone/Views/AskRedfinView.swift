@@ -16,12 +16,9 @@ struct AskRedfinView: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     var body: some View {
-        VStack(spacing: 0) {
-            headerBar
-            ZStack(alignment: .bottom) {
-                messageList
-                inputFooter
-            }
+        ZStack(alignment: .bottom) {
+            messageList
+            inputFooter
         }
         .background(Color(.systemBackground))
         .environment(\.horizontalSizeClass, .regular)
@@ -110,6 +107,7 @@ struct AskRedfinView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 16) {
+                    Color.clear.frame(height: 0)
                     ForEach(chatViewModel.activeMessages) { message in
                         ChatMessageBubble(
                             message: message,
@@ -141,7 +139,11 @@ struct AskRedfinView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 16)
             }
+            .contentMargins(.top, 76)
             .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                headerBar
+            }
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
                 guard !hasRestoredScroll else { return }

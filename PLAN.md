@@ -1,8 +1,13 @@
-# Move chat header back into VStack with gradient background
+# Let chat text scroll freely under the header with gradient fade
 
-**What changes:**
+**What changes**
+- The header moves from being stacked above the chat to being attached as a top safe-area inset of the ScrollView
+- This means the chat content extends all the way up behind the header instead of getting clipped at the header's bottom edge
+- The existing gradient background on the header will naturally fade the text as it scrolls beneath it — no hard clip
+- A small top content margin is added so messages start below the header when at rest
 
-- Move the header out of the overlay `ZStack` and back into the normal vertical layout (above the message list)
-- Give the header a gradient background that fades from solid to transparent at the bottom, so chat text is subtly visible as it scrolls beneath
-- Remove the extra top padding on the message list that was compensating for the overlay header
-- All existing functionality (thread switcher, dismiss button, glass effects) stays the same
+**What stays the same**
+- Header stays visually in the same position with the same gradient style
+- All scroll behavior (restore position, scroll-to-top/bottom, thread switching) unchanged
+- Input footer and voice mode unchanged
+- All existing animations and interactions preserved
