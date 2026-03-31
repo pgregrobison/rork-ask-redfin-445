@@ -107,7 +107,11 @@ struct AskRedfinView: View {
                                 chatViewModel.setFeedback(feedback, for: message.id)
                             },
                             onShowOnMap: onShowOnMap,
-                            onListingTap: onListingTap
+                            onListingTap: onListingTap,
+                            carouselScrollPosition: Binding(
+                                get: { chatViewModel.carouselScrollPositions[message.id] },
+                                set: { chatViewModel.carouselScrollPositions[message.id] = $0 }
+                            )
                         )
                         .id(message.id)
                     }

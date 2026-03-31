@@ -7,6 +7,7 @@ struct ChatListingCards: View {
     let onToggleSave: (Listing) -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
+    @Binding var scrolledListingID: String?
 
     private var matchedListings: [Listing] {
         listingIds.compactMap { id in
@@ -29,9 +30,13 @@ struct ChatListingCards: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .id(listing.id)
                     }
                 }
+                .scrollTargetLayout()
             }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $scrolledListingID)
             .contentMargins(.horizontal, 16)
             .scrollIndicators(.hidden)
 

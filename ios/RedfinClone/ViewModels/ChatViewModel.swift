@@ -25,6 +25,7 @@ class ChatViewModel {
     var showThreadSwitcher: Bool = false
     var lastSearchResults: [Listing] = []
     var scrollPositions: [String: String] = [:]
+    var carouselScrollPositions: [String: String] = [:]
     var bottomSpacerHeights: [String: CGFloat] = [:]
     var isVoiceModeActive: Bool = false
     var isVoiceMuted: Bool = false
