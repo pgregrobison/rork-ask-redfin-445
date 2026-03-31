@@ -1,10 +1,10 @@
-# Filter "Show on Map" to only New York area homes
+# Fix chat over-scroll into blank space
 
-**What's happening now:**
-- The "Show on map" button in Ask Redfin fits ALL matched listings on the map, including homes in Seattle, WA
-- This causes the map to zoom out to country level to show both coasts
+**Problem**
+- After sending messages back and forth, users can scroll far below the last message into empty white space
+- This happens because a large spacer is added when sending a message (to push it to the top of the screen) but is never removed after the AI response finishes
 
-**What will change:**
-- When "Show on map" is tapped, only New York area homes will be included
-- The map will stay zoomed in to the New York metro area instead of zooming out to the entire country
-- The filtering will happen in the listing cards view before passing listings to the map, so only NY-state homes are sent to the map fit function
+**Fix**
+- After the AI response finishes streaming, shrink the spacer back to zero so there's no extra blank space below the conversation
+- Same fix applied for voice mode responses
+- All existing scroll behaviors (auto-scroll on send, auto-scroll on input focus, scroll restoration) remain untouched
