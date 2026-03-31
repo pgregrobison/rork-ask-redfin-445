@@ -26,7 +26,6 @@ class ChatViewModel {
     var lastSearchResults: [Listing] = []
     var scrollPositions: [String: String] = [:]
     var carouselScrollPositions: [String: String] = [:]
-    var bottomSpacerHeights: [String: CGFloat] = [:]
     var isVoiceModeActive: Bool = false
     var isVoiceMuted: Bool = false
     var voiceTranscriptMessageId: String?
@@ -159,9 +158,6 @@ class ChatViewModel {
         voiceTranscriptMessageId = userMsg.id
         updateThreadTitle(from: phrase)
 
-        if let threadId = activeThreadId {
-            bottomSpacerHeights[threadId] = UIScreen.main.bounds.height
-        }
         voiceScrollToTopId = userMsg.id
 
         var accumulated = ""

@@ -1,23 +1,12 @@
-# Fix chat spacer behavior — only remove when content fills viewport or user scrolls up
+# Fix chat bounce by removing the spacer entirely
 
-**What's changing:**
+**Problem**
+When the chat has more than a screen of messages, sending a new message causes a visual "bounce" — the message jumps up then snaps back down due to an invisible spacer being added and then immediately collapsed.
 
-The bottom spacer in the chat (which pushes new messages to the top of the screen) currently disappears as soon as the bot finishes responding. Instead, it should stick around until the chat naturally fills the screen or the user scrolls up.
-
-**New behavior:**
-
-- When a message is sent, a spacer appears to keep the user's message near the top
-- The spacer stays even after the bot finishes responding
-- The spacer only disappears when:
-  1. The total chat content grows taller than the visible area, **or**
-  2. The user manually scrolls upward
-- Once removed, the spacer stays gone for that scroll session
-- When the user sends another message, the spacer reappears and the cycle repeats
-
-**What stays the same:**
-
-- Auto-scroll to user messages on send
-- Auto-scroll on input focus
-- All voice mode scroll behavior
-- Thread switching behavior
-- Header gradient and input bar
+**Fix**
+- Remove the bottom spacer system completely — no more invisible spacer below messages
+- When a message is sent, simply scroll so the new user message lands near the top of the screen
+  - For long conversations, this works naturally since there's plenty of content above
+  - For short conversations, the message will be as high as possible given the content — it starts at the top of the scroll area
+- The thinking indicator and incoming bot response will appear below the user message, keeping it positioned well
+- All other behaviors stay the same: auto-scroll on input focus, scroll position saving between threads, voice mode scroll, keyboard dismiss on scroll, etc.
