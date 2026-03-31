@@ -1,10 +1,9 @@
-# Filter "Show on Map" to only New York area homes
+# Stabilize loading indicator position & animate homes in
 
-**What's happening now:**
-- The "Show on map" button in Ask Redfin fits ALL matched listings on the map, including homes in Seattle, WA
-- This causes the map to zoom out to country level to show both coasts
+**What changes:**
 
-**What will change:**
-- When "Show on map" is tapped, only New York area homes will be included
-- The map will stay zoomed in to the New York metro area instead of zooming out to the entire country
-- The filtering will happen in the listing cards view before passing listings to the map, so only NY-state homes are sent to the map fit function
+- **Unified loading indicator:** Instead of the thinking indicator appearing/disappearing as a separate item that shifts around, it will always occupy a fixed spot at the bottom of the chat. The text will crossfade smoothly between "Thinking" → "Searching homes" without any position change. When loading finishes, the indicator fades out in place.
+
+- **Smooth home card entrance:** When the listing cards appear after the search, they'll animate in with a subtle slide-up and fade effect — quick but elegant, not instant.
+
+No other chat functionality changes.

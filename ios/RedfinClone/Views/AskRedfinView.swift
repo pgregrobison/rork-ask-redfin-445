@@ -127,10 +127,12 @@ struct AskRedfinView: View {
                         .id(message.id)
                     }
 
-                    if chatViewModel.thinkingState != .none {
-                        ThinkingIndicator(label: chatViewModel.thinkingState.label)
-                            .id("thinking")
-                    }
+                    ThinkingIndicator(label: chatViewModel.thinkingState.label)
+                        .opacity(chatViewModel.thinkingState != .none ? 1 : 0)
+                        .frame(height: chatViewModel.thinkingState != .none ? nil : 0)
+                        .clipped()
+                        .animation(.easeInOut(duration: 0.25), value: chatViewModel.thinkingState)
+                        .id("thinking")
 
                     Color.clear
                         .frame(height: currentBottomSpacerHeight)

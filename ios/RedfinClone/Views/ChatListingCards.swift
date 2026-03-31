@@ -8,6 +8,7 @@ struct ChatListingCards: View {
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
     @Binding var scrolledListingID: String?
+    @State private var hasAppeared: Bool = false
 
     private var matchedListings: [Listing] {
         listingIds.compactMap { id in
@@ -57,6 +58,14 @@ struct ChatListingCards: View {
                     .background(Color.primary, in: Capsule())
                 }
                 .padding(.horizontal, 16)
+            }
+        }
+        .opacity(hasAppeared ? 1 : 0)
+        .offset(y: hasAppeared ? 0 : 16)
+        .onAppear {
+            guard !hasAppeared else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                hasAppeared = true
             }
         }
     }

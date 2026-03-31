@@ -9,6 +9,8 @@ struct ThinkingIndicator: View {
             Text(label)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .contentTransition(.numericText())
+                .animation(.easeInOut(duration: 0.3), value: label)
 
             HStack(spacing: 3) {
                 ForEach(0..<3, id: \.self) { index in
