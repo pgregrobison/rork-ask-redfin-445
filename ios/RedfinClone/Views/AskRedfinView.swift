@@ -38,13 +38,13 @@ struct AskRedfinView: View {
             LinearGradient(
                 stops: [
                     .init(color: Color(.systemBackground), location: 0),
-                    .init(color: Color(.systemBackground), location: 0.55),
+                    .init(color: Color(.systemBackground).opacity(0.6), location: 0.4),
                     .init(color: Color(.systemBackground).opacity(0), location: 1)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .padding(.bottom, -24)
+            .padding(.bottom, -20)
             .allowsHitTesting(false),
             alignment: .top
         )
@@ -139,7 +139,7 @@ struct AskRedfinView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 16)
             }
-            .contentMargins(.top, 76)
+            .contentMargins(.top, 0)
             .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
             .safeAreaInset(edge: .top, spacing: 0) {
                 headerBar

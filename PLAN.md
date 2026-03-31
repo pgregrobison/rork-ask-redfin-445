@@ -1,13 +1,11 @@
-# Let chat text scroll freely under the header with gradient fade
+# Fix chat header gradient and content offset
 
-**What changes**
-- The header moves from being stacked above the chat to being attached as a top safe-area inset of the ScrollView
-- This means the chat content extends all the way up behind the header instead of getting clipped at the header's bottom edge
-- The existing gradient background on the header will naturally fade the text as it scrolls beneath it — no hard clip
-- A small top content margin is added so messages start below the header when at rest
+Two targeted fixes in the Ask Redfin chat view:
 
-**What stays the same**
-- Header stays visually in the same position with the same gradient style
-- All scroll behavior (restore position, scroll-to-top/bottom, thread switching) unchanged
-- Input footer and voice mode unchanged
-- All existing animations and interactions preserved
+**1. Soften the header gradient**
+- Currently the gradient is fully opaque for 55% of its height, completely hiding text beneath it
+- Change it to fade out much sooner — fully opaque only at the very top, then quickly transitioning to transparent so text is visible through most of the header area
+
+**2. Fix the excessive top spacing**
+- The chat content is pushed down ~100pt too far because there's both a large top content margin (76pt) and the header's safe area inset stacking together
+- Remove the redundant top content margin so the chat content sits naturally just below the header
