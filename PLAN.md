@@ -1,9 +1,15 @@
-# Show compass only when map is rotated
+# Fix map compass and scale bar visibility and positioning
 
-**Change**
+**What's wrong now:**
 
-- The Apple Maps compass will be hidden by default when the map is facing north
-- When the user rotates the map away from north, the compass will automatically fade in
-- Tapping the compass will rotate the map back to north, then the compass will fade away again
+- The scale bar never appears because it's missing the auto-visibility setting
+- The compass is always visible because it's grouped with the scale and not responding to rotation
+- Both controls are placed in the bottom-left corner together
 
-This matches the standard Apple Maps behavior where the compass only appears when needed.
+**What will change:**
+
+- **Scale bar** (bottom-left): Will appear temporarily when zooming in/out, then fade away — standard Apple Maps behavior
+- **Compass** (bottom-right): Will only appear when the map is rotated away from north, then fade once the map returns to north — standard Apple Maps behavior
+- Both controls will have the automatic visibility setting so they show/hide on their own
+- The compass moves to the bottom-right corner, the scale stays in the bottom-left
+

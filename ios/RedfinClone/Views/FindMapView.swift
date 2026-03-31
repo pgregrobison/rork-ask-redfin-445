@@ -44,13 +44,16 @@ struct FindMapView: View {
                 MapActionButtons(viewModel: viewModel)
             }
             .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 8) {
-                    MapScaleView(scope: mapScope)
-                    MapCompass(scope: mapScope)
-                        .mapControlVisibility(.automatic)
-                }
-                .padding(.leading, 16)
-                .padding(.bottom, 100)
+                MapScaleView(scope: mapScope)
+                    .mapControlVisibility(.automatic)
+                    .padding(.leading, 16)
+                    .padding(.bottom, 100)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                MapCompass(scope: mapScope)
+                    .mapControlVisibility(.automatic)
+                    .padding(.trailing, 16)
+                    .padding(.bottom, 100)
             }
 
             Group {
