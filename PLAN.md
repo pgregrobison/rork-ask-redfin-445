@@ -1,11 +1,9 @@
-# Fix chat header gradient and content offset
+# Show compass only when map is rotated
 
-Two targeted fixes in the Ask Redfin chat view:
+**Change**
 
-**1. Soften the header gradient**
-- Currently the gradient is fully opaque for 55% of its height, completely hiding text beneath it
-- Change it to fade out much sooner — fully opaque only at the very top, then quickly transitioning to transparent so text is visible through most of the header area
+- The Apple Maps compass will be hidden by default when the map is facing north
+- When the user rotates the map away from north, the compass will automatically fade in
+- Tapping the compass will rotate the map back to north, then the compass will fade away again
 
-**2. Fix the excessive top spacing**
-- The chat content is pushed down ~100pt too far because there's both a large top content margin (76pt) and the header's safe area inset stacking together
-- Remove the redundant top content margin so the chat content sits naturally just below the header
+This matches the standard Apple Maps behavior where the compass only appears when needed.

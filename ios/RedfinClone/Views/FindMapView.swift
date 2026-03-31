@@ -47,6 +47,7 @@ struct FindMapView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     MapScaleView(scope: mapScope)
                     MapCompass(scope: mapScope)
+                        .mapControlVisibility(.automatic)
                 }
                 .padding(.leading, 16)
                 .padding(.bottom, 100)
