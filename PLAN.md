@@ -1,9 +1,14 @@
-# Skip photo focus view when navigating back
+# Transparent chat header with scroll fade effect
 
-**Problem**
-When you navigate away from a home detail while the photo viewer is open, then press back, you land on the photo viewer instead of the home detail — adding an extra "back" tap.
+**Changes**
 
-**Fix**
-- Automatically close the photo focus overlay whenever you leave a home's detail page
-- This way, pressing back always returns to the home detail (with the info sheet), never the photo viewer
-- No change to how the photo viewer works when you're actively using it
+- Remove the solid/opaque background from the Ask Redfin chat header so chat messages are visible all the way to the top edge of the sheet
+- Make the header overlay the scroll content (floating on top) instead of sitting above it in a VStack
+- Add a progressive gradient fade mask at the top of the chat so messages gracefully dissolve as they scroll under the header area
+- Extend the scroll content to start beneath the header with appropriate top padding so nothing is hidden initially
+
+**Design**
+
+- The thread switcher pill and close button float transparently over the chat
+- As messages scroll up behind the header, they progressively fade out via a linear gradient mask — creating a clean, native feel
+- No abrupt cutoff — smooth opacity transition from fully visible to fully transparent over ~60pt
