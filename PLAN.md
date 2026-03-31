@@ -1,13 +1,13 @@
-# Improve in-chat flow widget spacing and keyboard-aware scrolling
+# Fix App Store submission by resetting signing credentials
 
-**Changes**
+The "Error Downloading App Information" error happens when the build system can't communicate properly with App Store Connect during the export/signing step. Since retrying hasn't helped, we need to reset the signing credentials.
 
-- [x] **More breathing room between subsections**: Increase vertical spacing between steps, dividers, and content sections in the Tour Scheduler, Mortgage Prequalification, and Tour Route widgets to a minimum of 12pt
-- [x] **Taller text fields**: Make all text input fields (income, down payment, full name, phone number) 44pt tall for comfortable tapping, matching Apple's recommended touch target
-- [x] **Keyboard-aware scroll**: When a text field inside a chat widget gains focus, the chat automatically scrolls so the focused input sits comfortably above the keyboard — no content hidden behind it
+**What I'll do:**
 
-**Affected areas**
+1. **Check current certificates and provisioning profiles** — List all existing distribution certificates and profiles in your Apple Developer account to identify stale or conflicting ones
+2. **Delete conflicting provisioning profiles** — Remove any duplicate or outdated profiles for your app's bundle ID that may be causing the mismatch
+3. **Regenerate the certificate** — Use the `ensureCertificate` tool to create a fresh distribution certificate
+4. **Re-sync capabilities** — Make sure your app's entitlements match what's registered in the Apple Developer Portal
+5. **Re-submit the build** — Attempt the App Store submission again with fresh credentials
 
-- Tour Scheduler flow (date, time, contact info steps)
-- Mortgage Prequalification flow (income, down payment, loan details steps)
-- Chat message list scroll behavior when keyboard appears
+This does **not** change any of your app's code — it only resets the signing/provisioning configuration on the Apple side.
