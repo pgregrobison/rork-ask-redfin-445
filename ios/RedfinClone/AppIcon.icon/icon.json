@@ -9,7 +9,14 @@
           "glass" : true,
           "hidden" : false,
           "image-name" : "Parts.svg",
-          "name" : "Parts"
+          "name" : "Parts",
+          "position" : {
+            "scale" : 1.2,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
         }
       ],
       "shadow" : {
