@@ -4,7 +4,7 @@ import MapKit
 struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
     let onListingTap: (Listing) -> Void
-
+    @Namespace private var mapScope
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -32,6 +32,8 @@ struct FindMapView: View {
                 }
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
+            .mapScope(mapScope)
+            .mapControls { }
             .onMapCameraChange(frequency: .onEnd) { context in
                 viewModel.persistMapRegion(context.region)
                 viewModel.updateLocationName(for: context.region)
@@ -40,6 +42,14 @@ struct FindMapView: View {
 
             .overlay(alignment: .topTrailing) {
                 MapActionButtons(viewModel: viewModel)
+            }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 8) {
+                    MapScaleView(scope: mapScope)
+                    MapCompass(scope: mapScope)
+                }
+                .padding(.leading, 16)
+                .padding(.bottom, 100)
             }
 
             Group {
