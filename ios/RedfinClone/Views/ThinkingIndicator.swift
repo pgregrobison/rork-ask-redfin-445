@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ThinkingIndicator: View {
     let label: String
-    @State private var dotOffsets: [CGFloat] = [0, 0, 0]
+    @State private var isAnimating: Bool = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -17,26 +17,19 @@ struct ThinkingIndicator: View {
                     Circle()
                         .fill(Color.secondary.opacity(0.6))
                         .frame(width: 5, height: 5)
-                        .offset(y: dotOffsets[index])
+                        .offset(y: isAnimating ? -6 : 0)
+                        .animation(
+                            .easeInOut(duration: 0.45)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(index) * 0.15),
+                            value: isAnimating
+                        )
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
-        .onAppear {
-            animateDots()
-        }
-    }
-
-    private func animateDots() {
-        for i in 0..<3 {
-            withAnimation(
-                .easeInOut(duration: 0.5)
-                .repeatForever(autoreverses: true)
-                .delay(Double(i) * 0.15)
-            ) {
-                dotOffsets[i] = -6
-            }
-        }
+        .onAppear { isAnimating = true }
+        .onDisappear { isAnimating = false }
     }
 }

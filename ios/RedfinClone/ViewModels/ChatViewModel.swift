@@ -207,10 +207,6 @@ class ChatViewModel {
         try? await Task.sleep(for: .milliseconds(Int.random(in: 500...900)))
         if Task.isCancelled { return }
 
-        let assistantMsg = ChatMessage(role: .assistant, content: "", isStreaming: true)
-        appendMessage(assistantMsg)
-        let msgId = assistantMsg.id
-
         let responseText: String
         var searchFilters: SearchFilters?
         var tourReq: TourRequest?
@@ -221,24 +217,26 @@ class ChatViewModel {
             thinkingState = .searching
             try? await Task.sleep(for: .milliseconds(Int.random(in: 300...600)))
             if Task.isCancelled { return }
-            thinkingState = .none
             responseText = text
             searchFilters = filters
 
         case .tour(let text, let request):
-            thinkingState = .none
             responseText = text
             tourReq = request
 
         case .mortgage(let text, let request):
-            thinkingState = .none
             responseText = text
             mortgageReq = request
 
         case .fallback(let text):
-            thinkingState = .none
             responseText = text
         }
+
+        thinkingState = .none
+
+        let assistantMsg = ChatMessage(role: .assistant, content: "", isStreaming: true)
+        appendMessage(assistantMsg)
+        let msgId = assistantMsg.id
 
         await streamText(responseText, toMessageId: msgId)
         if Task.isCancelled { return }
