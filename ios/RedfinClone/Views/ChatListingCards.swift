@@ -42,7 +42,8 @@ struct ChatListingCards: View {
 
             if !matchedListings.isEmpty {
                 Button {
-                    onShowOnMap(matchedListings)
+                    let nyListings = matchedListings.filter { $0.state == "NY" }
+                    onShowOnMap(nyListings.isEmpty ? matchedListings : nyListings)
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "map")
