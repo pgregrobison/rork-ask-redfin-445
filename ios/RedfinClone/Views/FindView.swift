@@ -5,12 +5,33 @@ struct FindView: View {
     @Bindable var viewModel: ListingsViewModel
     let onListingTap: (Listing) -> Void
 
+    @State private var showLocationMenu: Bool = false
+    @State private var showFilterSheet: Bool = false
+    @State private var locationSearchService = LocationSearchService()
+
     var body: some View {
-        Group {
-            if viewModel.showListView {
-                FindListView(viewModel: viewModel, onListingTap: onListingTap)
-            } else {
-                FindMapView(viewModel: viewModel, onListingTap: onListingTap)
+        ZStack(alignment: .top) {
+            Group {
+                if viewModel.showListView {
+                    FindListView(viewModel: viewModel, onListingTap: onListingTap)
+                } else {
+                    FindMapView(viewModel: viewModel, onListingTap: onListingTap)
+                }
+            }
+
+            if showLocationMenu {
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            showLocationMenu = false
+                        }
+                    }
+
+                locationMenuPanel
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -25,52 +46,8 @@ struct FindView: View {
                 }
             }
 
-            ToolbarItem(placement: .topBarLeading) {
-                Button {} label: {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                }
-            }
-
             ToolbarItem(placement: .principal) {
-                if viewModel.showListView {
-                    VStack(spacing: 0) {
-                        Text("\(viewModel.listings.count) homes")
-                            .font(.headline)
-                        Text(viewModel.locationName)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text(viewModel.locationName)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 14)
-                        .frame(height: 44)
-                        .adaptiveGlass(in: .capsule)
-                }
-            }
-
-            if viewModel.showListView {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        ForEach(SortOption.allCases, id: \.self) { option in
-                            Button {
-                                viewModel.sortOption = option
-                            } label: {
-                                HStack {
-                                    Text(option.rawValue)
-                                    if viewModel.sortOption == option {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    }
-                }
+                locationPill
             }
 
             ToolbarItem(placement: .topBarTrailing) {
@@ -80,5 +57,53 @@ struct FindView: View {
                 }
             }
         }
+        .sheet(isPresented: $showFilterSheet) {
+            FilterSheetView()
+                .presentationDetents([.medium, .large])
+        }
+    }
+
+    private var locationPill: some View {
+        Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                showLocationMenu.toggle()
+            }
+        } label: {
+            VStack(spacing: 1) {
+                Text(viewModel.locationName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Text("\(viewModel.listings.count) homes")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .adaptiveGlassInteractive(in: .capsule)
+    }
+
+    private var locationMenuPanel: some View {
+        LocationMenuView(
+            viewModel: viewModel,
+            searchService: locationSearchService,
+            onClose: {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    showLocationMenu = false
+                }
+            },
+            onOpenFilter: {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    showLocationMenu = false
+                }
+                showFilterSheet = true
+            }
+        )
+        .adaptiveGlass(in: .rect(cornerRadius: 16))
     }
 }
