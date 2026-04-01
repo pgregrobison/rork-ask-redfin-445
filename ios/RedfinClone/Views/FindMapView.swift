@@ -78,7 +78,7 @@ private struct MapActionButtons: View {
             })
         ])
         .padding(.trailing, 16)
-        .padding(.top, 56)
+        .padding(.top, 8)
         .animation(nil, value: viewModel.selectedListing != nil)
     }
 }
