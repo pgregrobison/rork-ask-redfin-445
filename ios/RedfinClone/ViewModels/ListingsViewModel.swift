@@ -22,6 +22,11 @@ class ListingsViewModel {
     var showListView: Bool = false
     var showChat: Bool = false
     var locationName: String = "New York City"
+
+    var filterMinPrice: Int? = nil
+    var filterMaxPrice: Int? = nil
+    var filterMinBeds: Int = 0
+    var filterMinBaths: Int = 0
     private var geocodeTask: Task<Void, Never>?
     private let geocoder = CLGeocoder()
     let locationService = LocationService()
@@ -33,21 +38,39 @@ class ListingsViewModel {
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
     ))
 
+    var filteredListings: [Listing] {
+        var result = listings
+        if let minPrice = filterMinPrice {
+            result = result.filter { $0.price >= minPrice }
+        }
+        if let maxPrice = filterMaxPrice {
+            result = result.filter { $0.price <= maxPrice }
+        }
+        if filterMinBeds > 0 {
+            result = result.filter { $0.beds >= filterMinBeds }
+        }
+        if filterMinBaths > 0 {
+            result = result.filter { Int($0.baths) >= filterMinBaths }
+        }
+        return result
+    }
+
     var sortedListings: [Listing] {
+        let base = filteredListings
         switch sortOption {
         case .recommended:
-            return listings.sorted { a, b in
+            return base.sorted { a, b in
                 if a.isHotHome != b.isHotHome { return a.isHotHome }
                 return a.daysOnMarket < b.daysOnMarket
             }
         case .priceLowToHigh:
-            return listings.sorted { $0.price < $1.price }
+            return base.sorted { $0.price < $1.price }
         case .priceHighToLow:
-            return listings.sorted { $0.price > $1.price }
+            return base.sorted { $0.price > $1.price }
         case .newest:
-            return listings.sorted { $0.daysOnMarket < $1.daysOnMarket }
+            return base.sorted { $0.daysOnMarket < $1.daysOnMarket }
         case .sqft:
-            return listings.sorted { $0.sqft > $1.sqft }
+            return base.sorted { $0.sqft > $1.sqft }
         }
     }
 

@@ -97,7 +97,7 @@ struct FindView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
-                    Text("\(viewModel.listings.count) homes")
+                    Text("\(viewModel.filteredListings.count) homes")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

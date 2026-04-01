@@ -8,7 +8,7 @@ struct FindMapView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Map(position: $viewModel.mapPosition) {
-                ForEach(viewModel.listings) { listing in
+                ForEach(viewModel.filteredListings) { listing in
                     Annotation(listing.id, coordinate: listing.coordinate) {
                         Button {
                             viewModel.selectListing(listing)
