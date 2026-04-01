@@ -1,22 +1,15 @@
-# Slack-style expanding menu that morphs from the location pill
+# Fix location menu: morph pill in-place, position over toolbar, left-align text
 
-**What changes**
+**Issue 1 — Pill should morph into the menu (not fade/swap)**
+- Remove the location pill from the toolbar entirely
+- Place a single element as an overlay at the toolbar level that IS the pill when collapsed and IS the expanded menu when open
+- When tapped, this single element animates its width, height, corner radius, and content to grow from a small centered capsule into the full-width menu card — no fading, no separate elements
 
-The location menu on the Find page will be redesigned to mimic Slack's expanding toolbar menu behavior.
+**Issue 2 — Menu positioned over the toolbar**
+- The expanded menu will sit directly on top of the toolbar row, covering the map/list toggle and profile button
+- The toolbar items stay in place (no opacity changes) — they're simply behind the menu in z-order
+- The menu's top edge aligns with the toolbar's top edge so it feels inline
 
-**How it works now**
-- Tapping the location pill opens a floating panel below the toolbar with a dark overlay behind it
-
-**How it will work**
-
-- **Morph animation**: Tapping the location pill causes it to expand outward, growing from its pill shape into a full-width rounded card that covers the entire navigation bar area and extends downward
-- **No background dimming**: The content behind (map or list) stays fully visible — no dark overlay
-- **Close behavior**: An X button in the top-left corner of the expanded card, plus tapping anywhere outside the card dismisses it
-- **Expanded card contents** (top to bottom):
-  - Header row: X close button on the left, location name + home count on the right
-  - Location search input field showing the current location
-  - Search suggestions list (appears when typing)
-  - Divider
-  - Action buttons row: Filter, Save Search (same as today, just inside the expanded card)
-- **Smooth spring animation**: The card morphs from the small pill size/position to the full card size, creating a fluid expansion effect
-- **Toolbar hidden when open**: The map/list toggle and profile button are hidden behind the expanded card — only the card is visible at the top of the screen
+**Issue 3 — Left-align text when expanded**
+- When the menu opens, "Manhattan" and "18 homes" will left-align properly as a leading-aligned VStack
+- The subtitle ("18 homes") will align to the leading edge of the title, not centered beneath it
