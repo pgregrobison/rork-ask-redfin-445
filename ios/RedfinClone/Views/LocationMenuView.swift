@@ -174,8 +174,8 @@ struct LocationMenuView: View {
             }
             .foregroundStyle(.primary)
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
+            .frame(minHeight: 40)
             .background(Color(.tertiarySystemFill), in: Capsule())
         }
     }
@@ -227,7 +227,7 @@ struct LocationMenuView: View {
     }
 
     private func segmentedPills(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(options, id: \.self) { value in
                 let isSelected = selection.wrappedValue == value
                 Button {
@@ -235,9 +235,9 @@ struct LocationMenuView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? .white : .primary)
+                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .frame(minHeight: 40)
                         .background(
                             isSelected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
                             in: Capsule()
@@ -260,7 +260,7 @@ struct LocationMenuView: View {
                         .font(.subheadline.weight(.medium))
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .frame(minHeight: 40)
                 .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 10))
             }
             .buttonStyle(.plain)
@@ -273,7 +273,7 @@ struct LocationMenuView: View {
                         .font(.subheadline.weight(.medium))
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .frame(minHeight: 40)
                 .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 10))
             }
             .buttonStyle(.plain)

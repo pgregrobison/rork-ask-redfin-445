@@ -1,8 +1,7 @@
-# Clip menu content during open/close animation
+# Fix pill selector visibility, spacing, and height
 
-**Problem**: When the location menu opens or closes, the inner content (filters, location input) visibly flies in/out above the menu boundary, spilling outside the glass container.
+**Changes to the filter pills in the location menu:**
 
-**Fix**: Add a content clip to the menu container so all animated content is masked within the menu's rounded rectangle shape during transitions.
-
-- The menu will clip its children to its bounds, so content sliding in from the top stays hidden until it's inside the menu area
-- No visual or behavioral changes otherwise — the menu still expands and collapses the same way
+- **Dark mode text fix**: Selected pill text will use the system background color (which automatically inverts between light/dark mode), ensuring the label is always visible against the accent color background
+- **Pill spacing**: Add a 4pt gap between each pill for breathing room
+- **Tappability**: Increase the minimum height of each filter row element (price dropdowns, bed/bath pills, action buttons) to 40pt for easier tapping
