@@ -23,6 +23,7 @@ struct ContentView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
+            .ignoresSafeArea(.keyboard)
             .onChange(of: viewModel.selectedListing?.id) { _, newValue in
                 withAnimation(.easeInOut(duration: 0.25)) {
                     showTabBar = newValue == nil

@@ -87,15 +87,12 @@ struct LocationMenuView: View {
                 menuAction(icon: "bookmark", label: "Save Search") {}
 
                 Spacer()
-
-                sortMenu
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 6)
         }
         .onAppear {
             searchService.searchText = viewModel.locationName
-            isSearchFocused = true
         }
     }
 
@@ -112,33 +109,6 @@ struct LocationMenuView: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-    }
-
-    private var sortMenu: some View {
-        Menu {
-            ForEach(SortOption.allCases, id: \.self) { option in
-                Button {
-                    viewModel.sortOption = option
-                } label: {
-                    HStack {
-                        Text(option.rawValue)
-                        if viewModel.sortOption == option {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.system(size: 13, weight: .semibold))
-                Text("Sort")
-                    .font(.subheadline.weight(.medium))
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .contentShape(Capsule())
-        }
     }
 
     private func selectSuggestion(_ suggestion: MKLocalSearchCompletion) {
