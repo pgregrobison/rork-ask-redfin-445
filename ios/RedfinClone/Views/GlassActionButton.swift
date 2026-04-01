@@ -86,6 +86,7 @@ struct GlassActionButtonStack: View {
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 if index < items.count - 1 {
                     Divider().frame(width: 32)
@@ -110,6 +111,7 @@ private struct GlassActionButtonStackIOS26: View {
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
                             .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 25))
                     .glassEffectUnion(id: "stack", namespace: unionNamespace)
@@ -142,6 +144,7 @@ struct GlassActionButtonRow: View {
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 if index < items.count - 1 {
                     Divider().frame(height: 32)
@@ -166,6 +169,7 @@ private struct GlassActionButtonRowIOS26: View {
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
                             .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .glassEffectUnion(id: "row", namespace: unionNamespace)

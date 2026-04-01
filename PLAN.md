@@ -1,7 +1,9 @@
-# Change app display name to "Ask Redfin"
+# Fix tap targets on map action buttons
 
-**What will change:**
+**Problem**
+The three stacked map action buttons (layers, draw, locate) have 44×44 frames, but the actual tappable area is smaller because the button style reduces hit testing to just the icon image, not the full frame.
 
-- The app's display name (shown under the icon on the home screen and on the App Store) will be updated from "AskRedfin" to "Ask Redfin" (with a space)
-- This is done by adding a display name setting in the project configuration for both Debug and Release builds
-
+**Fix**
+- Add an explicit tap area shape (`.contentShape(Rectangle())`) to each button's label in the combined stack, ensuring the full 44×44 area is tappable
+- Applied to both the standard and iOS 26 glass-effect variants of the stacked buttons
+- No visual changes — only the interactive hit area is expanded
