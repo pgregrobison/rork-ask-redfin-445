@@ -235,7 +235,7 @@ struct LocationMenuView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .foregroundStyle(isSelected ? Color.white : .primary)
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: 40)
                         .background(

@@ -175,7 +175,7 @@ struct FilterSheetView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .foregroundStyle(isSelected ? Color.white : .primary)
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: 40)
                         .background(
@@ -195,14 +195,26 @@ struct FilterSheetView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
 
-            segmentedPills(
-                options: Array(0..<propertyTypes.count),
-                selection: Binding(
-                    get: { propertyTypes.firstIndex(of: propertyType) ?? 0 },
-                    set: { propertyType = propertyTypes[$0] }
-                ),
-                labelForValue: { propertyTypes[$0] }
-            )
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: 8)], spacing: 8) {
+                ForEach(propertyTypes, id: \.self) { type in
+                    let isSelected = propertyType == type
+                    Button {
+                        propertyType = type
+                    } label: {
+                        Text(type)
+                            .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                            .foregroundStyle(isSelected ? Color.white : .primary)
+                            .padding(.horizontal, 14)
+                            .frame(minHeight: 40)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                isSelected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                                in: .rect(cornerRadius: 10)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
     }
 }

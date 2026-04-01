@@ -1,10 +1,11 @@
-# Match filter sheet styles to the upper menu
+# Fix pill selected state color & revert property type styling
 
-**Changes**
+**Bug fix — selected pill turns blue with black text:**
 
-- **Price filter**: Replace the current slider with the same min/max dropdown style used in the upper menu (two capsule buttons with "No Min" / "No Max" defaults and the same price options)
-- **Beds filter**: Replace the segmented picker with the same pill selector style from the upper menu (capsule pills: Any, 1+, 2+, 3+, 4+, 5+)
-- **Baths filter**: Replace the segmented picker with the same pill selector style from the upper menu (capsule pills: Any, 1+, 2+, 3+, 4+)
-- **Order**: Reorder to match the upper menu — Price → Beds → Baths → Property Type
-- **Data binding**: Connect the filter sheet to the shared filter state so changes apply to listings (currently it uses local state that doesn't persist)
-- **Visual consistency**: Same 40pt minimum height, 4pt spacing between pills, accent color selected state with inverted text color matching the upper menu
+- The selected pill background uses the system accent color (blue), but the text color can glitch to black after interaction due to how SwiftUI resolves `systemBackground` in button contexts
+- Fix by using `.white` for selected text and `.label` for the unselected text — this ensures contrast is always correct regardless of interaction state, in both light and dark mode
+
+**Revert — Property Type section in the filter sheet:**
+
+- Change the Property Type back from the cramped capsule pill row (6 items like "Multi-family" barely fit) to a wrapping chip/tag layout that gives each option enough room to breathe and be easily readable
+- Each chip will have a rounded rectangle background, comfortable padding, and clear selected/unselected states
