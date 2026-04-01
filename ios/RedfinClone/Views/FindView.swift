@@ -28,36 +28,50 @@ struct FindView: View {
                     }
             }
 
+            toolbarActions
+
             morphingPillMenu
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    viewModel.showListView.toggle()
-                } label: {
-                    Image(systemName: viewModel.showListView ? "map" : "list.bullet")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                }
-            }
-
-            ToolbarItem(placement: .principal) {
-                Color.clear
-                    .frame(width: 1, height: 1)
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showFilterSheet) {
             FilterSheetView()
                 .presentationDetents([.medium, .large])
         }
+    }
+
+    private var toolbarActions: some View {
+        HStack {
+            GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
+                viewModel.showListView.toggle()
+            }
+
+            Spacer()
+
+            HStack(spacing: 8) {
+                if viewModel.showListView {
+                    GlassActionMenuButton(icon: "arrow.up.arrow.down") {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Button {
+                                viewModel.sortOption = option
+                            } label: {
+                                HStack {
+                                    Text(option.rawValue)
+                                    if viewModel.sortOption == option {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                }
+                GlassActionButton(icon: "person.crop.circle") {}
+            }
+            .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
     }
 
     private var morphingPillMenu: some View {
