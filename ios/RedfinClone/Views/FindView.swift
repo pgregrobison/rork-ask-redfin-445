@@ -35,7 +35,7 @@ struct FindView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showFilterSheet) {
-            FilterSheetView()
+            FilterSheetView(viewModel: viewModel)
                 .presentationDetents([.medium, .large])
         }
     }
