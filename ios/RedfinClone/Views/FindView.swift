@@ -128,6 +128,7 @@ struct FindView: View {
         }
         .frame(maxWidth: showLocationMenu ? .infinity : nil)
         .adaptiveGlass(in: .rect(cornerRadius: showLocationMenu ? 20 : 25))
+        .clipped()
         .padding(.horizontal, showLocationMenu ? 8 : 0)
         .padding(.top, 4)
         .contentShape(.interaction, RoundedRectangle(cornerRadius: showLocationMenu ? 20 : 25))
