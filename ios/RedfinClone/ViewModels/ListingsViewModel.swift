@@ -167,6 +167,9 @@ class ListingsViewModel {
 
     func locateUser() {
         locationService.locateUser()
+        if locationService.userLocation != nil {
+            panToUserLocation()
+        }
     }
 
     func triggerCompassNotificationIfNeeded() {
