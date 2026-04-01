@@ -33,7 +33,10 @@ struct FindView: View {
             morphingPillMenu
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) { Color.clear }
+        }
         .sheet(isPresented: $showFilterSheet) {
             FilterSheetView()
                 .presentationDetents([.medium, .large])
