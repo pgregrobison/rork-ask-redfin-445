@@ -2,12 +2,18 @@ import SwiftUI
 
 struct MyHomeView: View {
     @Environment(\.colorScheme) private var colorScheme
+    let debugSettings: DebugSettings
+    @State private var showDebugPanel: Bool = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 addHomeCard
                 featureTiles
+
+                Spacer().frame(height: 16)
+
+                debugButton
             }
             .padding(.bottom, 100)
         }
@@ -95,5 +101,24 @@ struct MyHomeView: View {
         .frame(minHeight: 130)
         .background(Color(.secondarySystemBackground))
         .clipShape(.rect(cornerRadius: 12))
+    }
+
+    private var debugButton: some View {
+        Button { showDebugPanel = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "wrench.and.screwdriver")
+                    .font(.subheadline.weight(.medium))
+                Text("Debug Panel")
+                    .font(.subheadline.weight(.medium))
+            }
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showDebugPanel) {
+            DebugPanelView(settings: debugSettings)
+                .presentationDetents([.medium])
+        }
     }
 }
