@@ -1,12 +1,25 @@
-# Fix toolbar fly-in during zoom transition on Find page
+# Move Find toolbar to native navigation bar
 
-**Problem**
-When using the zoom transition from the "Find" tab, the native navigation toolbar slides in from the right because "Find" completely hides the navigation bar. Pages like "For You" that already show the native toolbar don't have this issue.
+**What changes**
 
-**Fix**
-On the "Find" page, instead of fully hiding the navigation bar, keep it technically visible but with a hidden background and no visible content. This way, during the zoom transition, the toolbar smoothly fades in place rather than flying in from the side.
+Move all the custom floating toolbar elements on the Find screen into the native navigation bar so zoom transitions animate correctly (fade in place, no fly-in from the side).
 
-- The Find page will use `.toolbarVisibility(.visible)` with `.toolbarBackgroundVisibility(.hidden)` instead of `.toolbar(.hidden)`
-- The custom overlay toolbar (map/list toggle, sort, profile buttons) will continue to work exactly as before
-- The native nav bar will be invisible but "present," so the zoom transition treats it as a crossfade rather than a push-in
-- No visual change to the Find page itself — the custom toolbar overlay remains identical
+**Layout in the native toolbar:**
+- **Left side**: List/map toggle button (glass style)
+- **Center (principal)**: Collapsed pill showing the location name and home count — tapping it opens the expanded menu
+- **Right side**: Sort button (only visible in list mode) and profile button (glass style)
+
+**Expanded location menu:**
+- When the center pill is tapped, the expanded menu (search, price, beds, baths, filter/save actions) appears as a content overlay anchored to the top of the screen, just below the navigation bar — same content and animation as today
+- A background dimming layer still dismisses the menu on tap
+- The pill in the toolbar visually updates (e.g. shows an X) while the menu is open
+
+**What stays the same:**
+- All menu content, filters, search, and interactions remain identical
+- Glass button styling is preserved
+- The map floating buttons (layers, draw, location) on the map view are unchanged
+- Dark/light mode behavior unchanged
+
+**Why this fixes the transition:**
+- The native toolbar participates in the zoom transition correctly — it fades in place instead of sliding in from the side
+- The transparent toolbar background (`.toolbarBackgroundVisibility(.hidden)`) keeps the current visual look

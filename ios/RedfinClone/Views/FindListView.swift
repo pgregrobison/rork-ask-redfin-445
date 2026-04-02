@@ -25,7 +25,7 @@ struct FindListView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 56)
+            .padding(.top, 8)
             .padding(.bottom, 100)
         }
         .background(Color(.systemBackground))
