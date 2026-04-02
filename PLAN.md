@@ -1,26 +1,20 @@
-# Slack-style expanding toolbar menu on Find page
+# Replace Fluid Grow with iOS 18 Zoom Transition & Fix Duplicate Toolbars
 
-**What changes**
+## What's changing
 
-The Find page's location menu will be rebuilt to work entirely within the native navigation toolbar, ensuring smooth zoom transitions while replicating the current custom menu behavior.
+**Bug fixes:**
+- Remove the duplicate heart and share buttons on the detail page (caused by the Fluid Grow wrapper adding its own toolbar on top of the detail page's toolbar)
+- Remove the extra back arrow showing alongside the X button in the focused photo view (same root cause)
 
-**Collapsed state (normal toolbar)**
-- The list/map toggle stays as the first leading action (left side)
-- The location pill becomes the second leading action, right next to the toggle — compact, showing the location name and home count
-- Trailing actions (sort, profile) remain unchanged on the right
+**New transition:**
+- Replace the custom "Fluid Grow" overlay with iOS 18's native **zoom transition** — the listing card visually zooms from its position on screen into the full detail page, and dismisses back into place
+- This uses the standard navigation push under the hood, so there's only ever one set of toolbar items (no duplicates)
 
-**Expanded state (menu open)**
-- Tapping the location pill causes the menu to expand horizontally from the pill's position to cover the full toolbar width, then grow downward to reveal the search, filters, and action buttons
-- The expansion animates with a spring, visually covering the trailing toolbar items (sort, profile) and the leading toggle
-- An X button appears in the top-left corner of the expanded menu for dismissal
-- Tapping outside the menu also dismisses it
-- The expanded menu contains the same content as today: location search, price/beds/baths filters, and the Filter/Save Search buttons
+**Debug panel:**
+- Rename "Fluid Grow" option to "Zoom" to reflect the new behavior
+- Everything else in the debug panel stays the same
 
-**Why this matters**
-- Using real native toolbar items means the zoom transition (list → detail) no longer causes the toolbar to fly in awkwardly from the side
-- The menu overlay covers the toolbar visually but doesn't interfere with the native navigation system underneath
-
-**Design details**
-- The expanded menu uses the same glass/material background as today
-- Spring animation for open/close matches the current feel
-- The pill chevron or X icon toggles based on menu state, same as current behavior
+**How it works:**
+- Each listing card becomes a zoom transition source
+- Tapping it pushes the detail page with a zoom animation from the card's exact position
+- Swiping back reverses the zoom, shrinking the detail page back into the card

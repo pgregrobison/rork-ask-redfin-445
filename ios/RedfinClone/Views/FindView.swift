@@ -29,70 +29,70 @@ struct FindView: View {
                     }
             }
 
-            expandedMenuOverlay
+            toolbarActions
+
+            morphingPillMenu
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarVisibility(.visible, for: .navigationBar)
-        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Group {
-                    if showLocationMenu {
-                        GlassActionButton(icon: "xmark") {
-                            closeMenu()
-                        }
-                    } else {
-                        HStack(spacing: 8) {
-                            GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
-                                viewModel.showListView.toggle()
-                            }
-                            locationPill
-                        }
-                    }
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 8) {
-                    if viewModel.showListView && !showLocationMenu {
-                        GlassActionMenuButton(icon: "arrow.up.arrow.down") {
-                            ForEach(SortOption.allCases, id: \.self) { option in
-                                Button {
-                                    viewModel.sortOption = option
-                                } label: {
-                                    HStack {
-                                        Text(option.rawValue)
-                                        if viewModel.sortOption == option {
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .transition(.scale(scale: 0.6).combined(with: .opacity))
-                    }
-                    if !showLocationMenu {
-                        GlassActionButton(icon: "person.crop.circle") {}
-                            .transition(.scale(scale: 0.6).combined(with: .opacity))
-                    }
-                }
-                .animation(.spring(response: 0.3, dampingFraction: 0.85), value: showLocationMenu)
-                .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showFilterSheet) {
             FilterSheetView(viewModel: viewModel)
                 .presentationDetents([.medium, .large])
         }
     }
 
-    private var locationPill: some View {
-        Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
-                showLocationMenu = true
+    private var toolbarActions: some View {
+        HStack {
+            GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
+                viewModel.showListView.toggle()
             }
-        } label: {
-            HStack(spacing: 6) {
-                VStack(spacing: 1) {
+
+            Spacer()
+
+            HStack(spacing: 8) {
+                if viewModel.showListView {
+                    GlassActionMenuButton(icon: "arrow.up.arrow.down") {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Button {
+                                viewModel.sortOption = option
+                            } label: {
+                                HStack {
+                                    Text(option.rawValue)
+                                    if viewModel.sortOption == option {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                }
+                GlassActionButton(icon: "person.crop.circle") {}
+            }
+            .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+    }
+
+    private var morphingPillMenu: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                if showLocationMenu {
+                    Button {
+                        closeMenu()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 36, height: 36)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.scale(scale: 0.5).combined(with: .opacity))
+                }
+
+                VStack(alignment: showLocationMenu ? .leading : .center, spacing: 1) {
                     Text(viewModel.locationName)
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -102,38 +102,42 @@ struct FindView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 6)
-            .frame(minHeight: 44)
-            .adaptiveGlass(in: .rect(cornerRadius: 25))
-        }
-        .buttonStyle(.plain)
-    }
+                .frame(maxWidth: showLocationMenu ? .infinity : nil, alignment: showLocationMenu ? .leading : .center)
 
-    private var expandedMenuOverlay: some View {
-        Group {
-            if showLocationMenu {
-                VStack(spacing: 0) {
-                    LocationMenuView(
-                        viewModel: viewModel,
-                        searchService: locationSearchService,
-                        onClose: {
-                            closeMenu()
-                        },
-                        onOpenFilter: {
-                            closeMenu()
-                            showFilterSheet = true
-                        }
-                    )
+                if showLocationMenu {
+                    Spacer(minLength: 0)
                 }
-                .adaptiveGlass(in: .rect(cornerRadius: 20))
-                .clipped()
-                .padding(.horizontal, 8)
+            }
+            .padding(.horizontal, showLocationMenu ? 12 : 14)
+            .padding(.vertical, showLocationMenu ? 10 : 6)
+            .frame(minHeight: 44)
+
+            if showLocationMenu {
+                LocationMenuView(
+                    viewModel: viewModel,
+                    searchService: locationSearchService,
+                    onClose: {
+                        closeMenu()
+                    },
+                    onOpenFilter: {
+                        closeMenu()
+                        showFilterSheet = true
+                    }
+                )
                 .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .frame(maxWidth: showLocationMenu ? .infinity : nil)
+        .adaptiveGlass(in: .rect(cornerRadius: showLocationMenu ? 20 : 25))
+        .clipped()
+        .padding(.horizontal, showLocationMenu ? 8 : 0)
+        .padding(.top, 4)
+        .contentShape(.interaction, RoundedRectangle(cornerRadius: showLocationMenu ? 20 : 25))
+        .onTapGesture {
+            if !showLocationMenu {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
+                    showLocationMenu = true
+                }
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.88), value: showLocationMenu)
