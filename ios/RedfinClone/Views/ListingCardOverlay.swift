@@ -34,11 +34,11 @@ struct ListingCardOverlay: View {
                 .background(Color(.secondarySystemBackground))
                 .clipShape(.rect(cornerRadius: cardCornerRadius, style: .continuous))
                 .shadow(color: .black.opacity(0.25), radius: 16, y: 4)
+                .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 .padding(.horizontal, cardInset)
                 .padding(.bottom, max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0))
             }
         }
-        .matchedTransitionSource(id: listing.id, in: zoomNamespace)
         .ignoresSafeArea(edges: .bottom)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
