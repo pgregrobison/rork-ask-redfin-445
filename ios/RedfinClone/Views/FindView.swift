@@ -44,6 +44,7 @@ struct FindView: View {
     private var toolbarActions: some View {
         HStack {
             GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
+                viewModel.dismissOverlay()
                 viewModel.showListView.toggle()
             }
 
