@@ -109,6 +109,7 @@ struct ListingDetailView: View {
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
+        .toolbarBackground(toolbarOpacity < 1 && useZoomTransition ? .hidden : .automatic, for: .navigationBar)
         .navigationBarBackButtonHidden(focusedPhotoIndex != nil || useZoomTransition)
         .onAppear {
             if useZoomTransition {

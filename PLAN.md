@@ -1,9 +1,9 @@
-# Fade-in toolbar on detail page during zoom transition
+# Fade entire navigation bar (including glass background) during zoom transition
 
-**What changes:**
+**Problem**
+The toolbar icons fade in after the zoom transition, but the glass background "bubbles" of the navigation bar are visible the entire time, breaking the effect.
 
-- When navigating to a listing detail page, the navigation bar buttons (heart, share, back) will start fully invisible
-- After the zoom transition finishes (~0.35s), the toolbar items will smoothly fade into view
-- This eliminates the "slide-in" feel and makes the toolbar appear to materialize in place
-- The fade-in applies to all toolbar items (back button area, heart, share, and any focus-mode items)
-- On dismiss, toolbar opacity resets so it's ready for the next navigation
+**Fix**
+- Hide the navigation bar's glass/material background during the zoom transition (while the toolbar opacity is 0)
+- Once the fade-in starts, switch the background to visible so it appears together with the icons
+- This ensures the entire navigation bar — background and icons — fades in as one unit after the zoom transition completes
