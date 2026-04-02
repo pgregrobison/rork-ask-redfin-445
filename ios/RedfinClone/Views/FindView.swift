@@ -36,16 +36,24 @@ struct FindView: View {
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
-                    viewModel.showListView.toggle()
+                Group {
+                    if showLocationMenu {
+                        GlassActionButton(icon: "xmark") {
+                            closeMenu()
+                        }
+                    } else {
+                        HStack(spacing: 8) {
+                            GlassActionButton(icon: viewModel.showListView ? "map" : "list.bullet") {
+                                viewModel.showListView.toggle()
+                            }
+                            locationPill
+                        }
+                    }
                 }
-            }
-            ToolbarItem(placement: .principal) {
-                principalPill
             }
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 8) {
-                    if viewModel.showListView {
+                    if viewModel.showListView && !showLocationMenu {
                         GlassActionMenuButton(icon: "arrow.up.arrow.down") {
                             ForEach(SortOption.allCases, id: \.self) { option in
                                 Button {
@@ -62,8 +70,12 @@ struct FindView: View {
                         }
                         .transition(.scale(scale: 0.6).combined(with: .opacity))
                     }
-                    GlassActionButton(icon: "person.crop.circle") {}
+                    if !showLocationMenu {
+                        GlassActionButton(icon: "person.crop.circle") {}
+                            .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    }
                 }
+                .animation(.spring(response: 0.3, dampingFraction: 0.85), value: showLocationMenu)
                 .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
             }
         }
@@ -73,23 +85,13 @@ struct FindView: View {
         }
     }
 
-    private var principalPill: some View {
+    private var locationPill: some View {
         Button {
-            if showLocationMenu {
-                closeMenu()
-            } else {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
-                    showLocationMenu = true
-                }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
+                showLocationMenu = true
             }
         } label: {
             HStack(spacing: 6) {
-                if showLocationMenu {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .transition(.scale(scale: 0.5).combined(with: .opacity))
-                }
                 VStack(spacing: 1) {
                     Text(viewModel.locationName)
                         .font(.subheadline)
@@ -100,6 +102,9 @@ struct FindView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 6)
@@ -107,7 +112,6 @@ struct FindView: View {
             .adaptiveGlass(in: .rect(cornerRadius: 25))
         }
         .buttonStyle(.plain)
-        .animation(.spring(response: 0.35, dampingFraction: 0.88), value: showLocationMenu)
     }
 
     private var expandedMenuOverlay: some View {
