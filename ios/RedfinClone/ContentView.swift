@@ -110,8 +110,7 @@ struct ContentView: View {
             listing: listing,
             isSaved: viewModel.isSaved(listing),
             onToggleSave: { viewModel.toggleSaved(listing) },
-            onAskRedfin: { viewModel.showChat = true },
-            useZoomTransition: debugSettings.cardTransition == .zoom
+            onAskRedfin: { viewModel.showChat = true }
         )
         .toolbar(.hidden, for: .tabBar)
         .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
