@@ -20,8 +20,8 @@ class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
-            content.title = "Exclusive Preview Nearby"
-            content.body = "A Compass Coming Soon listing at \(nearestListing.address) is near you. Tap for an exclusive first look."
+            content.title = "Compass Coming Soon Nearby"
+            content.body = "Stop by for a first look walkthrough until 5pm today."
             content.sound = .default
             content.userInfo = ["compassListingID": nearestListing.id]
 
