@@ -1,20 +1,12 @@
-# Replace Fluid Grow with iOS 18 Zoom Transition & Fix Duplicate Toolbars
+# Fix toolbar fly-in during zoom transition on Find page
 
-## What's changing
+**Problem**
+When using the zoom transition from the "Find" tab, the native navigation toolbar slides in from the right because "Find" completely hides the navigation bar. Pages like "For You" that already show the native toolbar don't have this issue.
 
-**Bug fixes:**
-- Remove the duplicate heart and share buttons on the detail page (caused by the Fluid Grow wrapper adding its own toolbar on top of the detail page's toolbar)
-- Remove the extra back arrow showing alongside the X button in the focused photo view (same root cause)
+**Fix**
+On the "Find" page, instead of fully hiding the navigation bar, keep it technically visible but with a hidden background and no visible content. This way, during the zoom transition, the toolbar smoothly fades in place rather than flying in from the side.
 
-**New transition:**
-- Replace the custom "Fluid Grow" overlay with iOS 18's native **zoom transition** — the listing card visually zooms from its position on screen into the full detail page, and dismisses back into place
-- This uses the standard navigation push under the hood, so there's only ever one set of toolbar items (no duplicates)
-
-**Debug panel:**
-- Rename "Fluid Grow" option to "Zoom" to reflect the new behavior
-- Everything else in the debug panel stays the same
-
-**How it works:**
-- Each listing card becomes a zoom transition source
-- Tapping it pushes the detail page with a zoom animation from the card's exact position
-- Swiping back reverses the zoom, shrinking the detail page back into the card
+- The Find page will use `.toolbarVisibility(.visible)` with `.toolbarBackgroundVisibility(.hidden)` instead of `.toolbar(.hidden)`
+- The custom overlay toolbar (map/list toggle, sort, profile buttons) will continue to work exactly as before
+- The native nav bar will be invisible but "present," so the zoom transition treats it as a crossfade rather than a push-in
+- No visual change to the Find page itself — the custom toolbar overlay remains identical
