@@ -203,12 +203,12 @@ struct FilterSheetView: View {
                     } label: {
                         Text(type)
                             .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                            .foregroundStyle(isSelected ? Color.white : .primary)
+                            .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
                             .padding(.horizontal, 14)
                             .frame(minHeight: 40)
                             .frame(maxWidth: .infinity)
                             .background(
-                                isSelected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                                isSelected ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Color(.tertiarySystemFill)),
                                 in: .rect(cornerRadius: 10)
                             )
                     }
