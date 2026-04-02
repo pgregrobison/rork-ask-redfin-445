@@ -6,6 +6,7 @@ struct ListingDetailView: View {
     let isSaved: Bool
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
+    var useZoomTransition: Bool = false
     @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
     @State private var focusedPhotoIndex: Int? = nil
@@ -14,6 +15,7 @@ struct ListingDetailView: View {
     @State private var dragStartOffset: CGFloat = 0
     @State private var scrolledToTop: Bool = true
     @State private var focusVisible: Bool = false
+    @State private var toolbarOpacity: Double = 0
 
     private let collapsedPeekHeight: CGFloat = 220
 
@@ -68,6 +70,14 @@ struct ListingDetailView: View {
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.white)
                     }
+                    .opacity(toolbarOpacity)
+                } else if useZoomTransition {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
+                    .opacity(toolbarOpacity)
                 }
             }
             ToolbarItem(placement: .principal) {
@@ -75,6 +85,7 @@ struct ListingDetailView: View {
                     Text("\(index + 1) of \(listing.photos.count)")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white)
+                        .opacity(toolbarOpacity)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -85,6 +96,7 @@ struct ListingDetailView: View {
                         .foregroundStyle(isSaved ? .red : (focusedPhotoIndex != nil ? .white : .primary))
                 }
                 .sensoryFeedback(.selection, trigger: isSaved)
+                .opacity(toolbarOpacity)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 ShareLink(item: listing.shareText) {
@@ -93,10 +105,23 @@ struct ListingDetailView: View {
                         .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
                 }
                 .sensoryFeedback(.selection, trigger: false)
+                .opacity(toolbarOpacity)
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
-        .navigationBarBackButtonHidden(focusedPhotoIndex != nil)
+        .navigationBarBackButtonHidden(focusedPhotoIndex != nil || useZoomTransition)
+        .onAppear {
+            if useZoomTransition {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(350))
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        toolbarOpacity = 1
+                    }
+                }
+            } else {
+                toolbarOpacity = 1
+            }
+        }
         .onDisappear {
             focusedPhotoIndex = nil
             focusVisible = false
