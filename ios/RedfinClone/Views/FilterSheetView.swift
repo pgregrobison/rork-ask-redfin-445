@@ -175,11 +175,11 @@ struct FilterSheetView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color.white : .primary)
+                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: 40)
                         .background(
-                            isSelected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Color(.tertiarySystemFill)),
                             in: Capsule()
                         )
                 }
