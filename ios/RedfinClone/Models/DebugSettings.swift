@@ -2,7 +2,7 @@ import SwiftUI
 
 nonisolated enum CardTransitionStyle: String, CaseIterable, Codable, Sendable {
     case nativePush = "Native Push"
-    case fluidGrow = "Fluid Grow"
+    case zoom = "Zoom"
 }
 
 @Observable

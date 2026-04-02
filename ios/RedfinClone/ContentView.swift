@@ -8,8 +8,7 @@ struct ContentView: View {
     @State private var navigationPath = NavigationPath()
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
-    @State private var fluidGrowListing: Listing?
-    @State private var fluidGrowVisible: Bool = false
+    @Namespace private var zoomNamespace
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -33,31 +32,10 @@ struct ContentView: View {
                 }
             }
             .navigationDestination(for: Listing.self) { listing in
-                ListingDetailView(
-                    listing: listing,
-                    isSaved: viewModel.isSaved(listing),
-                    onToggleSave: { viewModel.toggleSaved(listing) },
-                    onAskRedfin: { viewModel.showChat = true }
-                )
-                .toolbar(.hidden, for: .tabBar)
-                .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
-                .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
+                listingDetail(for: listing)
             }
         }
         .tint(.primary)
-        .overlay {
-            if let listing = fluidGrowListing {
-                FluidGrowDetailView(
-                    listing: listing,
-                    isVisible: fluidGrowVisible,
-                    isSaved: viewModel.isSaved(listing),
-                    onToggleSave: { viewModel.toggleSaved(listing) },
-                    onAskRedfin: { viewModel.showChat = true },
-                    onDismiss: { dismissFluidGrow() }
-                )
-            }
-        }
-        .animation(.spring(response: 0.45, dampingFraction: 0.88), value: fluidGrowListing?.id)
         .sheet(isPresented: $viewModel.showChat, onDismiss: {
             if let listings = pendingMapListings {
                 pendingMapListings = nil
@@ -110,15 +88,15 @@ struct ContentView: View {
     private var tabContent: some View {
         switch selectedTab {
         case .find:
-            FindView(viewModel: viewModel) { listing in
+            FindView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
         case .forYou:
-            ForYouView(viewModel: viewModel) { listing in
+            ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
         case .saved:
-            SavedView(viewModel: viewModel) { listing in
+            SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
         case .myHome:
@@ -126,34 +104,27 @@ struct ContentView: View {
         }
     }
 
-    private func navigateToListing(_ listing: Listing) {
-        viewModel.markSeen(listing)
-        switch debugSettings.cardTransition {
-        case .nativePush:
-            navigationPath.append(listing)
-        case .fluidGrow:
-            fluidGrowListing = listing
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.88)) {
-                fluidGrowVisible = true
-            }
-            withAnimation(.easeOut(duration: 0.2)) {
-                showTabBar = false
-            }
+    @ViewBuilder
+    private func listingDetail(for listing: Listing) -> some View {
+        let detail = ListingDetailView(
+            listing: listing,
+            isSaved: viewModel.isSaved(listing),
+            onToggleSave: { viewModel.toggleSaved(listing) },
+            onAskRedfin: { viewModel.showChat = true }
+        )
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
+        .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
+
+        if debugSettings.cardTransition == .zoom {
+            detail.navigationTransition(.zoom(sourceID: listing.id, in: zoomNamespace))
+        } else {
+            detail
         }
     }
 
-    private func dismissFluidGrow() {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-            fluidGrowVisible = false
-        }
-        Task {
-            try? await Task.sleep(for: .milliseconds(350))
-            fluidGrowListing = nil
-            if viewModel.selectedListing == nil {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    showTabBar = true
-                }
-            }
-        }
+    private func navigateToListing(_ listing: Listing) {
+        viewModel.markSeen(listing)
+        navigationPath.append(listing)
     }
 }

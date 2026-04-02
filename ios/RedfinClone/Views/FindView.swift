@@ -3,6 +3,7 @@ import MapKit
 
 struct FindView: View {
     @Bindable var viewModel: ListingsViewModel
+    var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
 
     @State private var showLocationMenu: Bool = false
@@ -13,9 +14,9 @@ struct FindView: View {
         ZStack(alignment: .top) {
             Group {
                 if viewModel.showListView {
-                    FindListView(viewModel: viewModel, onListingTap: onListingTap)
+                    FindListView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
                 } else {
-                    FindMapView(viewModel: viewModel, onListingTap: onListingTap)
+                    FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
                 }
             }
 

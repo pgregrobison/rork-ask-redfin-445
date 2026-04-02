@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ForYouView: View {
     let viewModel: ListingsViewModel
+    var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -60,6 +61,7 @@ struct ForYouView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 }
             }
         }
@@ -81,6 +83,7 @@ struct ForYouView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 }
             }
         }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FindListView: View {
     @Bindable var viewModel: ListingsViewModel
+    var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -20,6 +21,7 @@ struct FindListView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 }
             }
             .padding(.horizontal, 16)

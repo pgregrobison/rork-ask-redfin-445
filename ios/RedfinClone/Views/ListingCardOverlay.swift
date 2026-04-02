@@ -4,6 +4,7 @@ import UIKit
 struct ListingCardOverlay: View {
     let listing: Listing
     let isSaved: Bool
+    var zoomNamespace: Namespace.ID
     let onDismiss: () -> Void
     let onToggleSave: () -> Void
     let onTap: () -> Void
@@ -37,6 +38,7 @@ struct ListingCardOverlay: View {
                 .padding(.bottom, max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0))
             }
         }
+        .matchedTransitionSource(id: listing.id, in: zoomNamespace)
         .ignoresSafeArea(edges: .bottom)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }

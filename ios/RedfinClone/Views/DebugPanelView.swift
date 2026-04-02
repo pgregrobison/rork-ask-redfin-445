@@ -54,7 +54,7 @@ extension CardTransitionStyle {
     var subtitle: String {
         switch self {
         case .nativePush: "Standard navigation push"
-        case .fluidGrow: "Card grows into detail view"
+        case .zoom: "Card zooms into detail view"
         }
     }
 }

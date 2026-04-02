@@ -1,24 +1,20 @@
-# Debug Panel with Transition Picker
+# Replace Fluid Grow with iOS 18 Zoom Transition & Fix Duplicate Toolbars
 
-## Features
+## What's changing
 
-- **Debug Panel** accessible from a visible button at the bottom of the "My Home" screen
-- Opens as a native sheet (consistent with existing filter sheets)
-- **Transition Picker**: Choose how tapping a home card navigates to the detail page
-  - **Native Push** — the current standard navigation push (default)
-  - **Fluid Grow** — the card visually expands/grows into the detail page using matched geometry animation
-- Selected transition is saved and persists across app launches
+**Bug fixes:**
+- Remove the duplicate heart and share buttons on the detail page (caused by the Fluid Grow wrapper adding its own toolbar on top of the detail page's toolbar)
+- Remove the extra back arrow showing alongside the X button in the focused photo view (same root cause)
 
-## Design
+**New transition:**
+- Replace the custom "Fluid Grow" overlay with iOS 18's native **zoom transition** — the listing card visually zooms from its position on screen into the full detail page, and dismisses back into place
+- This uses the standard navigation push under the hood, so there's only ever one set of toolbar items (no duplicates)
 
-- A subtle "Debug" button at the bottom of My Home, styled with a wrench/ant icon and secondary text so it's clearly a dev tool
-- The sheet uses a clean grouped list layout with labeled sections
-- Each debug option is a distinct section — starting with "Card Transition"
-- The transition picker uses a segmented-style row with pill options (Native Push / Fluid Grow)
-- Designed to be easily extensible — adding new debug toggles/pickers is straightforward
+**Debug panel:**
+- Rename "Fluid Grow" option to "Zoom" to reflect the new behavior
+- Everything else in the debug panel stays the same
 
-## How It Works
-
-- **Native Push**: Tapping a card does `navigationPath.append(listing)` as it does today
-- **Fluid Grow**: Tapping a card triggers a matched geometry transition — the card grows into a full-screen detail view overlaid on top, with a spring animation. Back navigation reverses the effect. The standard NavigationStack push is bypassed for this mode.
-- A shared `DebugSettings` object (saved to UserDefaults) is injected into the environment so all views can read the current transition preference
+**How it works:**
+- Each listing card becomes a zoom transition source
+- Tapping it pushes the detail page with a zoom animation from the card's exact position
+- Swiping back reverses the zoom, shrinking the detail page back into the card
