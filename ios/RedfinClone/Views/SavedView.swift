@@ -11,7 +11,7 @@ struct SavedView: View {
                 emptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: Theme.Spacing.md) {
                         ForEach(viewModel.savedListings) { listing in
                             Button { onListingTap(listing) } label: {
                                 HomeCard(
@@ -26,13 +26,13 @@ struct SavedView: View {
                             .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+                    .padding(.horizontal, Theme.Spacing.md)
+                    .padding(.top, Theme.Spacing.sm)
                     .padding(.bottom, 100)
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .navigationTitle("Saved")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -46,19 +46,19 @@ struct SavedView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.md) {
             Spacer()
             Image(systemName: "heart")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
                 .frame(width: 80, height: 80)
-                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20))
+                .background(Theme.Colors.secondaryBackground, in: .rect(cornerRadius: Theme.Radius.xl))
 
             Text("No saved homes yet")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
             Text("Tap the heart icon on any listing to save it here for quick access.")
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)

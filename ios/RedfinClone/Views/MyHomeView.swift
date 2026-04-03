@@ -7,7 +7,7 @@ struct MyHomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xl) {
                 addHomeCard
                 featureTiles
 
@@ -17,7 +17,7 @@ struct MyHomeView: View {
             }
             .padding(.bottom, 100)
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .navigationTitle("My Home")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -31,37 +31,37 @@ struct MyHomeView: View {
     }
 
     private var addHomeCard: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.md) {
             Image(systemName: "house")
                 .font(.system(size: 40))
                 .foregroundStyle(.secondary)
 
             Text("What's your home worth?")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
             Text("Add your address to track your home's estimated value, compare with nearby sales, and see market trends.")
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
             Button(action: {}) {
                 Text("Add address")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, Theme.Spacing.xxl)
                     .padding(.vertical, 14)
                     .background(Color(white: 0.15), in: .rect(cornerRadius: 10))
             }
         }
-        .padding(24)
+        .padding(Theme.Spacing.xl)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 16))
-        .padding(.horizontal, 20)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.large))
+        .padding(.horizontal, Theme.Spacing.lg)
     }
 
     private var featureTiles: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             featureTile(
                 icon: "chart.line.uptrend.xyaxis",
                 title: "Value trends",
@@ -78,7 +78,7 @@ struct MyHomeView: View {
                 description: "Compare with nearby sales"
             )
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Theme.Spacing.lg)
     }
 
     private func featureTile(icon: String, title: String, description: String) -> some View {
@@ -88,32 +88,32 @@ struct MyHomeView: View {
                 .foregroundStyle(.primary)
 
             Text(title)
-                .font(.caption.bold())
+                .font(Theme.Typography.captionBold)
 
             Text(description)
-                .font(.caption2)
+                .font(Theme.Typography.micro)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
-        .padding(12)
+        .padding(Theme.Spacing.sm)
         .frame(maxWidth: .infinity)
         .frame(minHeight: 130)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 12))
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
     private var debugButton: some View {
         Button { showDebugPanel = true } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: Theme.Spacing.xs) {
                 Image(systemName: "wrench.and.screwdriver")
-                    .font(.subheadline.weight(.medium))
+                    .font(Theme.Typography.secondary.weight(.medium))
                 Text("Debug Panel")
-                    .font(.subheadline.weight(.medium))
+                    .font(Theme.Typography.secondary.weight(.medium))
             }
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, Theme.Spacing.sm)
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showDebugPanel) {

@@ -49,10 +49,10 @@ struct CustomTabBar: View {
 
     @available(iOS 26.0, *)
     private var glassTabBar: some View {
-        GlassEffectContainer(spacing: 12) {
-            HStack(spacing: 12) {
+        GlassEffectContainer(spacing: Theme.Spacing.sm) {
+            HStack(spacing: Theme.Spacing.sm) {
                 tabPillContent
-                    .padding(.horizontal, 8)
+                    .padding(.horizontal, Theme.Spacing.xs)
                     .glassEffect(.regular.interactive(), in: .capsule)
 
                 Button(action: onFABTap) {
@@ -63,23 +63,23 @@ struct CustomTabBar: View {
                 }
                 .glassEffect(.regular.interactive(), in: .circle)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Theme.Spacing.md)
         }
     }
 
     private var legacyTabBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             tabPillContent
-                .padding(.horizontal, 8)
+                .padding(.horizontal, Theme.Spacing.xs)
                 .background(.ultraThinMaterial, in: Capsule())
-                .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+                .shadow(color: Theme.Shadow.overlayColor, radius: Theme.Shadow.overlayRadius, y: Theme.Shadow.overlayY)
 
             Button(action: onFABTap) {
                 ZStack {
                     Circle()
                         .fill(.ultraThinMaterial)
                         .frame(width: 62, height: 62)
-                        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                        .shadow(color: Theme.Shadow.overlayColor, radius: Theme.Shadow.mediumRadius, y: Theme.Shadow.mediumY)
 
                     Image(systemName: "sparkle")
                         .font(.system(size: 19, weight: .semibold))
@@ -87,7 +87,7 @@ struct CustomTabBar: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Spacing.md)
     }
 
     private var tabPillContent: some View {
@@ -98,12 +98,12 @@ struct CustomTabBar: View {
                         selectedTab = tab
                     }
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: Theme.Spacing.xxs) {
                         Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
                             .font(.system(size: 19, weight: .semibold))
                             .contentTransition(.symbolEffect(.replace))
                         Text(tab.title)
-                            .font(.caption2)
+                            .font(Theme.Typography.micro)
                             .fontWeight(selectedTab == tab ? .semibold : .regular)
                     }
                     .foregroundStyle(selectedTab == tab ? .primary : .secondary)

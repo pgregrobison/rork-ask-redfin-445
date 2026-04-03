@@ -23,7 +23,7 @@ struct ForYouView: View {
             }
             .padding(.bottom, 100)
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .navigationTitle("For You")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -39,12 +39,12 @@ struct ForYouView: View {
     private func sectionHeader(title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.title2.bold())
+                .font(Theme.Typography.sectionTitle)
             Text(subtitle)
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Theme.Spacing.lg)
     }
 
     private var hotHomesScroll: some View {
@@ -65,7 +65,7 @@ struct ForYouView: View {
                 }
             }
         }
-        .contentMargins(.horizontal, 20)
+        .contentMargins(.horizontal, Theme.Spacing.lg)
         .scrollIndicators(.hidden)
     }
 
@@ -87,31 +87,31 @@ struct ForYouView: View {
                 }
             }
         }
-        .contentMargins(.horizontal, 20)
+        .contentMargins(.horizontal, Theme.Spacing.lg)
         .scrollIndicators(.hidden)
     }
 
     private var marketInsightCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             HStack(spacing: 10) {
                 Image(systemName: "chart.bar")
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(.primary)
                 Text("Market Insight")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
             }
 
             Text("NYC Housing Market Trends")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
             Text("The NYC metro housing market remains competitive with a median home price of $1.2M, up 4.2% year-over-year. Inventory is tight with homes spending an average of 21 days on market. Manhattan condos and Brooklyn brownstones continue to see the strongest buyer demand, while Queens offers the best value per square foot.")
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .lineSpacing(3)
         }
-        .padding(20)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 16))
-        .padding(.horizontal, 20)
+        .padding(Theme.Spacing.lg)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.large))
+        .padding(.horizontal, Theme.Spacing.lg)
     }
 }
