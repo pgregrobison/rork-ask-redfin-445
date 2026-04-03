@@ -136,7 +136,7 @@ struct FindView: View {
         .adaptiveGlass(in: .rect(cornerRadius: showLocationMenu ? 20 : 25))
         .clipped()
         .padding(.horizontal, showLocationMenu ? 8 : 0)
-        .offset(y: -20)
+        .offset(y: -60)
         .contentShape(.interaction, RoundedRectangle(cornerRadius: showLocationMenu ? 20 : 25))
         .onTapGesture {
             if !showLocationMenu {
