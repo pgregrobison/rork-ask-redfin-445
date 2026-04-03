@@ -37,14 +37,14 @@ struct FilterSheetView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Theme.Spacing.xl) {
                     priceSection
                     bedsSection
                     bathsSection
                     propertyTypeSection
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
+                .padding(.horizontal, Theme.Spacing.md)
+                .padding(.top, Theme.Spacing.md)
             }
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
@@ -69,13 +69,12 @@ struct FilterSheetView: View {
     }
 
     private var priceSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text("Price")
-                .font(.subheadline)
-                .fontWeight(.semibold)
+                .font(Theme.Typography.secondaryBold)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 8) {
+            HStack(spacing: Theme.Spacing.xs) {
                 priceDropdown(
                     label: priceLabel(for: viewModel.filterMinPrice, fallback: "No Min"),
                     options: priceOptions,
@@ -117,10 +116,10 @@ struct FilterSheetView: View {
                     .font(.system(size: 9, weight: .bold))
             }
             .foregroundStyle(.primary)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, Theme.Spacing.sm)
             .frame(maxWidth: .infinity)
-            .frame(minHeight: 40)
-            .background(Color(.tertiarySystemFill), in: Capsule())
+            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+            .background(Theme.Colors.fill, in: Capsule())
         }
     }
 
@@ -137,10 +136,9 @@ struct FilterSheetView: View {
     }
 
     private var bedsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text("Beds")
-                .font(.subheadline)
-                .fontWeight(.semibold)
+                .font(Theme.Typography.secondaryBold)
                 .foregroundStyle(.secondary)
 
             segmentedPills(
@@ -152,10 +150,9 @@ struct FilterSheetView: View {
     }
 
     private var bathsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text("Baths")
-                .font(.subheadline)
-                .fontWeight(.semibold)
+                .font(Theme.Typography.secondaryBold)
                 .foregroundStyle(.secondary)
 
             segmentedPills(
@@ -167,7 +164,7 @@ struct FilterSheetView: View {
     }
 
     private func segmentedPills(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.xxs) {
             ForEach(options, id: \.self) { value in
                 let isSelected = selection.wrappedValue == value
                 Button {
@@ -175,11 +172,11 @@ struct FilterSheetView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
                         .frame(maxWidth: .infinity)
-                        .frame(minHeight: 40)
+                        .frame(minHeight: Theme.ButtonSize.minHeight - 4)
                         .background(
-                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
                             in: Capsule()
                         )
                 }
@@ -189,13 +186,12 @@ struct FilterSheetView: View {
     }
 
     private var propertyTypeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text("Property Type")
-                .font(.subheadline)
-                .fontWeight(.semibold)
+                .font(Theme.Typography.secondaryBold)
                 .foregroundStyle(.secondary)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: 8)], spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: Theme.Spacing.xs)], spacing: Theme.Spacing.xs) {
                 ForEach(propertyTypes, id: \.self) { type in
                     let isSelected = propertyType == type
                     Button {
@@ -203,13 +199,13 @@ struct FilterSheetView: View {
                     } label: {
                         Text(type)
                             .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                            .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
-                            .padding(.horizontal, 14)
-                            .frame(minHeight: 40)
+                            .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
+                            .padding(.horizontal, Theme.Spacing.sm + 2)
+                            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
                             .frame(maxWidth: .infinity)
                             .background(
-                                isSelected ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Color(.tertiarySystemFill)),
-                                in: .rect(cornerRadius: 10)
+                                isSelected ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Theme.Colors.fill),
+                                in: .rect(cornerRadius: Theme.Radius.pill)
                             )
                     }
                     .buttonStyle(.plain)

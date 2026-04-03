@@ -10,10 +10,10 @@ struct InlineVoiceOrb: View {
     @State private var ring2Opacity: Double = 0.12
     @State private var appeared: Bool = false
 
-    private let accentColor = Theme.redfinGreenColor
+    private let accentColor = Theme.Colors.brandGreen
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             ZStack {
                 Circle()
                     .fill(accentColor.opacity(0.03))

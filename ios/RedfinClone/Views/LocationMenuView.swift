@@ -40,15 +40,15 @@ struct LocationMenuView: View {
             searchField
 
             if !searchService.suggestions.isEmpty {
-                Divider().padding(.leading, 14)
+                Divider().padding(.leading, Theme.Spacing.sm + 2)
                 suggestionslist
             }
 
-            Divider().padding(.leading, 14)
+            Divider().padding(.leading, Theme.Spacing.sm + 2)
             priceFilterRow
             bedsFilterRow
             bathsFilterRow
-            Divider().padding(.leading, 14)
+            Divider().padding(.leading, Theme.Spacing.sm + 2)
             actionButtons
         }
         .onAppear {
@@ -57,16 +57,16 @@ struct LocationMenuView: View {
     }
 
     private var searchField: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: Theme.IconSize.small, weight: .medium))
                 .foregroundStyle(.secondary)
 
             TextField("Search location...", text: Binding(
                 get: { searchService.searchText },
                 set: { searchService.updateQuery($0) }
             ))
-            .font(.body)
+            .font(Theme.Typography.body)
             .focused($isSearchFocused)
             .submitLabel(.search)
 
@@ -75,13 +75,13 @@ struct LocationMenuView: View {
                     searchService.clear()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
+                        .font(.system(size: Theme.ButtonSize.iconSize))
                         .foregroundStyle(.tertiary)
                 }
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.horizontal, Theme.Spacing.sm + 2)
+        .padding(.vertical, Theme.Spacing.sm)
     }
 
     private var suggestionslist: some View {
@@ -111,8 +111,8 @@ struct LocationMenuView: View {
 
                             Spacer()
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, Theme.Spacing.sm + 2)
+                        .padding(.vertical, Theme.Spacing.xs + 2)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -123,13 +123,12 @@ struct LocationMenuView: View {
     }
 
     private var priceFilterRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
             Text("Price")
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(Theme.Typography.captionBold)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 8) {
+            HStack(spacing: Theme.Spacing.xs) {
                 priceDropdown(
                     label: priceLabel(for: viewModel.filterMinPrice, fallback: "No Min"),
                     options: priceOptions,
@@ -147,8 +146,8 @@ struct LocationMenuView: View {
                 )
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.sm + 2)
+        .padding(.vertical, Theme.Spacing.xs + 2)
     }
 
     private func priceDropdown(label: String, options: [(String, Int?)], selection: Binding<Int?>) -> some View {
@@ -173,10 +172,10 @@ struct LocationMenuView: View {
                     .font(.system(size: 9, weight: .bold))
             }
             .foregroundStyle(.primary)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, Theme.Spacing.sm)
             .frame(maxWidth: .infinity)
-            .frame(minHeight: 40)
-            .background(Color(.tertiarySystemFill), in: Capsule())
+            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+            .background(Theme.Colors.fill, in: Capsule())
         }
     }
 
@@ -193,10 +192,9 @@ struct LocationMenuView: View {
     }
 
     private var bedsFilterRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
             Text("Beds")
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(Theme.Typography.captionBold)
                 .foregroundStyle(.secondary)
 
             segmentedPills(
@@ -205,15 +203,14 @@ struct LocationMenuView: View {
                 labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
             )
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.sm + 2)
+        .padding(.vertical, Theme.Spacing.xs + 2)
     }
 
     private var bathsFilterRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
             Text("Baths")
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(Theme.Typography.captionBold)
                 .foregroundStyle(.secondary)
 
             segmentedPills(
@@ -222,12 +219,12 @@ struct LocationMenuView: View {
                 labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
             )
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.sm + 2)
+        .padding(.vertical, Theme.Spacing.xs + 2)
     }
 
     private func segmentedPills(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.xxs) {
             ForEach(options, id: \.self) { value in
                 let isSelected = selection.wrappedValue == value
                 Button {
@@ -235,11 +232,11 @@ struct LocationMenuView: View {
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
                         .frame(maxWidth: .infinity)
-                        .frame(minHeight: 40)
+                        .frame(minHeight: Theme.ButtonSize.minHeight - 4)
                         .background(
-                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
                             in: Capsule()
                         )
                 }
@@ -249,37 +246,37 @@ struct LocationMenuView: View {
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.xs) {
             Button {
                 onOpenFilter()
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "slider.horizontal.3")
                         .font(.system(size: 13, weight: .semibold))
                     Text("Filter")
                         .font(.subheadline.weight(.medium))
                 }
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: 40)
-                .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 10))
+                .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+                .background(Theme.Colors.fill, in: .rect(cornerRadius: Theme.Radius.pill))
             }
             .buttonStyle(.plain)
 
             Button {} label: {
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "bookmark")
                         .font(.system(size: 13, weight: .semibold))
                     Text("Save Search")
                         .font(.subheadline.weight(.medium))
                 }
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: 40)
-                .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 10))
+                .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+                .background(Theme.Colors.fill, in: .rect(cornerRadius: Theme.Radius.pill))
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.xs + 2)
+        .padding(.vertical, Theme.Spacing.xs + 2)
     }
 
     private func selectSuggestion(_ suggestion: MKLocalSearchCompletion) {

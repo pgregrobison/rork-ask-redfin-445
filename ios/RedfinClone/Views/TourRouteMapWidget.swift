@@ -34,14 +34,14 @@ struct TourRouteMapWidget: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .padding(16)
+            .padding(Theme.Spacing.md)
 
             Map(position: $mapPosition) {
                 ForEach(tourStops) { stop in
                     Annotation(stop.address, coordinate: stop.coordinate) {
                         ZStack {
                             Circle()
-                                .fill(Color(white: 0.15))
+                                .fill(Theme.Colors.stepIndicator)
                                 .frame(width: 28, height: 28)
                             Text("\(stop.id)")
                                 .font(.caption2.bold())
@@ -52,7 +52,7 @@ struct TourRouteMapWidget: View {
                 }
 
                 MapPolyline(coordinates: tourStops.map { $0.coordinate })
-                    .stroke(Color(white: 0.15), lineWidth: 3)
+                    .stroke(Theme.Colors.stepIndicator, lineWidth: 3)
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .frame(height: 200)
@@ -63,7 +63,7 @@ struct TourRouteMapWidget: View {
                     HStack(spacing: 10) {
                         ZStack {
                             Circle()
-                                .fill(Color(white: 0.15))
+                                .fill(Theme.Colors.stepIndicator)
                                 .frame(width: 22, height: 22)
                             Text("\(stop.id)")
                                 .font(.system(size: 10, weight: .bold))
@@ -78,10 +78,10 @@ struct TourRouteMapWidget: View {
                     }
                 }
             }
-            .padding(16)
+            .padding(Theme.Spacing.md)
         }
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 16))
-        .padding(.horizontal, 16)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.widget))
+        .padding(.horizontal, Theme.Spacing.md)
     }
 }

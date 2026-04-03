@@ -8,14 +8,14 @@ struct NudgeBubbleView: View {
     var body: some View {
         if isVisible {
             Text(String(text.prefix(visibleCharCount)))
-                .font(.caption)
+                .font(Theme.Typography.caption)
                 .fontWeight(.medium)
                 .lineLimit(1)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(Color(.secondarySystemBackground))
-            .clipShape(.rect(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+            .padding(.horizontal, Theme.Spacing.sm + 2)
+            .padding(.vertical, Theme.Spacing.xs + 2)
+            .background(Theme.Colors.secondaryBackground)
+            .clipShape(.rect(cornerRadius: Theme.Radius.medium + 2))
+            .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: Theme.Shadow.mediumY)
             .transition(.opacity.combined(with: .scale(scale: 0.8, anchor: .bottom)))
         }
     }

@@ -253,8 +253,8 @@ struct AskRedfinView: View {
                                 } label: {
                                     Image(systemName: "stop.fill")
                                         .font(.system(size: 12, weight: .bold))
-                                        .foregroundStyle(Color(.systemBackground))
-                                        .frame(width: 44, height: 44)
+                                        .foregroundStyle(Theme.Colors.invertedPrimary)
+                                        .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
                                         .background(Color.primary)
                                         .clipShape(Circle())
                                 }
@@ -264,9 +264,9 @@ struct AskRedfinView: View {
                                     sendAndScroll()
                                 } label: {
                                     Image(systemName: "arrow.up")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundStyle(Color(.systemBackground))
-                                        .frame(width: 44, height: 44)
+                                        .font(.system(size: Theme.ButtonSize.iconSize, weight: .bold))
+                                        .foregroundStyle(Theme.Colors.invertedPrimary)
+                                        .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
                                         .background(Color.primary)
                                         .clipShape(Circle())
                                 }
@@ -278,9 +278,9 @@ struct AskRedfinView: View {
                                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 } label: {
                                     Image(systemName: "waveform")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundStyle(Color(.systemBackground))
-                                        .frame(width: 44, height: 44)
+                                        .font(.system(size: Theme.ButtonSize.iconSize, weight: .bold))
+                                        .foregroundStyle(Theme.Colors.invertedPrimary)
+                                        .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
                                         .background(Color.primary)
                                         .clipShape(Circle())
                                 }
@@ -302,8 +302,8 @@ struct AskRedfinView: View {
                     Image(systemName: chatViewModel.isVoiceMuted ? "mic.slash.fill" : "mic.fill")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(chatViewModel.isVoiceMuted ? .white : .primary)
-                        .frame(width: 44, height: 44)
-                        .background(chatViewModel.isVoiceMuted ? Color.red : Color(.tertiarySystemFill))
+                        .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
+                        .background(chatViewModel.isVoiceMuted ? Color.red : Theme.Colors.fill)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -315,8 +315,8 @@ struct AskRedfinView: View {
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Color(.systemBackground))
-                        .frame(width: 44, height: 44)
+                        .foregroundStyle(Theme.Colors.invertedPrimary)
+                        .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
                         .background(Color.primary)
                         .clipShape(Circle())
                 }

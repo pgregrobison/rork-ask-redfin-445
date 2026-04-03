@@ -23,22 +23,22 @@ struct ChatMessageBubble: View {
         HStack {
             Spacer(minLength: 60)
             Text(message.content)
-                .font(.body)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .font(Theme.Typography.body)
+                .padding(.horizontal, Theme.Spacing.md)
+                .padding(.vertical, Theme.Spacing.xs + 2)
                 .background(userBubbleBackground)
-                .clipShape(.rect(cornerRadius: 18, style: .continuous))
+                .clipShape(.rect(cornerRadius: Theme.Radius.chatBubble, style: .continuous))
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Spacing.md)
     }
 
     private var assistantBubble: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs + 2) {
             if !message.content.isEmpty {
                 Text(message.content)
-                    .font(.body)
+                    .font(Theme.Typography.body)
                     .textSelection(.enabled)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, Theme.Spacing.md)
             }
 
             if let searchResults = message.searchResults, !searchResults.isEmpty {
@@ -76,12 +76,12 @@ struct ChatMessageBubble: View {
 
     private var userBubbleBackground: Color {
         colorScheme == .dark
-            ? Color(red: 254/255, green: 254/255, blue: 254/255).opacity(0.12)
-            : Color(.systemGray6)
+            ? Theme.Colors.Chat.userBubbleDark
+            : Theme.Colors.Chat.userBubbleLight
     }
 
     private var feedbackButtons: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.xs) {
             Button { onFeedback(.thumbsUp) } label: {
                 Image(systemName: message.feedback == .thumbsUp ? "hand.thumbsup.fill" : "hand.thumbsup")
                     .font(.system(size: Theme.IconSize.small, weight: .semibold))
@@ -100,6 +100,6 @@ struct ChatMessageBubble: View {
                     .contentShape(Rectangle())
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Spacing.md)
     }
 }

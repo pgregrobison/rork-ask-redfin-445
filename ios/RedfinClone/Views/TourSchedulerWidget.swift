@@ -262,17 +262,17 @@ struct TourSchedulerWidget: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.bottom, Theme.Spacing.md)
     }
 
     private func continueButton(action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text("Continue")
                 .font(.subheadline.bold())
-                .foregroundStyle(Color(.systemBackground))
+                .foregroundStyle(Theme.Colors.invertedPrimary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
                 .background(Color.primary, in: Capsule())
         }
     }

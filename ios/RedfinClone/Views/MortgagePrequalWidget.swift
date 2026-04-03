@@ -143,7 +143,7 @@ struct MortgagePrequalWidget: View {
         ZStack {
             if index < currentStep {
                 Circle()
-                    .fill(Theme.redfinGreenColor)
+                    .fill(Theme.Colors.brandGreen)
                     .frame(width: 24, height: 24)
                 Image(systemName: "checkmark")
                     .font(.system(size: 11, weight: .bold))
@@ -154,7 +154,7 @@ struct MortgagePrequalWidget: View {
                     .frame(width: 24, height: 24)
                 Text("\(index + 1)")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color(.systemBackground))
+                    .foregroundStyle(Theme.Colors.invertedPrimary)
             } else {
                 Circle()
                     .strokeBorder(Color(.tertiaryLabel), lineWidth: 1.5)
@@ -244,7 +244,7 @@ struct MortgagePrequalWidget: View {
             } label: {
                 Text("Get Prequalified")
                     .font(.subheadline.bold())
-                    .foregroundStyle(Color(.systemBackground))
+                    .foregroundStyle(Theme.Colors.invertedPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(canSubmit ? Color.primary : Color.gray, in: Capsule())
@@ -258,7 +258,7 @@ struct MortgagePrequalWidget: View {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(Theme.redfinGreenColor)
+                    .foregroundStyle(Theme.Colors.brandGreen)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Prequalification Complete!")
@@ -281,7 +281,7 @@ struct MortgagePrequalWidget: View {
                         Spacer()
                         Text(formatCurrency(estimated))
                             .font(.subheadline.bold())
-                            .foregroundStyle(Theme.redfinGreenColor)
+                            .foregroundStyle(Theme.Colors.brandGreen)
                     }
                 }
             }

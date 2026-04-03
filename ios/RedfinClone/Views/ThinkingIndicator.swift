@@ -5,9 +5,9 @@ struct ThinkingIndicator: View {
     @State private var isAnimating: Bool = false
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Theme.Spacing.xxs + 2) {
             Text(label)
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText())
                 .animation(.easeInOut(duration: 0.3), value: label)
@@ -28,7 +28,7 @@ struct ThinkingIndicator: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Spacing.md)
         .onAppear { isAnimating = true }
         .onDisappear { isAnimating = false }
     }

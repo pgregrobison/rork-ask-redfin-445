@@ -50,9 +50,9 @@ struct FindPillOverlay: View {
                         Spacer(minLength: 0)
                     }
                 }
-                .padding(.horizontal, showLocationMenu ? 12 : 14)
-                .padding(.vertical, showLocationMenu ? 10 : 6)
-                .frame(minHeight: 44)
+                .padding(.horizontal, showLocationMenu ? Theme.Spacing.sm : Theme.Spacing.sm + 2)
+                .padding(.vertical, showLocationMenu ? Theme.Spacing.xs + 2 : Theme.Spacing.xxs + 2)
+                .frame(minHeight: Theme.ButtonSize.minHeight)
 
                 if showLocationMenu {
                     LocationMenuView(
@@ -70,9 +70,9 @@ struct FindPillOverlay: View {
                 }
             }
             .frame(maxWidth: showLocationMenu ? .infinity : nil)
-            .adaptiveGlass(in: .rect(cornerRadius: showLocationMenu ? 20 : 25))
+            .adaptiveGlass(in: .rect(cornerRadius: showLocationMenu ? Theme.Radius.xl : 25))
             .clipped()
-            .padding(.horizontal, showLocationMenu ? 8 : 0)
+            .padding(.horizontal, showLocationMenu ? Theme.Spacing.xs : 0)
             .contentShape(.interaction, RoundedRectangle(cornerRadius: showLocationMenu ? 20 : 25))
             .onTapGesture {
                 if !showLocationMenu {

@@ -30,6 +30,14 @@ enum Theme {
         static let fill = Color(.tertiarySystemFill)
         static let separator = Color(.separator)
 
+        enum Chat {
+            static let userBubbleLight = Color(.systemGray6)
+            static let userBubbleDark = Color(red: 254/255, green: 254/255, blue: 254/255).opacity(0.12)
+            static let inputCornerRadius: CGFloat = 24
+        }
+
+        static let stepIndicator = Color(white: 0.15)
+
         enum Badge {
             static let hot = Color(white: 0.15)
             static let listedByRedfin = Colors.brandRed
@@ -61,6 +69,9 @@ enum Theme {
         static let large: CGFloat = 16
         static let xl: CGFloat = 20
         static let full: CGFloat = 9999
+        static let chatBubble: CGFloat = 18
+        static let widget: CGFloat = 16
+        static let pill: CGFloat = 10
     }
 
     // MARK: - Spacing

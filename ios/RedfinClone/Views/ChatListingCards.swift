@@ -17,9 +17,9 @@ struct ChatListingCards: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             ScrollView(.horizontal) {
-                HStack(spacing: 12) {
+                HStack(spacing: Theme.Spacing.sm) {
                     ForEach(matchedListings) { listing in
                         Button { onListingTap(listing) } label: {
                             HomeCard(
@@ -38,7 +38,7 @@ struct ChatListingCards: View {
             }
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $scrolledListingID)
-            .contentMargins(.horizontal, 16)
+            .contentMargins(.horizontal, Theme.Spacing.md)
             .scrollIndicators(.hidden)
 
             if !matchedListings.isEmpty {
@@ -46,22 +46,18 @@ struct ChatListingCards: View {
                     let nyListings = matchedListings.filter { $0.state == "NY" }
                     onShowOnMap(nyListings.isEmpty ? matchedListings : nyListings)
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "map")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         Text("Show on map")
-                            .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundStyle(Color(.systemBackground))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.primary, in: Capsule())
                 }
-                .padding(.horizontal, 16)
+                .buttonStyle(.primary)
+                .padding(.horizontal, Theme.Spacing.md)
             }
         }
         .opacity(hasAppeared ? 1 : 0)
-        .offset(y: hasAppeared ? 0 : 16)
+        .offset(y: hasAppeared ? 0 : Theme.Spacing.md)
         .onAppear {
             guard !hasAppeared else { return }
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
