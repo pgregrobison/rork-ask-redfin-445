@@ -1,10 +1,5 @@
-# Standardize toolbars to match the Detail Page pattern
+# Shift location pill upward into the toolbar area
 
-**What's wrong now:**
-The Find tab stuffs multiple trailing buttons (sort, profile) into a single toolbar slot with hand-tuned spacing. Every other screen (Detail Page, For You, Saved, My Home) uses the native pattern — one toolbar item per action — and the system handles spacing automatically.
-
-**What changes:**
-- **Find tab trailing toolbar** — Split the sort button and profile button into their own individual toolbar items (just like the Detail Page has separate items for heart and share). Remove the manual `HStack` and `spacing: 12` wrapper entirely.
-- No visual change to other screens — they already follow the correct pattern.
-
-This is a one-file change in the Find view. The system toolbar spacing will be consistent across the entire app.
+**Change:**
+- Move the location + homes glass pill upward using a negative vertical offset so it visually overlaps with the navigation toolbar, appearing as if it's part of the toolbar while still being a separate element below it.
+- Adjust from the current small top padding to a negative offset (approximately -20pt) to tuck it into the toolbar region.
