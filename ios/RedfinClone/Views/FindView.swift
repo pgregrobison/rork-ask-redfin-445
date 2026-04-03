@@ -137,6 +137,7 @@ struct FindView: View {
         .clipped()
         .padding(.horizontal, showLocationMenu ? 8 : 0)
         .offset(y: -54)
+        .zIndex(1)
         .contentShape(.interaction, RoundedRectangle(cornerRadius: showLocationMenu ? 20 : 25))
         .onTapGesture {
             if !showLocationMenu {
