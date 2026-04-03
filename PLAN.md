@@ -1,8 +1,10 @@
-# Fix Find tab trailing toolbar spacing and styling
+# Standardize toolbars to match the Detail Page pattern
 
-**What's changing:**
+**What's wrong now:**
+The Find tab stuffs multiple trailing buttons (sort, profile) into a single toolbar slot with hand-tuned spacing. Every other screen (Detail Page, For You, Saved, My Home) uses the native pattern — one toolbar item per action — and the system handles spacing automatically.
 
-- Update the trailing toolbar icons (sort and profile) on the Find tab to match the consistent styling used across For You, Saved, and My Home tabs
-- Increase spacing between the sort and profile buttons from the current tight `4pt` to a more comfortable `12pt`
-- Apply the same icon font sizing (`Theme.IconSize.medium`) used everywhere else in the app
-- This ensures visual consistency across all tabs
+**What changes:**
+- **Find tab trailing toolbar** — Split the sort button and profile button into their own individual toolbar items (just like the Detail Page has separate items for heart and share). Remove the manual `HStack` and `spacing: 12` wrapper entirely.
+- No visual change to other screens — they already follow the correct pattern.
+
+This is a one-file change in the Find view. The system toolbar spacing will be consistent across the entire app.

@@ -42,18 +42,16 @@ struct FindView: View {
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    if viewModel.showListView {
-                        sortMenu
-                            .transition(.scale(scale: 0.6).combined(with: .opacity))
-                    }
-                    Button {} label: {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                    }
+            if viewModel.showListView {
+                ToolbarItem(placement: .topBarTrailing) {
+                    sortMenu
                 }
-                .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {} label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                }
             }
         }
         .sheet(isPresented: $showFilterSheet) {
