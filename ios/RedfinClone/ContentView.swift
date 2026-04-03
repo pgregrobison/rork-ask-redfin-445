@@ -112,20 +112,35 @@ struct ContentView: View {
 
     @ViewBuilder
     private func listingDetail(for listing: Listing) -> some View {
-        let detail = ListingDetailView(
-            listing: listing,
-            isSaved: viewModel.isSaved(listing),
-            onToggleSave: { viewModel.toggleSaved(listing) },
-            onAskRedfin: { viewModel.showChat = true }
-        )
-        .toolbar(.hidden, for: .tabBar)
-        .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
-        .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
+        let detail = detailView(for: listing)
+            .toolbar(.hidden, for: .tabBar)
+            .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
+            .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
 
         if debugSettings.cardTransition == .zoom {
             detail.navigationTransition(.zoom(sourceID: listing.id, in: zoomNamespace))
         } else {
             detail
+        }
+    }
+
+    @ViewBuilder
+    private func detailView(for listing: Listing) -> some View {
+        switch debugSettings.detailPageStyle {
+        case .sheet:
+            ListingDetailView(
+                listing: listing,
+                isSaved: viewModel.isSaved(listing),
+                onToggleSave: { viewModel.toggleSaved(listing) },
+                onAskRedfin: { viewModel.showChat = true }
+            )
+        case .redfin:
+            RedfinDetailView(
+                listing: listing,
+                isSaved: viewModel.isSaved(listing),
+                onToggleSave: { viewModel.toggleSaved(listing) },
+                onAskRedfin: { viewModel.showChat = true }
+            )
         }
     }
 

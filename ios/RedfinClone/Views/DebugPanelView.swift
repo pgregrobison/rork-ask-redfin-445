@@ -37,6 +37,37 @@ struct DebugPanelView: View {
                 } footer: {
                     Text("Controls how tapping a listing card navigates to the detail page.")
                 }
+
+                Section {
+                    ForEach(DetailPageStyle.allCases, id: \.self) { style in
+                        Button {
+                            settings.detailPageStyle = style
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(style.rawValue)
+                                        .font(.body)
+                                        .foregroundStyle(.primary)
+                                    Text(style.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if settings.detailPageStyle == style {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("DP Style")
+                } footer: {
+                    Text("Controls the layout and design of the listing detail page.")
+                }
             }
             .navigationTitle("Debug")
             .navigationBarTitleDisplayMode(.inline)
@@ -55,6 +86,15 @@ extension CardTransitionStyle {
         switch self {
         case .nativePush: "Standard navigation push"
         case .zoom: "Card zooms into detail view"
+        }
+    }
+}
+
+extension DetailPageStyle {
+    var subtitle: String {
+        switch self {
+        case .sheet: "Bottom sheet over photos"
+        case .redfin: "Full vertical scroll layout"
         }
     }
 }
