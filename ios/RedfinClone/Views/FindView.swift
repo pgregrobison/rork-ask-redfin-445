@@ -39,18 +39,18 @@ struct FindView: View {
                     viewModel.showListView.toggle()
                 } label: {
                     Image(systemName: viewModel.showListView ? "map" : "list.bullet")
-                        .fontWeight(.semibold)
+                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 4) {
+                HStack(spacing: 12) {
                     if viewModel.showListView {
                         sortMenu
                             .transition(.scale(scale: 0.6).combined(with: .opacity))
                     }
                     Button {} label: {
                         Image(systemName: "person.crop.circle")
-                            .fontWeight(.semibold)
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }
                 }
                 .animation(.easeInOut(duration: 0.2), value: viewModel.showListView)
@@ -78,7 +78,7 @@ struct FindView: View {
             }
         } label: {
             Image(systemName: "arrow.up.arrow.down")
-                .fontWeight(.semibold)
+                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
         }
     }
 
