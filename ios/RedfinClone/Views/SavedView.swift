@@ -16,7 +16,7 @@ struct SavedView: View {
                             Button { onListingTap(listing) } label: {
                                 HomeCard(
                                     listing: listing,
-                                    size: .large,
+                                    size: .medium,
                                     isSaved: true,
                                     badge: listing.primaryBadge,
                                     onToggleSave: { viewModel.toggleSaved(listing) }

@@ -14,7 +14,7 @@ struct FindListView: View {
                     } label: {
                         HomeCard(
                             listing: listing,
-                            size: .large,
+                            size: .medium,
                             isSaved: viewModel.isSaved(listing),
                             badge: listing.primaryBadge,
                             onToggleSave: { viewModel.toggleSaved(listing) }

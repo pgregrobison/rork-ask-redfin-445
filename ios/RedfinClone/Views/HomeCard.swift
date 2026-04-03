@@ -15,23 +15,22 @@ enum HomeCardSize {
 
     var cornerRadius: CGFloat {
         switch self {
-        case .large: Theme.Radius.large
-        case .medium, .compact: 14
+        case .large, .medium: Theme.Radius.large
+        case .compact: 14
         }
     }
 
     var fixedWidth: CGFloat? {
         switch self {
         case .large: nil
-        case .medium: Theme.CardSize.FixedWidth.medium
+        case .medium: nil
         case .compact(let width): width
         }
     }
 
     var priceFont: Font {
         switch self {
-        case .large: Theme.Typography.sectionTitle
-        case .medium: Theme.Typography.cardTitle
+        case .large, .medium: Theme.Typography.sectionTitle
         case .compact: Theme.Typography.headline
         }
     }
@@ -54,8 +53,8 @@ enum HomeCardSize {
 
     var tagFont: Font {
         switch self {
-        case .large: Theme.Typography.caption
-        case .medium, .compact: Theme.Typography.micro
+        case .large, .medium: Theme.Typography.caption
+        case .compact: Theme.Typography.micro
         }
     }
 
@@ -69,8 +68,8 @@ enum HomeCardSize {
 
     var showShareAction: Bool {
         switch self {
-        case .large: true
-        case .medium, .compact: false
+        case .large, .medium: true
+        case .compact: false
         }
     }
 }

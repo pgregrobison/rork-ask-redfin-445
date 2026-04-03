@@ -24,7 +24,7 @@ struct ChatListingCards: View {
                         Button { onListingTap(listing) } label: {
                             HomeCard(
                                 listing: listing,
-                                size: .medium,
+                                size: .compact(width: 300),
                                 isSaved: savedListingIDs.contains(listing.id),
                                 badge: listing.primaryBadge,
                                 onToggleSave: { onToggleSave(listing) }

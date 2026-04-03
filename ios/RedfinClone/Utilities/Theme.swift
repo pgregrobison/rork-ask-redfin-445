@@ -147,8 +147,8 @@ enum Theme {
 
         enum InfoPadding {
             static let large = EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
-            static let medium = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
-            static let compact = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+            static let medium = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+            static let compact = EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
         }
     }
 
