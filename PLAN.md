@@ -1,4 +1,4 @@
-# Bump location pill up another 40pt
+# Adjust location pill offset from -60 to -54
 
 **Change:**
-- Move the location + homes glass pill upward by an additional 40 points, changing the vertical offset from `-20` to `-60`
+- Move the location + homes pill down by 6 points (from -60pt to -54pt offset)
