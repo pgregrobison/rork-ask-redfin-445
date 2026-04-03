@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var navigationPath = NavigationPath()
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
+    @State private var showLocationMenu: Bool = false
     @Namespace private var zoomNamespace
 
     var body: some View {
@@ -33,6 +34,11 @@ struct ContentView: View {
             }
             .navigationDestination(for: Listing.self) { listing in
                 listingDetail(for: listing)
+            }
+        }
+        .overlay(alignment: .top) {
+            if selectedTab == .find && navigationPath.isEmpty {
+                FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
             }
         }
         .tint(.primary)
