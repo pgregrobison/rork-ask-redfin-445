@@ -11,6 +11,7 @@ struct RedfinDetailView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var homePrice: String = ""
     @State private var downPaymentPercent: Double = 20
+    @State private var selectedMediaTab: Int = 0
 
     private let redfinRed = Color(red: 0.78, green: 0.13, blue: 0.13)
 
@@ -47,7 +48,9 @@ struct RedfinDetailView: View {
         principalAndInterest + propertyTaxes + homeInsurance + hoaDuesAmount
     }
 
-    private var photoCarouselHeight: CGFloat { 340 }
+    private var photoCarouselHeight: CGFloat {
+        UIScreen.main.bounds.height * 0.4
+    }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -113,28 +116,43 @@ struct RedfinDetailView: View {
 
     // MARK: - Hero Photo Carousel
 
+    private let segmentedControlHeight: CGFloat = 40
+    private let segmentedControlBottomInset: CGFloat = 16
+    private let dotsAboveSegmented: CGFloat = 8
+
     private var heroPhotoCarousel: some View {
-        TabView(selection: $currentPhotoIndex) {
-            ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
-                Color(.tertiarySystemBackground)
-                    .overlay {
-                        AsyncImage(url: URL(string: url)) { phase in
-                            if let image = phase.image {
-                                image.resizable().aspectRatio(contentMode: .fill)
-                            } else if phase.error != nil {
-                                Color(.tertiarySystemBackground)
-                            } else {
-                                ProgressView()
+        ZStack(alignment: .bottom) {
+            TabView(selection: $currentPhotoIndex) {
+                ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
+                    Color(.tertiarySystemBackground)
+                        .overlay {
+                            AsyncImage(url: URL(string: url)) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fill)
+                                } else if phase.error != nil {
+                                    Color(.tertiarySystemBackground)
+                                } else {
+                                    ProgressView()
+                                }
                             }
+                            .allowsHitTesting(false)
                         }
-                        .allowsHitTesting(false)
-                    }
-                    .clipped()
-                    .tag(index)
+                        .clipped()
+                        .tag(index)
+                }
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: photoCarouselHeight)
+
+            VStack(spacing: dotsAboveSegmented) {
+                carouselDots
+                mediaSegmentedControl
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, segmentedControlBottomInset)
         }
-        .tabViewStyle(.page(indexDisplayMode: .always))
         .frame(height: photoCarouselHeight)
+        .clipShape(.rect)
         .overlay(alignment: .topLeading) {
             if let badge = listing.primaryBadge {
                 Text(badge.text)
@@ -156,6 +174,41 @@ struct RedfinDetailView: View {
                 .background(.black.opacity(0.5), in: .rect(cornerRadius: 8))
                 .padding(.top, 60)
                 .padding(.trailing, 16)
+        }
+    }
+
+    private var carouselDots: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<listing.photos.count, id: \.self) { index in
+                Circle()
+                    .fill(index == currentPhotoIndex ? Color.white : Color.white.opacity(0.5))
+                    .frame(width: 7, height: 7)
+            }
+        }
+    }
+
+    private var mediaSegmentedControl: some View {
+        Group {
+            if #available(iOS 26.0, *) {
+                Picker("", selection: $selectedMediaTab) {
+                    Text("Media").tag(0)
+                    Text("Map").tag(1)
+                    Text("3D").tag(2)
+                    Text("Street").tag(3)
+                }
+                .pickerStyle(.segmented)
+                .frame(height: segmentedControlHeight)
+                .glassEffect(in: .capsule)
+            } else {
+                Picker("", selection: $selectedMediaTab) {
+                    Text("Media").tag(0)
+                    Text("Map").tag(1)
+                    Text("3D").tag(2)
+                    Text("Street").tag(3)
+                }
+                .pickerStyle(.segmented)
+                .frame(height: segmentedControlHeight)
+            }
         }
     }
 
@@ -252,10 +305,10 @@ struct RedfinDetailView: View {
             Button(action: {}) {
                 Text("Estimate my rate")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.systemBackground))
                     .padding(.horizontal, 18)
                     .padding(.vertical, 12)
-                    .background(redfinRed, in: .rect(cornerRadius: 10))
+                    .background(Color.primary, in: Capsule())
             }
         }
         .padding(.bottom, 16)
@@ -267,13 +320,10 @@ struct RedfinDetailView: View {
         Button(action: {}) {
             Text("Request showing")
                 .font(.headline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color(.systemBackground))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color(.separator), lineWidth: 1)
-                )
+                .background(Color.primary, in: Capsule())
         }
         .padding(.bottom, 12)
     }
@@ -404,7 +454,7 @@ struct RedfinDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
+                        Capsule()
                             .stroke(Color(.separator), lineWidth: 1)
                     )
             }
@@ -522,10 +572,10 @@ struct RedfinDetailView: View {
             Button(action: {}) {
                 Text("Estimate my payment & rate")
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(.systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(redfinRed, in: .rect(cornerRadius: 10))
+                    .background(Color.primary, in: Capsule())
             }
 
             VStack(spacing: 6) {
@@ -571,14 +621,10 @@ struct RedfinDetailView: View {
                     Text("Tour in person")
                         .font(.subheadline.weight(.semibold))
                 }
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color(.systemBackground))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(redfinRed.opacity(0.08), in: .rect(cornerRadius: 10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(redfinRed.opacity(0.3), lineWidth: 1)
-                )
+                .background(Color.primary, in: Capsule())
             }
 
             Button(action: {}) {
@@ -592,7 +638,7 @@ struct RedfinDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    Capsule()
                         .stroke(Color(.separator), lineWidth: 1)
                 )
             }
