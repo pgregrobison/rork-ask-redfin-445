@@ -13,7 +13,7 @@ struct RedfinDetailView: View {
     @State private var downPaymentPercent: Double = 20
     @State private var selectedMediaTab: Int = 0
 
-    private let redfinRed = Color(red: 0.78, green: 0.13, blue: 0.13)
+    private let redfinRed = Theme.Colors.brandRed
 
     private var monthlyPayment: Int {
         let principal = Double(listing.price) * (1.0 - downPaymentPercent / 100.0)
@@ -76,10 +76,10 @@ struct RedfinDetailView: View {
             .ignoresSafeArea(edges: .top)
 
             askRedfinFAB
-                .padding(.trailing, 16)
-                .padding(.bottom, 16)
+                .padding(.trailing, Theme.Spacing.md)
+                .padding(.bottom, Theme.Spacing.md)
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(scrollOffset < -(photoCarouselHeight - 100) ? .visible : .hidden, for: .navigationBar)
         .toolbar {
@@ -124,13 +124,13 @@ struct RedfinDetailView: View {
         ZStack(alignment: .bottom) {
             TabView(selection: $currentPhotoIndex) {
                 ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
-                    Color(.tertiarySystemBackground)
+                    Theme.Colors.tertiaryBackground
                         .overlay {
                             AsyncImage(url: URL(string: url)) { phase in
                                 if let image = phase.image {
                                     image.resizable().aspectRatio(contentMode: .fill)
                                 } else if phase.error != nil {
-                                    Color(.tertiarySystemBackground)
+                                    Theme.Colors.tertiaryBackground
                                 } else {
                                     ProgressView()
                                 }
@@ -148,7 +148,7 @@ struct RedfinDetailView: View {
                 carouselDots
                 mediaSegmentedControl
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Theme.Spacing.md)
             .padding(.bottom, segmentedControlBottomInset)
         }
         .frame(height: photoCarouselHeight)
@@ -156,24 +156,24 @@ struct RedfinDetailView: View {
         .overlay(alignment: .topLeading) {
             if let badge = listing.primaryBadge {
                 Text(badge.text)
-                    .font(.caption2.bold())
+                    .font(Theme.Typography.micro.bold())
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(badge.color, in: .rect(cornerRadius: 6))
+                    .padding(.horizontal, Theme.Spacing.xs)
+                    .padding(.vertical, Theme.Spacing.xxs)
+                    .background(badge.color, in: .rect(cornerRadius: Theme.Radius.xs))
                     .padding(.top, 60)
-                    .padding(.leading, 16)
+                    .padding(.leading, Theme.Spacing.md)
             }
         }
         .overlay(alignment: .topTrailing) {
             Text("\(currentPhotoIndex + 1) / \(listing.photos.count)")
-                .font(.caption.weight(.semibold))
+                .font(Theme.Typography.caption.weight(.semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(.black.opacity(0.5), in: .rect(cornerRadius: 8))
+                .background(.black.opacity(0.5), in: .rect(cornerRadius: Theme.Radius.small))
                 .padding(.top, 60)
-                .padding(.trailing, 16)
+                .padding(.trailing, Theme.Spacing.md)
         }
     }
 
@@ -251,7 +251,7 @@ struct RedfinDetailView: View {
 
             Color.clear.frame(height: 80)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Theme.Spacing.lg)
     }
 
     // MARK: - Price & Address
@@ -260,58 +260,54 @@ struct RedfinDetailView: View {
         VStack(spacing: 6) {
             Text(listing.formattedFullPrice)
                 .font(.system(size: 32, weight: .bold))
-                .padding(.top, 20)
+                .padding(.top, Theme.Spacing.lg)
 
-            HStack(spacing: 4) {
+            HStack(spacing: Theme.Spacing.xxs) {
                 Text("\(listing.beds) beds")
                 Text("·")
                 Text("\(listing.bathsFormatted) baths")
                 Text("·")
                 Text("\(listing.sqft.formatted()) sq ft")
             }
-            .font(.subheadline)
+            .font(Theme.Typography.secondary)
             .foregroundStyle(.secondary)
 
             Text(listing.fullAddress)
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.bottom, 16)
+        .padding(.bottom, Theme.Spacing.md)
     }
 
     // MARK: - Rate & Estimate Row
 
     private var rateEstimateRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("$\(totalMonthly.formatted())/mo")
-                    .font(.subheadline.bold())
-                HStack(spacing: 4) {
+                    .font(Theme.Typography.secondaryBold)
+                HStack(spacing: Theme.Spacing.xxs) {
                     Text("Rates dropped")
-                        .font(.caption)
+                        .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                     Image(systemName: "info.circle")
-                        .font(.caption2)
+                        .font(Theme.Typography.micro)
                         .foregroundStyle(.tertiary)
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+            .background(Theme.Colors.secondaryBackground, in: .rect(cornerRadius: Theme.Radius.medium))
 
             Spacer()
 
             Button(action: {}) {
                 Text("Estimate my rate")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(.systemBackground))
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 12)
-                    .background(Color.primary, in: Capsule())
             }
+            .buttonStyle(.smallPill)
         }
-        .padding(.bottom, 16)
+        .padding(.bottom, Theme.Spacing.md)
     }
 
     // MARK: - Request Showing
@@ -319,19 +315,15 @@ struct RedfinDetailView: View {
     private var requestShowingSection: some View {
         Button(action: {}) {
             Text("Request showing")
-                .font(.headline)
-                .foregroundStyle(Color(.systemBackground))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.primary, in: Capsule())
         }
-        .padding(.bottom, 12)
+        .buttonStyle(.primary)
+        .padding(.bottom, Theme.Spacing.sm)
     }
 
     // MARK: - Action Buttons
 
     private var actionButtonsRow: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: Theme.Spacing.lg) {
             Spacer()
 
             ShareLink(item: listing.shareText) {
@@ -349,25 +341,25 @@ struct RedfinDetailView: View {
 
             Spacer()
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, Theme.Spacing.xs)
     }
 
     private func actionCircle(icon: String, tint: Color? = nil) -> some View {
         Image(systemName: icon)
-            .font(.system(size: 16, weight: .medium))
+            .font(.system(size: Theme.ButtonSize.iconSize, weight: .medium))
             .foregroundStyle(tint ?? .primary)
-            .frame(width: 44, height: 44)
+            .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
             .overlay(
                 Circle()
-                    .stroke(Color(.separator), lineWidth: 1)
+                    .stroke(Theme.Colors.separator, lineWidth: 1)
             )
     }
 
     // MARK: - Property Details Grid
 
     private var propertyDetailsGrid: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Spacing.md) {
                 propertyDetailItem(icon: "house", value: listing.propertyType, label: "Property type")
                 propertyDetailItem(icon: "calendar", value: "\(listing.yearBuilt)", label: "Built")
                 propertyDetailItem(icon: "arrow.up.left.and.arrow.down.right", value: listing.lotSize, label: "Lot size")
@@ -376,22 +368,22 @@ struct RedfinDetailView: View {
                 propertyDetailItem(icon: "banknote", value: listing.hoaDues == "N/A" ? "$0" : listing.hoaDues, label: "HOA dues")
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Theme.Spacing.xs)
     }
 
     private func propertyDetailItem(icon: String, value: String, label: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: Theme.ButtonSize.iconSize, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
-                    .font(.subheadline.bold())
+                    .font(Theme.Typography.secondaryBold)
                     .lineLimit(1)
                 Text(label)
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -403,21 +395,21 @@ struct RedfinDetailView: View {
     private var highlightsSection: some View {
         Group {
             if !listing.tags.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: Theme.Spacing.xs)], alignment: .leading, spacing: Theme.Spacing.xs) {
                         ForEach(listing.tags, id: \.self) { tag in
                             Text(tag)
-                                .font(.subheadline)
+                                .font(Theme.Typography.secondary)
                                 .padding(.horizontal, 14)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, Theme.Spacing.xs)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color(.separator), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: Theme.Radius.xl)
+                                        .stroke(Theme.Colors.separator, lineWidth: 1)
                                 )
                         }
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, Theme.Spacing.xs)
             }
         }
     }
@@ -425,9 +417,9 @@ struct RedfinDetailView: View {
     // MARK: - Description
 
     private var descriptionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             Text(listing.description)
-                .font(.body)
+                .font(Theme.Typography.body)
                 .foregroundStyle(.secondary)
                 .lineLimit(showFullDescription ? nil : 3)
 
@@ -437,40 +429,32 @@ struct RedfinDetailView: View {
                         showFullDescription.toggle()
                     }
                 } label: {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Theme.Spacing.xxs) {
                         Text(showFullDescription ? "Show less" : "Continue reading")
                         Image(systemName: showFullDescription ? "chevron.up" : "chevron.down")
-                            .font(.caption.bold())
+                            .font(Theme.Typography.captionBold)
                     }
-                    .font(.subheadline.bold())
-                    .foregroundStyle(redfinRed)
                 }
+                .buttonStyle(.textLink)
             }
 
             Button(action: {}) {
                 Text("Full property details")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .overlay(
-                        Capsule()
-                            .stroke(Color(.separator), lineWidth: 1)
-                    )
             }
-            .padding(.top, 4)
+            .buttonStyle(.secondary)
+            .padding(.top, Theme.Spacing.xxs)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Theme.Spacing.xs)
     }
 
     // MARK: - Monthly Payment Breakdown
 
     private var monthlyPaymentBreakdown: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Theme.Spacing.lg) {
             Text("$\(totalMonthly.formatted()) /mo")
                 .font(.system(size: 28, weight: .bold))
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+                .padding(.top, Theme.Spacing.xs)
 
             paymentBreakdownList
 
@@ -478,25 +462,25 @@ struct RedfinDetailView: View {
 
             paymentInputs
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text("Loan details")
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
                 Text("30-yr fixed, 6.67%")
                     .font(.subheadline.weight(.medium))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Theme.Spacing.xs)
     }
 
     private var paymentBreakdownList: some View {
-        VStack(spacing: 12) {
-            paymentLineItem(color: Color(red: 0.2, green: 0.4, blue: 0.8), label: "Principal and interest", amount: principalAndInterest, percent: totalMonthly > 0 ? Int(Double(principalAndInterest) / Double(totalMonthly) * 100) : 0)
-            paymentLineItem(color: Color(red: 0.3, green: 0.7, blue: 0.4), label: "Property taxes", amount: propertyTaxes, percent: totalMonthly > 0 ? Int(Double(propertyTaxes) / Double(totalMonthly) * 100) : 0)
-            paymentLineItem(color: Color(red: 0.95, green: 0.7, blue: 0.2), label: "Homeowners insurance", amount: homeInsurance, percent: totalMonthly > 0 ? Int(Double(homeInsurance) / Double(totalMonthly) * 100) : 0)
+        VStack(spacing: Theme.Spacing.sm) {
+            paymentLineItem(color: Theme.Colors.Chart.blue, label: "Principal and interest", amount: principalAndInterest, percent: totalMonthly > 0 ? Int(Double(principalAndInterest) / Double(totalMonthly) * 100) : 0)
+            paymentLineItem(color: Theme.Colors.Chart.green, label: "Property taxes", amount: propertyTaxes, percent: totalMonthly > 0 ? Int(Double(propertyTaxes) / Double(totalMonthly) * 100) : 0)
+            paymentLineItem(color: Theme.Colors.Chart.amber, label: "Homeowners insurance", amount: homeInsurance, percent: totalMonthly > 0 ? Int(Double(homeInsurance) / Double(totalMonthly) * 100) : 0)
             if hoaDuesAmount > 0 {
-                paymentLineItem(color: Color(red: 0.6, green: 0.4, blue: 0.8), label: "HOA dues", amount: hoaDuesAmount, percent: totalMonthly > 0 ? Int(Double(hoaDuesAmount) / Double(totalMonthly) * 100) : 0)
+                paymentLineItem(color: Theme.Colors.Chart.purple, label: "HOA dues", amount: hoaDuesAmount, percent: totalMonthly > 0 ? Int(Double(hoaDuesAmount) / Double(totalMonthly) * 100) : 0)
             }
         }
     }
@@ -507,10 +491,10 @@ struct RedfinDetailView: View {
                 .fill(color)
                 .frame(width: 10, height: 10)
             Text(label)
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
             Spacer()
             Text("$\(amount.formatted()) (\(percent)%)")
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
         }
     }
@@ -525,17 +509,17 @@ struct RedfinDetailView: View {
 
             HStack(spacing: 2) {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(red: 0.2, green: 0.4, blue: 0.8))
+                    .fill(Theme.Colors.Chart.blue)
                     .frame(width: max(piWidth, 2))
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(red: 0.3, green: 0.7, blue: 0.4))
+                    .fill(Theme.Colors.Chart.green)
                     .frame(width: max(taxWidth, 2))
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(red: 0.95, green: 0.7, blue: 0.2))
+                    .fill(Theme.Colors.Chart.amber)
                     .frame(width: max(insWidth, 2))
                 if hoaDuesAmount > 0 {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(red: 0.6, green: 0.4, blue: 0.8))
+                        .fill(Theme.Colors.Chart.purple)
                         .frame(width: max(hoaWidth, 2))
                 }
             }
@@ -544,19 +528,19 @@ struct RedfinDetailView: View {
     }
 
     private var paymentInputs: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: Theme.Spacing.md) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text("Home price")
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
                 Text(listing.formattedFullPrice)
                     .font(.subheadline.weight(.medium))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text("Down payment")
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
                 Text("\(Int(downPaymentPercent))% ($\((Int(Double(listing.price) * downPaymentPercent / 100.0)).formatted()))")
                     .font(.subheadline.weight(.medium))
@@ -568,106 +552,89 @@ struct RedfinDetailView: View {
     // MARK: - Estimate Payment Button
 
     private var estimatePaymentButton: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             Button(action: {}) {
                 Text("Estimate my payment & rate")
-                    .font(.headline)
-                    .foregroundStyle(Color(.systemBackground))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.primary, in: Capsule())
             }
+            .buttonStyle(.primary)
 
             VStack(spacing: 6) {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark")
-                        .font(.caption.bold())
-                        .foregroundStyle(Theme.redfinGreenColor)
+                        .font(Theme.Typography.captionBold)
+                        .foregroundStyle(Theme.Colors.brandGreen)
                     Text("Takes about 3 minutes")
-                        .font(.caption)
+                        .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                 }
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark")
-                        .font(.caption.bold())
-                        .foregroundStyle(Theme.redfinGreenColor)
+                        .font(Theme.Typography.captionBold)
+                        .foregroundStyle(Theme.Colors.brandGreen)
                     Text("Won't affect your credit score")
-                        .font(.caption)
+                        .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                 }
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Theme.Spacing.xs)
     }
 
     // MARK: - Take a Tour
 
     private var takeTourSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.md) {
             Text("Take a tour")
-                .font(.title2.bold())
+                .font(Theme.Typography.sectionTitle)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+                .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "house.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(redfinRed.opacity(0.15))
-                .padding(.bottom, 4)
+                .padding(.bottom, Theme.Spacing.xxs)
 
             Button(action: {}) {
-                HStack(spacing: 8) {
+                HStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "person.2")
-                        .font(.subheadline.weight(.semibold))
                     Text("Tour in person")
-                        .font(.subheadline.weight(.semibold))
                 }
-                .foregroundStyle(Color(.systemBackground))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.primary, in: Capsule())
             }
+            .buttonStyle(.primary)
 
             Button(action: {}) {
-                HStack(spacing: 8) {
+                HStack(spacing: Theme.Spacing.xs) {
                     Image(systemName: "video")
-                        .font(.subheadline.weight(.semibold))
                     Text("Tour via video chat")
-                        .font(.subheadline.weight(.semibold))
                 }
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .overlay(
-                    Capsule()
-                        .stroke(Color(.separator), lineWidth: 1)
-                )
             }
+            .buttonStyle(.secondary)
 
             Text("It's free, cancel anytime.")
-                .font(.caption)
+                .font(Theme.Typography.caption)
                 .foregroundStyle(.tertiary)
-                .padding(.bottom, 8)
+                .padding(.bottom, Theme.Spacing.xs)
         }
     }
 
     // MARK: - Ask Redfin Section
 
     private var askRedfinSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             Text("Ask Redfin")
-                .font(.title2.bold())
+                .font(Theme.Typography.sectionTitle)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+                .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "bubble.left.and.bubble.right.fill")
                 .font(.system(size: 40))
                 .foregroundStyle(redfinRed.opacity(0.2))
 
             Text("I'm here to help answer your questions about this property or your services. I can also connect you with a licensed advisor. Let's dive in!")
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, Theme.Spacing.md)
 
             Button(action: onAskRedfin) {
                 HStack(spacing: 6) {
@@ -677,29 +644,29 @@ struct RedfinDetailView: View {
                         .font(.subheadline.weight(.semibold))
                 }
                 .foregroundStyle(.primary)
-                .padding(.horizontal, 32)
-                .padding(.vertical, 12)
+                .padding(.horizontal, Theme.Spacing.xxl)
+                .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
                 .overlay(
                     Capsule()
-                        .stroke(Color(.separator), lineWidth: 1)
+                        .stroke(Theme.Colors.separator, lineWidth: 1)
                 )
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, Theme.Spacing.xs)
         }
     }
 
     // MARK: - Lifestyle
 
     private var lifestyleSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.md) {
             Text("Lifestyle")
-                .font(.title2.bold())
+                .font(Theme.Typography.sectionTitle)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+                .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "figure.walk")
                 .font(.system(size: 36))
-                .foregroundStyle(Theme.redfinGreenColor.opacity(0.3))
+                .foregroundStyle(Theme.Colors.brandGreen.opacity(0.3))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 lifestylePill(icon: "figure.walk", label: "Walker's paradise")
@@ -710,33 +677,33 @@ struct RedfinDetailView: View {
 
             Button(action: {}) {
                 Text("How is this calculated?")
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
                     .underline()
             }
 
             Text("Provided by Walk Score and Local Logic")
-                .font(.caption2)
+                .font(Theme.Typography.micro)
                 .foregroundStyle(.tertiary)
-                .padding(.bottom, 8)
+                .padding(.bottom, Theme.Spacing.xs)
         }
     }
 
     private func lifestylePill(icon: String, label: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.caption)
+                .font(Theme.Typography.caption)
                 .foregroundStyle(.secondary)
             Text(label)
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .lineLimit(1)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color(.separator), lineWidth: 1)
+            RoundedRectangle(cornerRadius: Theme.Radius.xl)
+                .stroke(Theme.Colors.separator, lineWidth: 1)
         )
     }
 
@@ -750,7 +717,7 @@ struct RedfinDetailView: View {
 
     private var sectionDivider: some View {
         Divider()
-            .padding(.vertical, 16)
+            .padding(.vertical, Theme.Spacing.md)
     }
 }
 

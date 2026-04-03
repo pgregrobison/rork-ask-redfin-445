@@ -1,79 +1,92 @@
-# Migrate Find Tab to Use Theme Design System Tokens
+# Phase 2: Button System + Detail Pages Theme Migration
 
-**Goal:** Replace all hardcoded colors, spacing, radii, fonts, and shadows across the Find tab and its components with centralized Theme tokens — without changing the visual appearance at all.
+## Overview
 
----
-
-### Theme Token Additions
-
-- **New radius token:** `Theme.Radius.xs` (4pt) for small elements, and `Theme.Radius.full` as a large value (e.g. 9999) for fully-rounded / capsule-like corners
-- **New spacing token:** None needed — existing `xxs` through `xxl` cover all current values
-- **Badge colors:** Wire up `Theme.Colors.Badge` tokens (already defined) to replace hardcoded badge colors in `HomeCardBadge`
-- **Map pin colors:** Wire up `Theme.Colors.MapPin` tokens (already defined) to replace hardcoded RGB values in `MapPinView`
-- **Typography:** Map `HomeCardSize` fonts to `Theme.Typography` tokens (e.g. `.title2.bold()` → `Theme.Typography.sectionTitle`)
-- **Card photo heights / widths:** Add `Theme.CardSize` tokens for the three card size variants (large/medium/compact photo heights, fixed widths, info padding)
+Migrate all 6 button patterns to Theme-backed styles, update detail pages to use theme tokens, and retroactively fix buttons in Phase 1 files.
 
 ---
 
-### Files Changed
+### Part A: Expand Theme + Create Button Styles
 
-**Theme.swift** — Add new tokens:
-- `Radius.xs` (4pt) and `Radius.full` (9999pt for fully rounded)
-- `CardSize` enum with photo height, fixed width, info padding, and font mappings per size variant — centralizing what's currently in `HomeCardSize`
-- Shadow: add an `overlay` shadow preset matching the current listing card overlay shadow
+**Theme.swift additions:**
 
-**FindListView.swift** — Replace:
-- `spacing: 16` → `Theme.Spacing.md`
-- `.padding(.horizontal, 16)` → `Theme.Spacing.md`
-- `.padding(.bottom, 100)` → leave as-is (layout-specific, not a design token)
+- Add `Theme.Colors.brandRed` reference for button use (already exists, just ensuring consistency)
+- Add `Theme.ButtonSize.verticalPadding` (14pt for full-width, 12pt for compact)
+- Add `Theme.ButtonSize.minHeight` (44pt touch target)
+
+**ButtonStyles.swift — 6 new/updated styles:**
+
+1. **PrimaryButtonStyle** (update existing) — Full-width capsule, `Color.primary` fill, inverted text, 14pt vertical padding, pressed opacity 0.85
+2. **SecondaryButtonStyle** (update existing) — Full-width capsule, 1pt separator stroke, 14pt vertical padding, pressed opacity 0.7
+3. **TextLinkButtonStyle** (new) — No background, `brandRed` foreground, bold subheadline, with chevron icon support
+4. **SmallPillButtonStyle** (new) — Inline capsule, `Color.primary` fill, inverted text, 12pt vertical / 18pt horizontal padding (for "Estimate my rate" type buttons)
+5. **ActionCircleButtonStyle** (new) — 44×44 circle with 1pt separator stroke, 16pt medium icon (for share/save/more row)
+6. **IconCircleButtonStyle** (new) — 44×44 solid circle, `Color.primary` fill, inverted icon (for send/stop/waveform buttons in chat input)
+
+Each will use Theme tokens for spacing, typography, colors, and radius.
+
+---
+
+### Part B: Retroactive Button Migration (Phase 1 files)
+
+**MyHomeView.swift:**
+
+- "Add address" button → use `PrimaryButtonStyle` variant or Theme tokens for its inline styling (currently uses `Color(white: 0.15)` with hardcoded corner radius)
+
+---
+
+### Part C: Detail Page Migration — ListingDetailView.swift
+
+Replace hardcoded values with Theme tokens:
+
 - `Color(.systemBackground)` → `Theme.Colors.background`
-
-**FindMapView.swift** — Replace:
-- `.padding(.trailing, 16)` → `Theme.Spacing.md`
-- `.padding(.top, 8)` → `Theme.Spacing.xs`
-- Animation spring values left as-is (motion, not a design token)
-
-**HomeCard.swift** — Replace:
-- `HomeCardSize` corner radii → `Theme.Radius` tokens
-- Photo heights, fixed widths, fonts, info padding → `Theme.CardSize` tokens
 - `Color(.secondarySystemBackground)` → `Theme.Colors.secondaryBackground`
 - `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
-- Badge padding and corner radius → `Theme.Spacing` and `Theme.Radius` tokens
-- `HomeCardBadge.color` → `Theme.Colors.Badge` tokens
-
-**HomeCardInfoSection.swift** — Replace:
-- Spacing values (6, 8) → `Theme.Spacing` tokens
-- `.padding(.trailing, 12)` → `Theme.Spacing.sm`
-- Tag background `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
-- Tag padding → `Theme.Spacing` tokens
-
-**ListingCardOverlay.swift** — Replace:
-- `Color(.secondarySystemBackground)` → `Theme.Colors.secondaryBackground`
-- `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
-- Card shadow → `Theme.Shadow.overlay` (new token)
-- `.frame(height: 220)` → card size photo height token
-- Padding values (8, 12, 20) → `Theme.Spacing` tokens
-- Badge styling → same Theme tokens as HomeCard
-
-**MapPinView.swift** — Replace:
-- Hardcoded RGB colors → `Theme.Colors.MapPin` tokens (already defined, just not wired up)
-- Font size 13 → closest Theme token or keep as map-pin-specific
-- Padding values → `Theme.Spacing` tokens
-- Shadow → `Theme.Shadow.subtle` (close match)
-
-**UserLocationDot.swift** — Replace:
-- Frame sizes (44, 16, 12) → Theme tokens where applicable
-- `Color.blue` left as-is (system semantic color, appropriate for location)
-
-**GlassActionButton.swift** — Replace:
-- `size: CGFloat = 44` → `Theme.IconSize.mediumTap`
-- Divider frame widths/heights (32) → Theme token
-- `.rect(cornerRadius: 25)` → `Theme.Radius.full` (fully rounded)
+- Corner radii (`12`, `16`, `18`) → `Theme.Radius.medium`, `.large`, `.xl`
+- Spacing values (`6`, `8`, `10`, `12`, `16`, `20`) → `Theme.Spacing` tokens
+- Typography (`.largeTitle.bold()`, `.title3.bold()`, `.subheadline`, etc.) → `Theme.Typography` tokens
+- Shadow → `Theme.Shadow` tokens
+- `Color(red: 0.78, green: 0.13, blue: 0.13)` → `Theme.Colors.brandRed`
+- "Request showing" button → Theme button tokens
+- "Continue reading" link → `TextLinkButtonStyle` or Theme tokens
+- Disclosure rows → Theme spacing/typography tokens
+- Key facts card, hot home badge, highlights section → Theme tokens
 
 ---
 
-### What Stays the Same
-- Navigation toolbar icons — handled natively by the system, no custom styling
-- Animation/spring values — motion parameters, not design tokens
-- Map style and camera behavior — MapKit native
-- The visual appearance — pixel-identical output before and after
+### Part D: Detail Page Migration — RedfinDetailView.swift
+
+Replace hardcoded values with Theme tokens:
+
+- `private let redfinRed` → `Theme.Colors.brandRed`
+- All `Color(.systemBackground)`, `Color(.secondarySystemBackground)`, `Color(.separator)` → Theme color tokens
+- All inline button styles:
+  - "Request showing" → `PrimaryButtonStyle`
+  - "Estimate my rate" → `SmallPillButtonStyle`
+  - "Tour in person" / "Estimate my payment & rate" → `PrimaryButtonStyle`
+  - "Tour via video chat" / "Full property details" / "Let's chat" → `SecondaryButtonStyle`
+  - "Continue reading" → `TextLinkButtonStyle`
+  - "How is this calculated?" → text link with Theme tokens
+  - Share/save/more action circles → `ActionCircleButtonStyle`
+- Chart colors → `Theme.Colors.Chart` tokens (already defined)
+- Spacing, typography, corner radii → Theme tokens throughout
+- Lifestyle pills stroke → Theme separator/radius tokens
+- Section divider padding → Theme spacing
+
+---
+
+### Part E: PhotoViewerView.swift Migration
+
+- "Request showing" button → Theme tokens + `Theme.Colors.brandRed`
+- Spacing values → Theme tokens
+- Already uses `GlassActionButton` (which uses Theme) — minimal changes needed
+
+---
+
+### What stays the same visually
+
+Everything should look identical after migration. The only possible micro-differences:
+
+- MyHomeView "Add address" button corner radius (currently 10pt) will snap to nearest theme token or get a new one
+- Any `Color(red: 0.78, green: 0.13, blue: 0.13)` replaced with `Theme.Colors.brandRed` (same color value)
+

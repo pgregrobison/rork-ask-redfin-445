@@ -53,7 +53,7 @@ struct ListingDetailView: View {
             }
         }
         .ignoresSafeArea()
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -115,14 +115,14 @@ struct ListingDetailView: View {
                             focusVisible = true
                         }
                     } label: {
-                        Color(.tertiarySystemBackground)
+                        Theme.Colors.tertiaryBackground
                             .frame(height: 300)
                             .overlay {
                                 AsyncImage(url: URL(string: url)) { phase in
                                     if let image = phase.image {
                                         image.resizable().aspectRatio(contentMode: .fill)
                                     } else if phase.error != nil {
-                                        Color(.tertiarySystemBackground)
+                                        Theme.Colors.tertiaryBackground
                                     } else {
                                         ProgressView()
                                     }
@@ -150,9 +150,9 @@ struct ListingDetailView: View {
             sheetContent
         }
         .frame(maxWidth: .infinity)
-        .background(Color(.systemBackground))
-        .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
-        .shadow(color: .black.opacity(0.1), radius: 10, y: -5)
+        .background(Theme.Colors.background)
+        .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
+        .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
         .gesture(sheetDrag)
     }
@@ -163,7 +163,7 @@ struct ListingDetailView: View {
                 .fill(Color(.systemGray3))
                 .frame(width: 36, height: 5)
                 .padding(.top, 10)
-                .padding(.bottom, 12)
+                .padding(.bottom, Theme.Spacing.sm)
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
@@ -201,7 +201,7 @@ struct ListingDetailView: View {
                     Color.clear.frame(height: 0).id("sheetTop")
 
                     headerSection
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, Theme.Spacing.lg)
 
                     if sheetSnap == .expanded {
                         expandedContent
@@ -258,18 +258,18 @@ struct ListingDetailView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(listing.formattedFullPrice)
-                    .font(.largeTitle.bold())
+                    .font(Theme.Typography.heroPrice)
 
-                HStack(spacing: 8) {
+                HStack(spacing: Theme.Spacing.xs) {
                     Text("\(listing.beds) bd")
                     Text("\(listing.bathsFormatted) ba")
                     Text("\(listing.sqft.formatted()) sq ft")
                 }
-                .font(.subheadline)
+                .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
 
                 Text(listing.fullAddress)
-                    .font(.subheadline)
+                    .font(Theme.Typography.secondary)
                     .foregroundStyle(.secondary)
             }
 
@@ -294,43 +294,43 @@ struct ListingDetailView: View {
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
         .allowsHitTesting(false)
         .frame(width: 70, height: 70)
-        .clipShape(.rect(cornerRadius: 12))
+        .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
     // MARK: - Expanded Content
 
     private var expandedContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Divider().padding(.vertical, 16)
+            Divider().padding(.vertical, Theme.Spacing.md)
 
             aboutSection
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Theme.Spacing.lg)
 
             metaStatsRow
-                .padding(.top, 20)
-                .padding(.horizontal, 20)
+                .padding(.top, Theme.Spacing.lg)
+                .padding(.horizontal, Theme.Spacing.lg)
 
-            Divider().padding(.vertical, 16)
+            Divider().padding(.vertical, Theme.Spacing.md)
 
             keyFactsSection
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Theme.Spacing.lg)
 
             if listing.isHotHome {
                 hotHomeBadge
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.top, Theme.Spacing.md)
             }
 
             if !listing.tags.isEmpty {
                 highlightsSection
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.top, Theme.Spacing.lg)
             }
 
-            Divider().padding(.vertical, 16)
+            Divider().padding(.vertical, Theme.Spacing.md)
 
             moreSections
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Theme.Spacing.lg)
         }
         .transition(.opacity)
     }
@@ -345,13 +345,13 @@ struct ListingDetailView: View {
     }
 
     private var detailFooter: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             requestShowingButton
 
             askRedfinButton
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, max(safeAreaBottom, 12))
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))
     }
 
     private var askRedfinButton: some View {
@@ -363,19 +363,19 @@ struct ListingDetailView: View {
         if #available(iOS 26.0, *) {
             Button(action: {}) {
                 Text("Request showing")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+                    .padding(.vertical, Theme.Spacing.md)
             }
             .glassEffect(.regular.tint(.red).interactive(), in: .capsule)
         } else {
             Button(action: {}) {
                 Text("Request showing")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
+                    .padding(.vertical, Theme.Spacing.md)
+                    .background(Theme.Colors.brandRed, in: Capsule())
             }
             .buttonStyle(.plain)
         }
@@ -422,10 +422,10 @@ struct ListingDetailView: View {
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("About this home")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
             Text(listing.description)
-                .font(.body)
+                .font(Theme.Typography.body)
                 .foregroundStyle(.secondary)
                 .lineLimit(showFullDescription ? nil : 4)
 
@@ -435,14 +435,13 @@ struct ListingDetailView: View {
                         showFullDescription.toggle()
                     }
                 } label: {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Theme.Spacing.xxs) {
                         Text(showFullDescription ? "Show less" : "Continue reading")
                         Image(systemName: showFullDescription ? "chevron.up" : "chevron.down")
-                            .font(.caption.bold())
+                            .font(Theme.Typography.captionBold)
                     }
-                    .font(.subheadline.bold())
-                    .foregroundStyle(Color(red: 0.78, green: 0.13, blue: 0.13))
                 }
+                .buttonStyle(.textLink)
             }
         }
     }
@@ -460,11 +459,11 @@ struct ListingDetailView: View {
     }
 
     private func metaStat(value: String, label: String) -> some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Theme.Spacing.xxs) {
             Text(value)
-                .font(.headline)
+                .font(Theme.Typography.headline)
             Text(label)
-                .font(.caption)
+                .font(Theme.Typography.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -473,11 +472,11 @@ struct ListingDetailView: View {
     // MARK: - Key Facts
 
     private var keyFactsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             Text("Key facts")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Spacing.md) {
                 keyFactRow(icon: "house", value: listing.propertyType, label: "Property type")
                 keyFactRow(icon: "calendar", value: "\(listing.yearBuilt)", label: "Year built")
                 keyFactRow(icon: "arrow.up.left.and.arrow.down.right", value: listing.lotSize, label: "Lot size")
@@ -486,9 +485,9 @@ struct ListingDetailView: View {
                 keyFactRow(icon: "percent", value: listing.buyerAgentFee, label: "Buyer's agent fee")
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 12))
+        .padding(Theme.Spacing.md)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
     private func keyFactRow(icon: String, value: String, label: String) -> some View {
@@ -500,9 +499,9 @@ struct ListingDetailView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
-                    .font(.subheadline.bold())
+                    .font(Theme.Typography.secondaryBold)
                 Text(label)
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -518,32 +517,32 @@ struct ListingDetailView: View {
                 .foregroundStyle(.primary)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Hot Home")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
                 Text("This home is likely to sell quickly.")
-                    .font(.caption)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(16)
+        .padding(Theme.Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 12))
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
     // MARK: - Highlights
 
     private var highlightsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
             Text("Highlights")
-                .font(.title3.bold())
+                .font(Theme.Typography.cardTitle)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], alignment: .leading, spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: Theme.Spacing.xs)], alignment: .leading, spacing: Theme.Spacing.xs) {
                 ForEach(listing.tags, id: \.self) { tag in
                     Text(tag)
-                        .font(.subheadline)
+                        .font(Theme.Typography.secondary)
                         .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color(.secondarySystemBackground))
+                        .padding(.vertical, Theme.Spacing.xs)
+                        .background(Theme.Colors.secondaryBackground)
                         .clipShape(Capsule())
                 }
             }
@@ -560,28 +559,28 @@ struct ListingDetailView: View {
             Divider().padding(.leading, 42)
             disclosureRow(icon: "graduationcap", title: "Schools nearby")
         }
-        .padding(4)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 12))
+        .padding(Theme.Spacing.xxs)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
     private func disclosureRow(icon: String, title: String) -> some View {
         Button(action: {}) {
-            HStack(spacing: 12) {
+            HStack(spacing: Theme.Spacing.sm) {
                 Image(systemName: icon)
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .frame(width: 28)
                 Text(title)
-                    .font(.body)
+                    .font(Theme.Typography.body)
                     .foregroundStyle(.primary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Theme.Spacing.sm)
+            .padding(.vertical, Theme.Spacing.sm)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

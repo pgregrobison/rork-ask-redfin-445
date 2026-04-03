@@ -87,27 +87,27 @@ struct FocusedPhotoViewer: View {
                 GlassActionButtonItem(icon: "square.and.arrow.up", action: {})
             ])
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Theme.Spacing.md)
         .padding(.top, safeAreaTop + 4)
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             Button(action: {}) {
                 Text("Request showing")
-                    .font(.headline)
+                    .font(Theme.Typography.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(red: 0.78, green: 0.13, blue: 0.13), in: .rect(cornerRadius: 30))
+                    .padding(.vertical, Theme.Spacing.md)
+                    .background(Theme.Colors.brandRed, in: Capsule())
             }
             .buttonStyle(.plain)
 
             GlassActionButton(icon: "sparkle") {}
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, max(safeAreaBottom, 12))
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, Theme.Spacing.sm)
+        .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))
     }
 
     private var safeAreaTop: CGFloat {

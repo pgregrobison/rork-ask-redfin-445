@@ -49,8 +49,8 @@ struct MyHomeView: View {
                     .font(Theme.Typography.headline)
                     .foregroundStyle(.white)
                     .padding(.horizontal, Theme.Spacing.xxl)
-                    .padding(.vertical, 14)
-                    .background(Color(white: 0.15), in: .rect(cornerRadius: 10))
+                    .padding(.vertical, Theme.ButtonSize.verticalPadding)
+                    .background(Color(white: 0.15), in: Capsule())
             }
         }
         .padding(Theme.Spacing.xl)

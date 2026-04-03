@@ -19,8 +19,9 @@ enum Theme {
     // MARK: - Brand Colors
 
     enum Colors {
-        static let brandRed = Color(red: 0.87, green: 0.2, blue: 0.25)
+        static let brandRed = Color(red: 0.78, green: 0.13, blue: 0.13)
         static let brandGreen = Color(red: 27/255, green: 107/255, blue: 58/255)
+        static let invertedPrimary = Color(.systemBackground)
 
         static let background = Color(.systemBackground)
         static let secondaryBackground = Color(.secondarySystemBackground)
@@ -134,5 +135,16 @@ enum Theme {
 
     enum DividerSize {
         static let standard: CGFloat = 32
+    }
+
+    // MARK: - Button Size Tokens
+
+    enum ButtonSize {
+        static let verticalPadding: CGFloat = 14
+        static let compactVerticalPadding: CGFloat = 12
+        static let pillHorizontalPadding: CGFloat = 18
+        static let minHeight: CGFloat = 44
+        static let iconSize: CGFloat = 16
+        static let circleSize: CGFloat = 44
     }
 }
