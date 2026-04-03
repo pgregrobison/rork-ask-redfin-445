@@ -4,7 +4,7 @@ struct GlassActionButton: View {
     let icon: String
     let action: () -> Void
     var foregroundColor: Color = .primary
-    var size: CGFloat = 44
+    var size: CGFloat = Theme.IconSize.mediumTap
 
     var body: some View {
         if #available(iOS 26.0, *) {
@@ -43,7 +43,7 @@ struct GlassActionMenuButton<MenuContent: View>: View {
                 Image(systemName: icon)
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
-                    .frame(width: 44, height: 44)
+                    .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                     .contentShape(Circle())
             }
             .glassEffect(in: .circle)
@@ -54,7 +54,7 @@ struct GlassActionMenuButton<MenuContent: View>: View {
                 Image(systemName: icon)
                     .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     .foregroundStyle(foregroundColor)
-                    .frame(width: 44, height: 44)
+                    .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                     .background(.ultraThinMaterial, in: Circle())
             }
         }
@@ -85,15 +85,15 @@ struct GlassActionButtonStack: View {
                     Image(systemName: item.icon)
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
                 if index < items.count - 1 {
-                    Divider().frame(width: 32)
+                    Divider().frame(width: Theme.DividerSize.standard)
                 }
             }
         }
-        .background(.ultraThinMaterial, in: .rect(cornerRadius: 25))
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.Radius.full))
     }
 }
 
@@ -110,13 +110,13 @@ private struct GlassActionButtonStackIOS26: View {
                         Image(systemName: item.icon)
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
-                            .frame(width: 44, height: 44)
+                            .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                             .contentShape(Rectangle())
                     }
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 25))
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: Theme.Radius.full))
                     .glassEffectUnion(id: "stack", namespace: unionNamespace)
                     if index < items.count - 1 {
-                        Divider().frame(width: 32)
+                        Divider().frame(width: Theme.DividerSize.standard)
                     }
                 }
             }
@@ -143,11 +143,11 @@ struct GlassActionButtonRow: View {
                     Image(systemName: item.icon)
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                         .contentShape(Rectangle())
                 }
                 if index < items.count - 1 {
-                    Divider().frame(height: 32)
+                    Divider().frame(height: Theme.DividerSize.standard)
                 }
             }
         }
@@ -168,13 +168,13 @@ private struct GlassActionButtonRowIOS26: View {
                         Image(systemName: item.icon)
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.primary)
-                            .frame(width: 44, height: 44)
+                            .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                             .contentShape(Rectangle())
                     }
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .glassEffectUnion(id: "row", namespace: unionNamespace)
                     if index < items.count - 1 {
-                        Divider().frame(height: 32)
+                        Divider().frame(height: Theme.DividerSize.standard)
                     }
                 }
             }

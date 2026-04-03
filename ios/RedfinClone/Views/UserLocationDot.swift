@@ -7,13 +7,13 @@ struct UserLocationDot: View {
         ZStack {
             Circle()
                 .fill(Color.blue.opacity(0.15))
-                .frame(width: 44, height: 44)
+                .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                 .scaleEffect(isPulsing ? 1.0 : 0.5)
                 .opacity(isPulsing ? 0.0 : 0.6)
 
             Circle()
                 .fill(Color.blue.opacity(0.15))
-                .frame(width: 44, height: 44)
+                .frame(width: Theme.IconSize.mediumTap, height: Theme.IconSize.mediumTap)
                 .scaleEffect(isPulsing ? 0.7 : 0.3)
                 .opacity(isPulsing ? 0.3 : 0.6)
 

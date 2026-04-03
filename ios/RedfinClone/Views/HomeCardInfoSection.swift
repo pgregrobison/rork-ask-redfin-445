@@ -7,7 +7,7 @@ struct HomeCardInfoSection: View {
     var onToggleSave: (() -> Void)? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: size.fixedWidth != nil ? 6 : 8) {
+        VStack(alignment: .leading, spacing: size.fixedWidth != nil ? Theme.Spacing.xxs + 2 : Theme.Spacing.xs) {
             Text(listing.formattedFullPrice)
                 .font(size.priceFont)
 
@@ -26,13 +26,13 @@ struct HomeCardInfoSection: View {
         .padding(size.infoPadding)
         .overlay(alignment: .topTrailing) {
             cardActions
-                .padding(.top, size.fixedWidth == nil ? 8 : 4)
-                .padding(.trailing, 12)
+                .padding(.top, size.fixedWidth == nil ? Theme.Spacing.xs : Theme.Spacing.xxs)
+                .padding(.trailing, Theme.Spacing.sm)
         }
     }
 
     private var statsRow: some View {
-        HStack(spacing: size.fixedWidth != nil ? 6 : 8) {
+        HStack(spacing: size.fixedWidth != nil ? Theme.Spacing.xxs + 2 : Theme.Spacing.xs) {
             Text("\(listing.beds) bd")
             Text("·")
             Text("\(listing.bathsFormatted) ba")
@@ -44,14 +44,14 @@ struct HomeCardInfoSection: View {
     }
 
     private var tagsRow: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Theme.Spacing.xxs + 2) {
             ForEach(listing.tags.prefix(3), id: \.self) { tag in
                 Text(tag)
                     .font(size.tagFont)
                     .lineLimit(1)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(.tertiarySystemBackground))
+                    .padding(.horizontal, Theme.Spacing.xs)
+                    .padding(.vertical, Theme.Spacing.xxs)
+                    .background(Theme.Colors.tertiaryBackground)
                     .clipShape(Capsule())
             }
         }
@@ -60,7 +60,7 @@ struct HomeCardInfoSection: View {
     }
 
     private var cardActions: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.xxs) {
             if size.showShareAction {
                 ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")

@@ -7,15 +7,15 @@ enum HomeCardSize {
 
     var photoHeight: CGFloat {
         switch self {
-        case .large: 240
-        case .medium: 220
-        case .compact: 180
+        case .large: Theme.CardSize.PhotoHeight.large
+        case .medium: Theme.CardSize.PhotoHeight.medium
+        case .compact: Theme.CardSize.PhotoHeight.compact
         }
     }
 
     var cornerRadius: CGFloat {
         switch self {
-        case .large: 16
+        case .large: Theme.Radius.large
         case .medium, .compact: 14
         }
     }
@@ -23,47 +23,47 @@ enum HomeCardSize {
     var fixedWidth: CGFloat? {
         switch self {
         case .large: nil
-        case .medium: 300
+        case .medium: Theme.CardSize.FixedWidth.medium
         case .compact(let width): width
         }
     }
 
     var priceFont: Font {
         switch self {
-        case .large: .title2.bold()
-        case .medium: .title3.bold()
-        case .compact: .headline
+        case .large: Theme.Typography.sectionTitle
+        case .medium: Theme.Typography.cardTitle
+        case .compact: Theme.Typography.headline
         }
     }
 
     var statsFont: Font {
         switch self {
-        case .large: .subheadline
-        case .medium: .subheadline
-        case .compact: .caption
+        case .large: Theme.Typography.secondary
+        case .medium: Theme.Typography.secondary
+        case .compact: Theme.Typography.caption
         }
     }
 
     var addressFont: Font {
         switch self {
-        case .large: .subheadline
-        case .medium: .subheadline
-        case .compact: .caption
+        case .large: Theme.Typography.secondary
+        case .medium: Theme.Typography.secondary
+        case .compact: Theme.Typography.caption
         }
     }
 
     var tagFont: Font {
         switch self {
-        case .large: .caption
-        case .medium, .compact: .caption2
+        case .large: Theme.Typography.caption
+        case .medium, .compact: Theme.Typography.micro
         }
     }
 
     var infoPadding: EdgeInsets {
         switch self {
-        case .large: EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
-        case .medium: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
-        case .compact: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+        case .large: Theme.CardSize.InfoPadding.large
+        case .medium: Theme.CardSize.InfoPadding.medium
+        case .compact: Theme.CardSize.InfoPadding.compact
         }
     }
 
@@ -93,12 +93,12 @@ struct HomeCard: View {
             )
         }
         .frame(width: size.fixedWidth)
-        .background(Color(.secondarySystemBackground))
+        .background(Theme.Colors.secondaryBackground)
         .clipShape(.rect(cornerRadius: size.cornerRadius))
     }
 
     private var photoSection: some View {
-        Color(.tertiarySystemBackground)
+        Theme.Colors.tertiaryBackground
             .frame(height: size.photoHeight)
             .overlay {
                 AsyncImage(url: URL(string: listing.photos.first ?? "")) { phase in
@@ -112,18 +112,18 @@ struct HomeCard: View {
             .overlay(alignment: .topLeading) {
                 if let badge {
                     badgeView(badge)
-                        .padding(size.fixedWidth != nil ? 10 : 12)
+                        .padding(size.fixedWidth != nil ? 10 : Theme.Spacing.sm)
                 }
             }
     }
 
     private func badgeView(_ badge: HomeCardBadge) -> some View {
         Text(badge.text)
-            .font(.caption2.bold())
+            .font(Theme.Typography.micro.bold())
             .foregroundStyle(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(badge.color, in: .rect(cornerRadius: 6))
+            .padding(.horizontal, Theme.Spacing.xs)
+            .padding(.vertical, Theme.Spacing.xxs)
+            .background(badge.color, in: .rect(cornerRadius: Theme.Radius.small))
     }
 }
 
@@ -144,10 +144,10 @@ enum HomeCardBadge {
 
     var color: Color {
         switch self {
-        case .hot: Color(white: 0.15)
-        case .listedByRedfin: Color(red: 0.78, green: 0.13, blue: 0.13)
-        case .compassComingSoon: .black
-        case .daysAgo: Theme.redfinGreenColor
+        case .hot: Theme.Colors.Badge.hot
+        case .listedByRedfin: Theme.Colors.Badge.listedByRedfin
+        case .compassComingSoon: Theme.Colors.Badge.compass
+        case .daysAgo: Theme.Colors.Badge.daysAgo
         }
     }
 }

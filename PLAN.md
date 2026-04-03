@@ -1,100 +1,79 @@
-# Create a comprehensive Design System (Theme.swift)
+# Migrate Find Tab to Use Theme Design System Tokens
 
-## Overview
-
-Expand the existing `Theme.swift` into a full design system with all the tokens needed for consistency across the app. This is **definition only** — no existing screens will be migrated in this step.
+**Goal:** Replace all hardcoded colors, spacing, radii, fonts, and shadows across the Find tab and its components with centralized Theme tokens — without changing the visual appearance at all.
 
 ---
 
-### **Colors**
+### Theme Token Additions
 
-- **Brand accent (Redfin red):** Updated to `(red: 0.87, green: 0.2, blue: 0.25)` — replaces all current hardcoded red values
-- **Green accent:** Keep current `redfinGreenColor`
-- **Semantic backgrounds:** Named references for `systemBackground`, `secondarySystemBackground`, `tertiarySystemBackground`
-- **Semantic fills:** `tertiarySystemFill`, `separator`
-- **Primary button colors:** `Color.primary` foreground on `Color(.systemBackground)` — auto-adapts light/dark
-- **Chart/payment breakdown colors:** Named set of 4 data visualization colors (blue, green, amber, purple)
-- **Map pin colors:** Named tokens for default, selected, and seen states (light + dark)
-- **Badge colors:** Named tokens for hot, listed-by-redfin, compass, days-ago
+- **New radius token:** `Theme.Radius.xs` (4pt) for small elements, and `Theme.Radius.full` as a large value (e.g. 9999) for fully-rounded / capsule-like corners
+- **New spacing token:** None needed — existing `xxs` through `xxl` cover all current values
+- **Badge colors:** Wire up `Theme.Colors.Badge` tokens (already defined) to replace hardcoded badge colors in `HomeCardBadge`
+- **Map pin colors:** Wire up `Theme.Colors.MapPin` tokens (already defined) to replace hardcoded RGB values in `MapPinView`
+- **Typography:** Map `HomeCardSize` fonts to `Theme.Typography` tokens (e.g. `.title2.bold()` → `Theme.Typography.sectionTitle`)
+- **Card photo heights / widths:** Add `Theme.CardSize` tokens for the three card size variants (large/medium/compact photo heights, fixed widths, info padding)
 
 ---
 
-### **Corner Radius (4 levels)**
+### Files Changed
 
-| Token | Value | Use case |
-|-------|-------|----------|
-| `small` | 8pt | Badges, small tags, inputs |
-| `medium` | 12pt | Cards, thumbnails, info panels |
-| `large` | 16pt | Large cards, widgets, sections |
-| `xl` | 20pt | Modals, expanded pill overlays, empty state icons |
+**Theme.swift** — Add new tokens:
+- `Radius.xs` (4pt) and `Radius.full` (9999pt for fully rounded)
+- `CardSize` enum with photo height, fixed width, info padding, and font mappings per size variant — centralizing what's currently in `HomeCardSize`
+- Shadow: add an `overlay` shadow preset matching the current listing card overlay shadow
 
----
+**FindListView.swift** — Replace:
+- `spacing: 16` → `Theme.Spacing.md`
+- `.padding(.horizontal, 16)` → `Theme.Spacing.md`
+- `.padding(.bottom, 100)` → leave as-is (layout-specific, not a design token)
+- `Color(.systemBackground)` → `Theme.Colors.background`
 
-### **Spacing (4pt scale)**
+**FindMapView.swift** — Replace:
+- `.padding(.trailing, 16)` → `Theme.Spacing.md`
+- `.padding(.top, 8)` → `Theme.Spacing.xs`
+- Animation spring values left as-is (motion, not a design token)
 
-| Token | Value |
-|-------|-------|
-| `xxs` | 4pt |
-| `xs` | 8pt |
-| `sm` | 12pt |
-| `md` | 16pt |
-| `lg` | 20pt |
-| `xl` | 24pt |
-| `xxl` | 32pt |
+**HomeCard.swift** — Replace:
+- `HomeCardSize` corner radii → `Theme.Radius` tokens
+- Photo heights, fixed widths, fonts, info padding → `Theme.CardSize` tokens
+- `Color(.secondarySystemBackground)` → `Theme.Colors.secondaryBackground`
+- `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
+- Badge padding and corner radius → `Theme.Spacing` and `Theme.Radius` tokens
+- `HomeCardBadge.color` → `Theme.Colors.Badge` tokens
 
----
+**HomeCardInfoSection.swift** — Replace:
+- Spacing values (6, 8) → `Theme.Spacing` tokens
+- `.padding(.trailing, 12)` → `Theme.Spacing.sm`
+- Tag background `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
+- Tag padding → `Theme.Spacing` tokens
 
-### **Shadows (3 levels)**
+**ListingCardOverlay.swift** — Replace:
+- `Color(.secondarySystemBackground)` → `Theme.Colors.secondaryBackground`
+- `Color(.tertiarySystemBackground)` → `Theme.Colors.tertiaryBackground`
+- Card shadow → `Theme.Shadow.overlay` (new token)
+- `.frame(height: 220)` → card size photo height token
+- Padding values (8, 12, 20) → `Theme.Spacing` tokens
+- Badge styling → same Theme tokens as HomeCard
 
-| Token | Opacity | Radius | Y offset | Use case |
-|-------|---------|--------|-----------|----------|
-| `subtle` | 0.08 | 4pt | 2pt | Map pins, small elements |
-| `medium` | 0.12 | 10pt | 4pt | Nudge bubbles, floating elements |
-| `elevated` | 0.20 | 16pt | 6pt | Card overlays, bottom sheets |
+**MapPinView.swift** — Replace:
+- Hardcoded RGB colors → `Theme.Colors.MapPin` tokens (already defined, just not wired up)
+- Font size 13 → closest Theme token or keep as map-pin-specific
+- Padding values → `Theme.Spacing` tokens
+- Shadow → `Theme.Shadow.subtle` (close match)
 
-Defined as a reusable `.shadow()` ViewModifier or extension for easy application.
+**UserLocationDot.swift** — Replace:
+- Frame sizes (44, 16, 12) → Theme tokens where applicable
+- `Color.blue` left as-is (system semantic color, appropriate for location)
 
----
-
-### **Typography**
-
-All typography tokens use native Dynamic Type styles — no raw point sizes.
-
-| Token | Style | Use case |
-|-------|-------|----------|
-| `heroPrice` | `.largeTitle.bold()` | Detail page price |
-| `sectionTitle` | `.title2.bold()` | Section headers |
-| `cardTitle` | `.title3.bold()` | Card titles, subsection headers |
-| `headline` | `.headline` | Buttons, emphasis |
-| `body` | `.body` | Body text |
-| `secondary` | `.subheadline` | Stats, addresses, descriptions |
-| `secondaryBold` | `.subheadline.bold()` | Links, inline emphasis |
-| `caption` | `.caption` | Labels, metadata |
-| `captionBold` | `.caption.bold()` | Badge text, small emphasis |
-| `micro` | `.caption2` | Smallest text, home counts |
-
----
-
-### **Icon Sizes (keep existing + add)**
-
-- `small`: 15pt (tap target 36pt)
-- `medium`: 17pt (tap target 44pt)
-- Existing values preserved for backward compatibility
+**GlassActionButton.swift** — Replace:
+- `size: CGFloat = 44` → `Theme.IconSize.mediumTap`
+- Divider frame widths/heights (32) → Theme token
+- `.rect(cornerRadius: 25)` → `Theme.Radius.full` (fully rounded)
 
 ---
 
-### **Button Styles**
-
-Reusable `ButtonStyle` definitions:
-
-- **Primary:** `Color.primary` background, `Color(.systemBackground)` text, full capsule shape, 14pt vertical padding
-- **Secondary (outline):** Transparent background, `Color(.separator)` 1pt capsule border, `.primary` text
-- **Glass action:** Existing glass button pattern, formalized as a style token
-
----
-
-### **What won't change**
-
-- No existing views will be modified
-- The current `Theme.IconSize` remains in place for backward compatibility
-- All new tokens are additive — nothing is removed
+### What Stays the Same
+- Navigation toolbar icons — handled natively by the system, no custom styling
+- Animation/spring values — motion parameters, not design tokens
+- Map style and camera behavior — MapKit native
+- The visual appearance — pixel-identical output before and after

@@ -79,8 +79,8 @@ private struct MapActionButtons: View {
                 viewModel.locateUser()
             })
         ])
-        .padding(.trailing, 16)
-        .padding(.top, 8)
+        .padding(.trailing, Theme.Spacing.md)
+        .padding(.top, Theme.Spacing.xs)
         .animation(nil, value: viewModel.selectedListing != nil)
     }
 }

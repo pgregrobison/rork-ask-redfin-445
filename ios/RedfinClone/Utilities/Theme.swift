@@ -54,10 +54,12 @@ enum Theme {
     // MARK: - Corner Radius
 
     enum Radius {
+        static let xs: CGFloat = 4
         static let small: CGFloat = 8
         static let medium: CGFloat = 12
         static let large: CGFloat = 16
         static let xl: CGFloat = 20
+        static let full: CGFloat = 9999
     }
 
     // MARK: - Spacing
@@ -101,5 +103,36 @@ enum Theme {
         static let elevatedColor = Color.black.opacity(0.20)
         static let elevatedRadius: CGFloat = 16
         static let elevatedY: CGFloat = 6
+
+        static let overlayColor = Color.black.opacity(0.25)
+        static let overlayRadius: CGFloat = 16
+        static let overlayY: CGFloat = 4
+    }
+
+    // MARK: - Card Size Tokens
+
+    enum CardSize {
+        enum PhotoHeight {
+            static let large: CGFloat = 240
+            static let medium: CGFloat = 220
+            static let compact: CGFloat = 180
+        }
+
+        enum FixedWidth {
+            static let medium: CGFloat = 300
+            static let compactDefault: CGFloat = 280
+        }
+
+        enum InfoPadding {
+            static let large = EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
+            static let medium = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+            static let compact = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+        }
+    }
+
+    // MARK: - Divider Size
+
+    enum DividerSize {
+        static let standard: CGFloat = 32
     }
 }

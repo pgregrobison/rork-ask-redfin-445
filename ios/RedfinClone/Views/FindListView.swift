@@ -7,7 +7,7 @@ struct FindListView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: Theme.Spacing.md) {
                 ForEach(viewModel.sortedListings) { listing in
                     Button {
                         onListingTap(listing)
@@ -24,10 +24,10 @@ struct FindListView: View {
                     .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Theme.Spacing.md)
             .padding(.bottom, 100)
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
     }
 
 }
