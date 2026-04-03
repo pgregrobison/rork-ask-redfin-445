@@ -6,8 +6,8 @@ nonisolated enum CardTransitionStyle: String, CaseIterable, Codable, Sendable {
 }
 
 nonisolated enum DetailPageStyle: String, CaseIterable, Codable, Sendable {
-    case sheet = "Sheet"
-    case redfin = "Redfin"
+    case current = "Current"
+    case james = "James"
 }
 
 @Observable
@@ -24,6 +24,6 @@ class DebugSettings {
         let stored = UserDefaults.standard.string(forKey: "debug_cardTransition") ?? ""
         self.cardTransition = CardTransitionStyle(rawValue: stored) ?? .nativePush
         let storedStyle = UserDefaults.standard.string(forKey: "debug_detailPageStyle") ?? ""
-        self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .sheet
+        self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .current
     }
 }

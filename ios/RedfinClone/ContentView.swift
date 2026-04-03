@@ -127,14 +127,14 @@ struct ContentView: View {
     @ViewBuilder
     private func detailView(for listing: Listing) -> some View {
         switch debugSettings.detailPageStyle {
-        case .sheet:
+        case .current:
             ListingDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )
-        case .redfin:
+        case .james:
             RedfinDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),

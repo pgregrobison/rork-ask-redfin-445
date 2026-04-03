@@ -93,8 +93,8 @@ extension CardTransitionStyle {
 extension DetailPageStyle {
     var subtitle: String {
         switch self {
-        case .sheet: "Bottom sheet over photos"
-        case .redfin: "Full vertical scroll layout"
+        case .current: "Bottom sheet over photos"
+        case .james: "Full vertical scroll layout"
         }
     }
 }
