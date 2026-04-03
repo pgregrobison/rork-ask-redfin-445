@@ -8,14 +8,14 @@ struct MapPinView: View {
 
     var body: some View {
         Text(listing.formattedPrice)
-            .font(.system(size: 13, weight: .bold))
+            .font(.system(size: Theme.IconSize.mapPin, weight: .bold))
             .tracking(-0.3)
             .foregroundStyle(textColor)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, Theme.MapPin.horizontalPadding)
             .padding(.vertical, Theme.Spacing.xxs + 2)
             .background(backgroundColor, in: Capsule())
             .shadow(color: Theme.Shadow.subtleColor, radius: Theme.Shadow.subtleRadius, y: Theme.Shadow.subtleY)
-            .padding(2)
+            .padding(Theme.MapPin.outerPadding)
             .contentShape(Rectangle())
             .animation(.easeInOut(duration: 0.2), value: isSelected)
             .animation(.easeInOut(duration: 0.2), value: isSeen)

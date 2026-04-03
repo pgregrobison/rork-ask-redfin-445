@@ -30,9 +30,9 @@ struct TourSchedulerWidget: View {
                 stepsView
             }
         }
-        .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 16))
-        .padding(.horizontal, 16)
+        .background(Theme.Colors.secondaryBackground)
+        .clipShape(.rect(cornerRadius: Theme.Radius.widget))
+        .padding(.horizontal, Theme.Spacing.md)
         .animation(.snappy(duration: 0.35), value: currentStep)
         .animation(.snappy(duration: 0.35), value: isConfirmed)
         .onChange(of: focusedField) { _, newField in
@@ -42,7 +42,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var headerView: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: "calendar.badge.clock")
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
@@ -63,7 +63,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var stepsView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             stepRow(
                 index: 0,
                 title: "Pick a day",
@@ -71,7 +71,7 @@ struct TourSchedulerWidget: View {
                 content: { dayPickerContent }
             )
 
-            Divider().padding(.leading, 48)
+            Divider().padding(.leading, Theme.DividerInset.stepIndicator)
 
             stepRow(
                 index: 1,
@@ -80,7 +80,7 @@ struct TourSchedulerWidget: View {
                 content: { timePickerContent }
             )
 
-            Divider().padding(.leading, 48)
+            Divider().padding(.leading, Theme.DividerInset.stepIndicator)
 
             stepRow(
                 index: 2,
@@ -104,7 +104,7 @@ struct TourSchedulerWidget: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
             } label: {
-                HStack(spacing: 12) {
+                HStack(spacing: Theme.Spacing.sm) {
                     stepIndicator(for: index)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -147,31 +147,31 @@ struct TourSchedulerWidget: View {
         ZStack {
             if index < currentStep {
                 Circle()
-                    .fill(Theme.redfinGreenColor)
+                    .fill(Theme.Colors.brandGreen)
                     .frame(width: 24, height: 24)
                 Image(systemName: "checkmark")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: Theme.Spacing.sm - 1, weight: .bold))
                     .foregroundStyle(.white)
             } else if index == currentStep {
                 Circle()
                     .fill(Color.primary)
                     .frame(width: 24, height: 24)
                 Text("\(index + 1)")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color(.systemBackground))
+                    .font(.system(size: Theme.Spacing.sm, weight: .bold))
+                    .foregroundStyle(Theme.Colors.invertedPrimary)
             } else {
                 Circle()
                     .strokeBorder(Color(.tertiaryLabel), lineWidth: 1.5)
                     .frame(width: 24, height: 24)
                 Text("\(index + 1)")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: Theme.Spacing.sm, weight: .medium))
                     .foregroundStyle(.tertiary)
             }
         }
     }
 
     private var dayPickerContent: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             DatePicker(
                 "Select date",
                 selection: $selectedDate,
@@ -186,7 +186,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var timePickerContent: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Spacing.sm) {
             DatePicker(
                 "Select time",
                 selection: $selectedTime,
@@ -201,7 +201,7 @@ struct TourSchedulerWidget: View {
     }
 
     private var contactContent: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: Theme.Spacing.sm + 2) {
             TextField("Full name", text: $fullName)
                 .font(.subheadline)
                 .textContentType(.name)
@@ -213,10 +213,10 @@ struct TourSchedulerWidget: View {
                         focusedField = .phone
                     }
                 }
-                .frame(minHeight: 44)
-                .padding(.horizontal, 12)
-                .background(Color(.tertiarySystemBackground))
-                .clipShape(.rect(cornerRadius: 10))
+                .frame(minHeight: Theme.ButtonSize.minHeight)
+                .padding(.horizontal, Theme.Spacing.sm)
+                .background(Theme.Colors.tertiaryBackground)
+                .clipShape(.rect(cornerRadius: Theme.Radius.inputField))
 
             TextField("Phone number", text: $phone)
                 .font(.subheadline)
@@ -225,10 +225,10 @@ struct TourSchedulerWidget: View {
                 .submitLabel(.done)
                 .focused($focusedField, equals: .phone)
                 .onSubmit { focusedField = nil }
-                .frame(minHeight: 44)
-                .padding(.horizontal, 12)
-                .background(Color(.tertiarySystemBackground))
-                .clipShape(.rect(cornerRadius: 10))
+                .frame(minHeight: Theme.ButtonSize.minHeight)
+                .padding(.horizontal, Theme.Spacing.sm)
+                .background(Theme.Colors.tertiaryBackground)
+                .clipShape(.rect(cornerRadius: Theme.Radius.inputField))
 
             Button {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -236,9 +236,9 @@ struct TourSchedulerWidget: View {
             } label: {
                 Text("Request Tour")
                     .font(.subheadline.bold())
-                    .foregroundStyle(Color(.systemBackground))
+                    .foregroundStyle(Theme.Colors.invertedPrimary)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
                     .background(canSubmit ? Color.primary : Color.gray, in: Capsule())
             }
             .disabled(!canSubmit)
@@ -246,10 +246,10 @@ struct TourSchedulerWidget: View {
     }
 
     private var confirmationView: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.sm) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(Theme.redfinGreenColor)
+                .font(Theme.Typography.largeNumber.weight(.medium))
+                .foregroundStyle(Theme.Colors.brandGreen)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Tour Requested")

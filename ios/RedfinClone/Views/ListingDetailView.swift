@@ -162,7 +162,7 @@ struct ListingDetailView: View {
             Capsule()
                 .fill(Color(.systemGray3))
                 .frame(width: 36, height: 5)
-                .padding(.top, 10)
+                .padding(.top, Theme.Spacing.xs + 2)
                 .padding(.bottom, Theme.Spacing.sm)
         }
         .frame(maxWidth: .infinity)
@@ -420,7 +420,7 @@ struct ListingDetailView: View {
     // MARK: - About Section
 
     private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs + 2) {
             Text("About this home")
                 .font(Theme.Typography.cardTitle)
 
@@ -491,7 +491,7 @@ struct ListingDetailView: View {
     }
 
     private func keyFactRow(icon: String, value: String, label: String) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: icon)
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.secondary)
@@ -511,7 +511,7 @@ struct ListingDetailView: View {
     // MARK: - Hot Home
 
     private var hotHomeBadge: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: "flame")
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)
@@ -540,7 +540,7 @@ struct ListingDetailView: View {
                 ForEach(listing.tags, id: \.self) { tag in
                     Text(tag)
                         .font(Theme.Typography.secondary)
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, Theme.Spacing.sm + 2)
                         .padding(.vertical, Theme.Spacing.xs)
                         .background(Theme.Colors.secondaryBackground)
                         .clipShape(Capsule())
@@ -554,9 +554,9 @@ struct ListingDetailView: View {
     private var moreSections: some View {
         VStack(spacing: 0) {
             disclosureRow(icon: "building.2", title: "Neighborhood insights")
-            Divider().padding(.leading, 42)
+            Divider().padding(.leading, Theme.DividerInset.disclosureRow)
             disclosureRow(icon: "chart.line.uptrend.xyaxis", title: "Price history")
-            Divider().padding(.leading, 42)
+            Divider().padding(.leading, Theme.DividerInset.disclosureRow)
             disclosureRow(icon: "graduationcap", title: "Schools nearby")
         }
         .padding(Theme.Spacing.xxs)
@@ -576,7 +576,7 @@ struct ListingDetailView: View {
                     .foregroundStyle(.primary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: Theme.Spacing.sm + 2, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, Theme.Spacing.sm)

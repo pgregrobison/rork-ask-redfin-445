@@ -25,7 +25,7 @@ struct FindListView: View {
                 }
             }
             .padding(.horizontal, Theme.Spacing.md)
-            .padding(.bottom, 100)
+            .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
     }

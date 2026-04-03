@@ -113,7 +113,7 @@ struct FilterSheetView: View {
                 Text(label)
                     .font(.subheadline.weight(.medium))
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: Theme.Spacing.xs + 1, weight: .bold))
             }
             .foregroundStyle(.primary)
             .padding(.horizontal, Theme.Spacing.sm)

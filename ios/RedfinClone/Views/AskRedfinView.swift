@@ -20,7 +20,7 @@ struct AskRedfinView: View {
             messageList
             inputFooter
         }
-        .background(Color(.systemBackground))
+        .background(Theme.Colors.background)
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])
@@ -32,19 +32,19 @@ struct AskRedfinView: View {
             Spacer()
             GlassActionButton(icon: "xmark", action: onDismiss)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.md)
         .background(
             LinearGradient(
                 stops: [
-                    .init(color: Color(.systemBackground), location: 0),
-                    .init(color: Color(.systemBackground).opacity(0.6), location: 0.4),
-                    .init(color: Color(.systemBackground).opacity(0), location: 1)
+                    .init(color: Theme.Colors.background, location: 0),
+                    .init(color: Theme.Colors.background.opacity(0.6), location: 0.4),
+                    .init(color: Theme.Colors.background.opacity(0), location: 1)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .padding(.bottom, -20)
+            .padding(.bottom, -Theme.Spacing.lg)
             .allowsHitTesting(false),
             alignment: .top
         )
@@ -85,20 +85,20 @@ struct AskRedfinView: View {
                 }
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: Theme.Spacing.xxs + 2) {
                 if chatViewModel.isTourDayThread {
                     Image(systemName: "car")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: Theme.Spacing.sm, weight: .semibold))
                 }
                 Text(truncatedTitle)
                     .font(.subheadline.bold())
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: Theme.Spacing.xs + 2, weight: .semibold))
             }
             .foregroundStyle(.primary)
-            .frame(height: 44)
-            .padding(.horizontal, 14)
+            .frame(height: Theme.ButtonSize.minHeight)
+            .padding(.horizontal, Theme.Spacing.sm + 2)
         }
         .tint(.primary)
     }
@@ -106,7 +106,7 @@ struct AskRedfinView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: Theme.Spacing.md) {
                     Color.clear.frame(height: 0)
                     ForEach(chatViewModel.activeMessages) { message in
                         ChatMessageBubble(
@@ -138,8 +138,8 @@ struct AskRedfinView: View {
                         .frame(height: currentBottomSpacerHeight)
                         .id("bottom-spacer")
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 16)
+                .padding(.top, Theme.Spacing.xs)
+                .padding(.bottom, Theme.Spacing.md)
             }
             .contentMargins(.top, 0)
             .contentMargins(.bottom, chatViewModel.isVoiceModeActive ? 220 : 72)
@@ -217,7 +217,7 @@ struct AskRedfinView: View {
             if chatViewModel.isVoiceModeActive {
                 InlineVoiceOrb(isListening: !chatViewModel.isVoiceMuted)
                     .transition(.scale(scale: 0.3).combined(with: .opacity))
-                    .padding(.bottom, 12)
+                    .padding(.bottom, Theme.Spacing.sm)
             }
 
             inputBar
@@ -226,9 +226,9 @@ struct AskRedfinView: View {
     }
 
     private var inputBar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Theme.Spacing.xs) {
             TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
-                .font(.body)
+                .font(Theme.Typography.body)
                 .lineSpacing(7)
                 .frame(minHeight: 24)
                 .lineLimit(1...4)
@@ -238,9 +238,9 @@ struct AskRedfinView: View {
                 .onSubmit {
                     sendAndScroll()
                 }
-                .padding(.leading, 16)
-                .padding(.trailing, chatViewModel.isVoiceModeActive ? 12 : 54)
-                .padding(.vertical, 12)
+                .padding(.leading, Theme.Spacing.md)
+                .padding(.trailing, chatViewModel.isVoiceModeActive ? Theme.Spacing.sm : 54)
+                .padding(.vertical, Theme.Spacing.sm)
                 .background(
                     inputBackground
                 )
@@ -325,18 +325,18 @@ struct AskRedfinView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: chatViewModel.isVoiceModeActive)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: chatViewModel.isVoiceMuted)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.bottom, Theme.Spacing.xs)
     }
 
     @ViewBuilder
     private var inputBackground: some View {
         if #available(iOS 26.0, *) {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Colors.Chat.inputCornerRadius, style: .continuous)
                 .fill(.clear)
                 .glassEffect(in: .capsule)
         } else {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: Theme.Colors.Chat.inputCornerRadius, style: .continuous)
                 .fill(.ultraThinMaterial)
         }
     }

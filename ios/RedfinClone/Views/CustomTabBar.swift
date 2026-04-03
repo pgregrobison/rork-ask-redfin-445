@@ -57,9 +57,9 @@ struct CustomTabBar: View {
 
                 Button(action: onFABTap) {
                     Image(systemName: "sparkle")
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.tabBar, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .frame(width: 62, height: 62)
+                        .frame(width: Theme.ButtonSize.fabSize, height: Theme.ButtonSize.fabSize)
                 }
                 .glassEffect(.regular.interactive(), in: .circle)
             }
@@ -78,11 +78,11 @@ struct CustomTabBar: View {
                 ZStack {
                     Circle()
                         .fill(.ultraThinMaterial)
-                        .frame(width: 62, height: 62)
+                        .frame(width: Theme.ButtonSize.fabSize, height: Theme.ButtonSize.fabSize)
                         .shadow(color: Theme.Shadow.overlayColor, radius: Theme.Shadow.mediumRadius, y: Theme.Shadow.mediumY)
 
                     Image(systemName: "sparkle")
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.tabBar, weight: .semibold))
                         .foregroundStyle(.primary)
                 }
             }
@@ -100,7 +100,7 @@ struct CustomTabBar: View {
                 } label: {
                     VStack(spacing: Theme.Spacing.xxs) {
                         Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
-                            .font(.system(size: 19, weight: .semibold))
+                            .font(.system(size: Theme.IconSize.tabBar, weight: .semibold))
                             .contentTransition(.symbolEffect(.replace))
                         Text(tab.title)
                             .font(Theme.Typography.micro)
@@ -108,7 +108,7 @@ struct CustomTabBar: View {
                     }
                     .foregroundStyle(selectedTab == tab ? .primary : .secondary)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 11)
+                    .padding(.vertical, Theme.ButtonSize.tabItemPadding)
                 }
             }
         }

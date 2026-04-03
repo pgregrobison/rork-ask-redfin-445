@@ -25,9 +25,9 @@ struct FindPillOverlay: View {
                             closeMenu()
                         } label: {
                             Image(systemName: "xmark")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.system(size: Theme.Spacing.sm + 2, weight: .semibold))
                                 .foregroundStyle(.secondary)
-                                .frame(width: 36, height: 36)
+                                .frame(width: Theme.IconSize.smallTap, height: Theme.IconSize.smallTap)
                                 .contentShape(Circle())
                         }
                         .buttonStyle(.plain)

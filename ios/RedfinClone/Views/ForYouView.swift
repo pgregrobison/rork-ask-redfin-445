@@ -21,7 +21,7 @@ struct ForYouView: View {
 
                 marketInsightCard
             }
-            .padding(.bottom, 100)
+            .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
         .navigationTitle("For You")

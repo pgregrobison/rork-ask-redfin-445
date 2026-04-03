@@ -309,9 +309,9 @@ struct MortgagePrequalWidget: View {
         Button(action: action) {
             Text("Continue")
                 .font(.subheadline.bold())
-                .foregroundStyle(Color(.systemBackground))
+                .foregroundStyle(Theme.Colors.invertedPrimary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
                 .background(enabled ? Color.primary : Color.gray, in: Capsule())
         }
         .disabled(!enabled)

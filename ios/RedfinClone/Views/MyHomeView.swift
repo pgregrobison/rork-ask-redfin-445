@@ -11,11 +11,11 @@ struct MyHomeView: View {
                 addHomeCard
                 featureTiles
 
-                Spacer().frame(height: 16)
+                Spacer().frame(height: Theme.Spacing.md)
 
                 debugButton
             }
-            .padding(.bottom, 100)
+            .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
         .navigationTitle("My Home")
@@ -33,7 +33,7 @@ struct MyHomeView: View {
     private var addHomeCard: some View {
         VStack(spacing: Theme.Spacing.md) {
             Image(systemName: "house")
-                .font(.system(size: 40))
+                .font(Theme.Typography.decorativeLG)
                 .foregroundStyle(.secondary)
 
             Text("What's your home worth?")
@@ -50,7 +50,7 @@ struct MyHomeView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, Theme.Spacing.xxl)
                     .padding(.vertical, Theme.ButtonSize.verticalPadding)
-                    .background(Color(white: 0.15), in: Capsule())
+                    .background(Theme.Colors.stepIndicator, in: Capsule())
             }
         }
         .padding(Theme.Spacing.xl)
@@ -82,7 +82,7 @@ struct MyHomeView: View {
     }
 
     private func featureTile(icon: String, title: String, description: String) -> some View {
-        VStack(spacing: 10) {
+        VStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: icon)
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.primary)

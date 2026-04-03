@@ -28,7 +28,7 @@ struct SavedView: View {
                     }
                     .padding(.horizontal, Theme.Spacing.md)
                     .padding(.top, Theme.Spacing.sm)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, Theme.Spacing.tabBarClearance)
                 }
             }
         }
@@ -49,7 +49,7 @@ struct SavedView: View {
         VStack(spacing: Theme.Spacing.md) {
             Spacer()
             Image(systemName: "heart")
-                .font(.system(size: 48))
+                .font(Theme.Typography.decorativeXL)
                 .foregroundStyle(.secondary)
                 .frame(width: 80, height: 80)
                 .background(Theme.Colors.secondaryBackground, in: .rect(cornerRadius: Theme.Radius.xl))
@@ -61,7 +61,7 @@ struct SavedView: View {
                 .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, Theme.Spacing.xxl + 8)
             Spacer()
         }
         .frame(maxWidth: .infinity)

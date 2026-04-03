@@ -93,7 +93,7 @@ struct LocationMenuView: View {
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: "mappin.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.system(size: Theme.Spacing.lg))
                                 .foregroundStyle(.red.opacity(0.8))
 
                             VStack(alignment: .leading, spacing: 2) {
@@ -169,7 +169,7 @@ struct LocationMenuView: View {
                 Text(label)
                     .font(.subheadline.weight(.medium))
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: Theme.Spacing.xs + 1, weight: .bold))
             }
             .foregroundStyle(.primary)
             .padding(.horizontal, Theme.Spacing.sm)
@@ -252,7 +252,7 @@ struct LocationMenuView: View {
             } label: {
                 HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.mapPin, weight: .semibold))
                     Text("Filter")
                         .font(.subheadline.weight(.medium))
                 }
@@ -265,7 +265,7 @@ struct LocationMenuView: View {
             Button {} label: {
                 HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "bookmark")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: Theme.IconSize.mapPin, weight: .semibold))
                     Text("Save Search")
                         .font(.subheadline.weight(.medium))
                 }

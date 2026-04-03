@@ -161,7 +161,7 @@ struct RedfinDetailView: View {
                     .padding(.horizontal, Theme.Spacing.xs)
                     .padding(.vertical, Theme.Spacing.xxs)
                     .background(badge.color, in: .rect(cornerRadius: Theme.Radius.xs))
-                    .padding(.top, 60)
+                    .padding(.top, Theme.Spacing.xxl + 28)
                     .padding(.leading, Theme.Spacing.md)
             }
         }
@@ -169,16 +169,16 @@ struct RedfinDetailView: View {
             Text("\(currentPhotoIndex + 1) / \(listing.photos.count)")
                 .font(Theme.Typography.caption.weight(.semibold))
                 .foregroundStyle(.white)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
+                .padding(.horizontal, Theme.Spacing.xs + 2)
+                .padding(.vertical, Theme.Spacing.xxs + 1)
                 .background(.black.opacity(0.5), in: .rect(cornerRadius: Theme.Radius.small))
-                .padding(.top, 60)
+                .padding(.top, Theme.Spacing.xxl + 28)
                 .padding(.trailing, Theme.Spacing.md)
         }
     }
 
     private var carouselDots: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Theme.Spacing.xxs + 2) {
             ForEach(0..<listing.photos.count, id: \.self) { index in
                 Circle()
                     .fill(index == currentPhotoIndex ? Color.white : Color.white.opacity(0.5))
@@ -257,9 +257,9 @@ struct RedfinDetailView: View {
     // MARK: - Price & Address
 
     private var priceAndAddressSection: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Theme.Spacing.xxs + 2) {
             Text(listing.formattedFullPrice)
-                .font(.system(size: 32, weight: .bold))
+                .font(Theme.Typography.heroNumber)
                 .padding(.top, Theme.Spacing.lg)
 
             HStack(spacing: Theme.Spacing.xxs) {
@@ -296,8 +296,8 @@ struct RedfinDetailView: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Theme.Spacing.sm + 2)
+            .padding(.vertical, Theme.Spacing.xs + 2)
             .background(Theme.Colors.secondaryBackground, in: .rect(cornerRadius: Theme.Radius.medium))
 
             Spacer()
@@ -372,7 +372,7 @@ struct RedfinDetailView: View {
     }
 
     private func propertyDetailItem(icon: String, value: String, label: String) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Theme.Spacing.xs + 2) {
             Image(systemName: icon)
                 .font(.system(size: Theme.ButtonSize.iconSize, weight: .medium))
                 .foregroundStyle(.secondary)
@@ -400,7 +400,7 @@ struct RedfinDetailView: View {
                         ForEach(listing.tags, id: \.self) { tag in
                             Text(tag)
                                 .font(Theme.Typography.secondary)
-                                .padding(.horizontal, 14)
+                                .padding(.horizontal, Theme.Spacing.sm + 2)
                                 .padding(.vertical, Theme.Spacing.xs)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: Theme.Radius.xl)
@@ -452,7 +452,7 @@ struct RedfinDetailView: View {
     private var monthlyPaymentBreakdown: some View {
         VStack(spacing: Theme.Spacing.lg) {
             Text("$\(totalMonthly.formatted()) /mo")
-                .font(.system(size: 28, weight: .bold))
+                .font(Theme.Typography.largeNumber)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, Theme.Spacing.xs)
 
@@ -558,8 +558,8 @@ struct RedfinDetailView: View {
             }
             .buttonStyle(.primary)
 
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
+            VStack(spacing: Theme.Spacing.xxs + 2) {
+                HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "checkmark")
                         .font(Theme.Typography.captionBold)
                         .foregroundStyle(Theme.Colors.brandGreen)
@@ -567,7 +567,7 @@ struct RedfinDetailView: View {
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                 }
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "checkmark")
                         .font(Theme.Typography.captionBold)
                         .foregroundStyle(Theme.Colors.brandGreen)
@@ -590,7 +590,7 @@ struct RedfinDetailView: View {
                 .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "house.fill")
-                .font(.system(size: 48))
+                .font(Theme.Typography.decorativeXL)
                 .foregroundStyle(redfinRed.opacity(0.15))
                 .padding(.bottom, Theme.Spacing.xxs)
 
@@ -627,7 +627,7 @@ struct RedfinDetailView: View {
                 .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 40))
+                .font(Theme.Typography.decorativeLG)
                 .foregroundStyle(redfinRed.opacity(0.2))
 
             Text("I'm here to help answer your questions about this property or your services. I can also connect you with a licensed advisor. Let's dive in!")
@@ -637,7 +637,7 @@ struct RedfinDetailView: View {
                 .padding(.horizontal, Theme.Spacing.md)
 
             Button(action: onAskRedfin) {
-                HStack(spacing: 6) {
+                HStack(spacing: Theme.Spacing.xxs + 2) {
                     Image(systemName: "bubble.left")
                         .font(.subheadline.weight(.semibold))
                     Text("Let's chat")
@@ -665,10 +665,10 @@ struct RedfinDetailView: View {
                 .padding(.top, Theme.Spacing.xs)
 
             Image(systemName: "figure.walk")
-                .font(.system(size: 36))
+                .font(Theme.Typography.decorativeMD)
                 .foregroundStyle(Theme.Colors.brandGreen.opacity(0.3))
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Spacing.xs + 2) {
                 lifestylePill(icon: "figure.walk", label: "Walker's paradise")
                 lifestylePill(icon: "bicycle", label: "Some bike-ability")
                 lifestylePill(icon: "moon.zzz", label: "Silent zone")
@@ -690,7 +690,7 @@ struct RedfinDetailView: View {
     }
 
     private func lifestylePill(icon: String, label: String) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Theme.Spacing.xxs + 2) {
             Image(systemName: icon)
                 .font(Theme.Typography.caption)
                 .foregroundStyle(.secondary)
@@ -698,8 +698,8 @@ struct RedfinDetailView: View {
                 .font(Theme.Typography.secondary)
                 .lineLimit(1)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Theme.Spacing.sm + 2)
+        .padding(.vertical, Theme.Spacing.xs + 2)
         .frame(maxWidth: .infinity)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.Radius.xl)

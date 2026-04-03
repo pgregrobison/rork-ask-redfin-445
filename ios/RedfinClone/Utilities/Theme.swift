@@ -14,6 +14,8 @@ enum Theme {
         static let mediumTap: CGFloat = 44
         static let small: CGFloat = 15
         static let smallTap: CGFloat = 36
+        static let tabBar: CGFloat = 19
+        static let mapPin: CGFloat = 13
     }
 
     // MARK: - Brand Colors
@@ -72,6 +74,7 @@ enum Theme {
         static let chatBubble: CGFloat = 18
         static let widget: CGFloat = 16
         static let pill: CGFloat = 10
+        static let inputField: CGFloat = 10
     }
 
     // MARK: - Spacing
@@ -84,6 +87,7 @@ enum Theme {
         static let lg: CGFloat = 20
         static let xl: CGFloat = 24
         static let xxl: CGFloat = 32
+        static let tabBarClearance: CGFloat = 100
     }
 
     // MARK: - Typography
@@ -99,6 +103,12 @@ enum Theme {
         static let caption: Font = .caption
         static let captionBold: Font = .caption.bold()
         static let micro: Font = .caption2
+
+        static let heroNumber: Font = .system(size: 32, weight: .bold)
+        static let largeNumber: Font = .system(size: 28, weight: .bold)
+        static let decorativeXL: Font = .system(size: 48)
+        static let decorativeLG: Font = .system(size: 40)
+        static let decorativeMD: Font = .system(size: 36)
     }
 
     // MARK: - Shadows
@@ -157,5 +167,17 @@ enum Theme {
         static let minHeight: CGFloat = 44
         static let iconSize: CGFloat = 16
         static let circleSize: CGFloat = 44
+        static let fabSize: CGFloat = 62
+        static let tabItemPadding: CGFloat = 11
+    }
+
+    enum DividerInset {
+        static let stepIndicator: CGFloat = 48
+        static let disclosureRow: CGFloat = 42
+    }
+
+    enum MapPin {
+        static let horizontalPadding: CGFloat = 10
+        static let outerPadding: CGFloat = 2
     }
 }
