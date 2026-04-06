@@ -206,29 +206,33 @@ struct RedfinDetailView: View {
 
     private var mediaSegmentedControl: some View {
         HStack(spacing: 0) {
-            mediaTabButton(icon: "play.fill", tab: 0)
-            mediaTabButton(icon: "mappin.fill", tab: 1)
-            mediaTabButton(icon: "cube.fill", tab: 2)
-            mediaTabButton(icon: "binoculars.fill", tab: 3)
+            mediaTabButton(icon: "play.fill", label: "Photos", tab: 0)
+            mediaTabButton(icon: "map.fill", label: "Map", tab: 1)
+            mediaTabButton(icon: "cube.fill", label: "3D", tab: 2)
+            mediaTabButton(icon: "binoculars.fill", label: "Street", tab: 3)
         }
         .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.Radius.medium))
     }
 
-    private func mediaTabButton(icon: String, tab: Int) -> some View {
+    private func mediaTabButton(icon: String, label: String, tab: Int) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedMediaTab = tab
             }
         } label: {
-            Image(systemName: icon)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(selectedMediaTab == tab ? .white : .white.opacity(0.5))
-                .frame(maxWidth: .infinity)
-                .frame(height: 40)
-                .background(
-                    selectedMediaTab == tab ? Color.white.opacity(0.2) : Color.clear,
-                    in: .rect(cornerRadius: Theme.Radius.small)
-                )
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                Text(label)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundStyle(selectedMediaTab == tab ? .white : .white.opacity(0.5))
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(
+                selectedMediaTab == tab ? Color.white.opacity(0.2) : Color.clear,
+                in: .rect(cornerRadius: Theme.Radius.small)
+            )
         }
         .padding(4)
     }
@@ -473,6 +477,7 @@ struct RedfinDetailView: View {
             Text("$\(totalMonthly.formatted()) /mo")
                 .font(Theme.Typography.largeNumber)
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.bottom, Theme.Spacing.xs)
 
             paymentBreakdownList
 
@@ -567,7 +572,7 @@ struct RedfinDetailView: View {
             let insWidth = geo.size.width * CGFloat(homeInsurance) / total
             let hoaWidth = geo.size.width * CGFloat(hoaDuesAmount) / total
 
-            HStack(spacing: 2) {
+            HStack(spacing: Theme.Spacing.xxs) {
                 Rectangle()
                     .fill(Theme.Colors.Chart.blue)
                     .frame(width: max(piWidth, 2))
@@ -644,7 +649,7 @@ struct RedfinDetailView: View {
                 .font(Theme.Typography.decorativeLG)
                 .foregroundStyle(redfinRed)
 
-            Text("I'm here to help answer your questions about this property or your services. I can also connect you with a licensed advisor. Let's dive in!")
+            Text("I'm here to help answer your questions about this property or your services. I can also connect you with a licensed advisor.")
                 .font(Theme.Typography.secondary)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

@@ -31,7 +31,7 @@ struct TextLinkButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Theme.Typography.secondaryBold)
-            .foregroundStyle(Theme.Colors.brandRed)
+            .foregroundStyle(.primary)
             .opacity(configuration.isPressed ? 0.6 : 1.0)
     }
 }
