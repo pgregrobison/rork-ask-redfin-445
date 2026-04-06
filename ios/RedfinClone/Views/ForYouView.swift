@@ -3,6 +3,7 @@ import SwiftUI
 struct ForYouView: View {
     let viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
+    let isActive: Bool
     let onListingTap: (Listing) -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -24,13 +25,15 @@ struct ForYouView: View {
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
-        .navigationTitle("For You")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(isActive ? "For You" : "")
+        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            if isActive {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {} label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
                 }
             }
         }

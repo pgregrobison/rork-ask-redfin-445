@@ -3,6 +3,7 @@ import SwiftUI
 struct MyHomeView: View {
     @Environment(\.colorScheme) private var colorScheme
     let debugSettings: DebugSettings
+    let isActive: Bool
     @State private var showDebugPanel: Bool = false
 
     var body: some View {
@@ -18,13 +19,15 @@ struct MyHomeView: View {
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
-        .navigationTitle("My Home")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(isActive ? "My Home" : "")
+        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            if isActive {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {} label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
                 }
             }
         }

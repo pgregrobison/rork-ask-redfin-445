@@ -4,6 +4,7 @@ import MapKit
 struct FindView: View {
     @Bindable var viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
+    let isActive: Bool
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -16,24 +17,26 @@ struct FindView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    viewModel.dismissOverlay()
-                    viewModel.showListView.toggle()
-                } label: {
-                    Image(systemName: viewModel.showListView ? "map" : "list.bullet")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            if isActive {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        viewModel.dismissOverlay()
+                        viewModel.showListView.toggle()
+                    } label: {
+                        Image(systemName: viewModel.showListView ? "map" : "list.bullet")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
                 }
-            }
-            if viewModel.showListView {
+                if viewModel.showListView {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        sortMenu
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
-                    sortMenu
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    Button {} label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
                 }
             }
         }

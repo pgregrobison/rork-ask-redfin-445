@@ -1,12 +1,10 @@
-# Persist map viewport when switching tabs
+# Fix duplicate toolbar items and leaked tab titles
 
 **Problem**
-Switching away from the Find tab and back resets the map to its default position, because the map view is destroyed and recreated each time.
+All four tabs share one navigation bar. Even hidden tabs contribute their toolbar buttons and titles, causing 4 profile icons and visible titles from other tabs on the Find screen.
 
-**Solution**
-Keep all tab views alive in the background by rendering them all simultaneously and only showing the active one. This way the map is never destroyed and its viewport is preserved naturally.
-
-**What changes**
-- The tab content area will render all tabs at once but only show the currently selected one
-- No visual or behavioral difference — the app looks and works exactly the same
-- The map remembers its zoom level, center position, and any selected listing when you navigate away and come back
+**Fix**
+- Conditionally apply `.toolbar` and `.navigationTitle` only when each tab is actually selected
+- Pass the current `selectedTab` into each tab view (or wrap toolbars in `if` checks) so non-active tabs don't inject toolbar items
+- This ensures only the active tab's navigation bar content is shown at any time
+- No visual changes to the active tab — each tab looks exactly the same as before when selected

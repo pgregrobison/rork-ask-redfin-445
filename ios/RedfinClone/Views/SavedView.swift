@@ -3,6 +3,7 @@ import SwiftUI
 struct SavedView: View {
     let viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
+    let isActive: Bool
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -33,13 +34,15 @@ struct SavedView: View {
             }
         }
         .background(Theme.Colors.background)
-        .navigationTitle("Saved")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(isActive ? "Saved" : "")
+        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {} label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+            if isActive {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {} label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                    }
                 }
             }
         }
