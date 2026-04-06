@@ -206,35 +206,35 @@ struct RedfinDetailView: View {
 
     private var mediaSegmentedControl: some View {
         HStack(spacing: 0) {
-            mediaTabButton(icon: "play.fill", label: "Photos", tab: 0)
-            mediaTabButton(icon: "map.fill", label: "Map", tab: 1)
-            mediaTabButton(icon: "cube.fill", label: "3D", tab: 2)
-            mediaTabButton(icon: "binoculars.fill", label: "Street", tab: 3)
+            mediaTabItem(icon: "play.fill", label: "Photos", tab: 0)
+            mediaTabItem(icon: "map.fill", label: "Map", tab: 1)
+            mediaTabItem(icon: "cube.fill", label: "3D", tab: 2)
+            mediaTabItem(icon: "binoculars.fill", label: "Street", tab: 3)
         }
-        .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.Radius.medium))
+        .padding(3)
+        .adaptiveGlassSegment()
     }
 
-    private func mediaTabButton(icon: String, label: String, tab: Int) -> some View {
+    private func mediaTabItem(icon: String, label: String, tab: Int) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedMediaTab = tab
             }
         } label: {
-            VStack(spacing: 2) {
+            HStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
                 Text(label)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
             }
             .foregroundStyle(selectedMediaTab == tab ? .white : .white.opacity(0.5))
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: 32)
             .background(
                 selectedMediaTab == tab ? Color.white.opacity(0.2) : Color.clear,
-                in: .rect(cornerRadius: Theme.Radius.small)
+                in: .capsule
             )
         }
-        .padding(4)
     }
 
     // MARK: - Main Content

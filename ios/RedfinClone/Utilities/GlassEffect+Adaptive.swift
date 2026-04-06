@@ -45,4 +45,13 @@ extension View {
             self.background(.ultraThinMaterial)
         }
     }
+
+    @ViewBuilder
+    func adaptiveGlassSegment() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(in: .capsule)
+        } else {
+            self.background(.ultraThinMaterial, in: .capsule)
+        }
+    }
 }
