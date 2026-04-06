@@ -16,6 +16,7 @@ struct RedfinDetailView: View {
     @State private var selectedMediaTab: Int = 0
 
     private let redfinRed = Theme.Colors.brandRed
+    private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
 
     private var monthlyPayment: Int {
         let principal = Double(listing.price) * (1.0 - downPaymentPercent / 100.0)
@@ -214,12 +215,10 @@ struct RedfinDetailView: View {
 
         if #available(iOS 26.0, *) {
             picker
-                .padding(Theme.Spacing.xxs)
-                .glassEffect(in: .rect(cornerRadius: Theme.Radius.medium))
+                .glassEffect(in: .rect(cornerRadius: 8))
         } else {
             picker
-                .padding(Theme.Spacing.xxs)
-                .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.Radius.medium))
+                .background(.ultraThinMaterial, in: .rect(cornerRadius: 8))
         }
     }
 
@@ -244,6 +243,8 @@ struct RedfinDetailView: View {
             sectionContainer(accent: true) {
                 ratePaymentContent
             }
+
+            checkmarkSection
 
             sectionContainer {
                 takeTourContent
@@ -279,7 +280,7 @@ struct RedfinDetailView: View {
     // MARK: - Price & Address
 
     private var priceAndAddressSection: some View {
-        VStack(spacing: Theme.Spacing.xxs + 2) {
+        VStack(spacing: Theme.Spacing.sm) {
             Text(listing.formattedFullPrice)
                 .font(Theme.Typography.heroNumber)
                 .padding(.top, Theme.Spacing.lg)
@@ -305,20 +306,36 @@ struct RedfinDetailView: View {
     // MARK: - Rate Summary
 
     private var rateSummarySection: some View {
-        VStack(spacing: Theme.Spacing.sm) {
-            HStack(spacing: Theme.Spacing.xxs) {
+        HStack {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text("$\(totalMonthly.formatted())/mo")
-                    .font(.system(size: 18, weight: .semibold))
-                Text("estimated")
-                    .font(Theme.Typography.secondary)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(Theme.Colors.brandGreen)
+
+                HStack(spacing: Theme.Spacing.xxs) {
+                    Text("Rates dropped")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(Theme.Colors.brandGreen)
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.Colors.brandGreen)
+                }
             }
+
+            Spacer()
 
             Button(action: {}) {
                 Text("Estimate my rate")
+                    .font(Theme.Typography.headline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.vertical, Theme.Spacing.sm)
             }
-            .buttonStyle(.primary)
+            .background(Theme.Colors.brandGreen, in: Capsule())
         }
+        .padding(.horizontal, Theme.Spacing.lg)
+        .padding(.vertical, Theme.Spacing.md)
+        .background(Theme.Colors.brandGreen.opacity(0.08), in: .rect(cornerRadius: Theme.Container.radius))
     }
 
     // MARK: - Request Showing
@@ -367,10 +384,6 @@ struct RedfinDetailView: View {
 
     private var featureAndDescriptionContent: some View {
         VStack(spacing: Theme.Spacing.xl) {
-            Text("Feature highlights")
-                .font(Theme.Typography.cardTitle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.Spacing.xl) {
                 ForEach(Array(featureHighlights.enumerated()), id: \.offset) { _, highlight in
                     iconTagCell(icon: highlight.icon, label: highlight.label)
@@ -455,61 +468,21 @@ struct RedfinDetailView: View {
 
             paymentBar
 
-            HStack(spacing: Theme.Spacing.xl) {
-                paymentInputCell(label: "Home price", value: listing.formattedFullPrice)
-                paymentInputCell(label: "Down payment", value: "\(Int(downPaymentPercent))% ($\((Int(Double(listing.price) * downPaymentPercent / 100.0)).formatted()))")
+            HStack(spacing: Theme.Spacing.sm) {
+                FilledInputView(label: "Home price", value: listing.formattedFullPrice, icon: "pencil")
+                FilledInputView(label: "Down payment", value: "\(Int(downPaymentPercent))% ($\((Int(Double(listing.price) * downPaymentPercent / 100.0)).formatted()))")
             }
 
-            VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-                Text("Loan details")
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
-                Text("30-yr fixed, 6.67%")
-                    .font(.subheadline.weight(.medium))
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            FilledInputView(label: "Loan details", value: "30-yr fixed, 6.67%", icon: "chevron.down")
 
             Button(action: {}) {
                 Text("Estimate my payment & rate")
             }
             .buttonStyle(.primary)
-
-            VStack(spacing: Theme.Spacing.xxs + 2) {
-                HStack(spacing: Theme.Spacing.xxs + 2) {
-                    Image(systemName: "checkmark")
-                        .font(Theme.Typography.captionBold)
-                        .foregroundStyle(Theme.Colors.brandGreen)
-                    Text("Takes about 3 minutes")
-                        .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
-                }
-                HStack(spacing: Theme.Spacing.xxs + 2) {
-                    Image(systemName: "checkmark")
-                        .font(Theme.Typography.captionBold)
-                        .foregroundStyle(Theme.Colors.brandGreen)
-                    Text("Won't affect your credit score")
-                        .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
         }
     }
 
-    private func paymentInputCell(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-            Text(label)
-                .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
-            HStack(spacing: Theme.Spacing.xxs) {
-                Text(value)
-                    .font(.subheadline.weight(.medium))
-                Image(systemName: "pencil")
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
+
 
     private var paymentBreakdownList: some View {
         VStack(spacing: Theme.Spacing.sm) {
@@ -566,16 +539,52 @@ struct RedfinDetailView: View {
 
     // MARK: - Take a Tour Container Content
 
+    private var checkmarkSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+            HStack(spacing: Theme.Spacing.xs) {
+                Image(systemName: "checkmark")
+                    .font(Theme.Typography.captionBold)
+                    .foregroundStyle(Theme.Colors.brandGreen)
+                Text("Takes about 3 minutes")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(.secondary)
+            }
+            HStack(spacing: Theme.Spacing.xs) {
+                Image(systemName: "checkmark")
+                    .font(Theme.Typography.captionBold)
+                    .foregroundStyle(Theme.Colors.brandGreen)
+                Text("Won't affect your credit score")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Theme.Container.padding)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.Container.radius, style: .continuous)
+                .stroke(Theme.Container.borderColor, lineWidth: Theme.Container.borderWidth)
+        )
+    }
+
     private var takeTourContent: some View {
         VStack(spacing: Theme.Spacing.xl) {
             Text("Take a tour")
                 .font(Theme.Typography.sectionTitle)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            Image(systemName: "house.fill")
-                .font(Theme.Typography.decorativeXL)
-                .foregroundStyle(redfinRed.opacity(0.15))
-                .padding(.bottom, Theme.Spacing.xxs)
+            AsyncImage(url: URL(string: tourIllustrationURL)) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 120)
+                } else {
+                    Image(systemName: "house.fill")
+                        .font(Theme.Typography.decorativeXL)
+                        .foregroundStyle(redfinRed.opacity(0.15))
+                }
+            }
+            .padding(.bottom, Theme.Spacing.xxs)
 
             Button(action: {}) {
                 HStack(spacing: Theme.Spacing.xs) {
@@ -607,7 +616,7 @@ struct RedfinDetailView: View {
                 .font(Theme.Typography.sectionTitle)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            Image(systemName: "bubble.left.and.bubble.right.fill")
+            Image(systemName: "sparkle")
                 .font(Theme.Typography.decorativeLG)
                 .foregroundStyle(redfinRed.opacity(0.2))
 
@@ -618,8 +627,8 @@ struct RedfinDetailView: View {
 
             Button(action: onAskRedfin) {
                 HStack(spacing: Theme.Spacing.xxs + 2) {
-                    Image(systemName: "bubble.left")
-                    Text("Let's chat")
+                    Image(systemName: "sparkle")
+                    Text("Ask me about \(listing.address)")
                 }
             }
             .buttonStyle(.secondary)
