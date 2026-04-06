@@ -201,6 +201,7 @@ class ChatViewModel {
 
     private func generateResponse(for input: String) async {
         thinkingState = .thinking
+        let thinkingStart = ContinuousClock.now
 
         let response = chatService.matchResponse(for: input)
 
@@ -230,6 +231,13 @@ class ChatViewModel {
 
         case .fallback(let text):
             responseText = text
+        }
+
+        let elapsed = ContinuousClock.now - thinkingStart
+        let minimumThinking: Duration = .seconds(2)
+        if elapsed < minimumThinking {
+            try? await Task.sleep(for: minimumThinking - elapsed)
+            if Task.isCancelled { return }
         }
 
         thinkingState = .none
