@@ -3,7 +3,7 @@ import SwiftUI
 struct FilledInputView: View {
     let label: String
     let value: String
-    var icon: String? = nil
+    var icon: String = "pencil"
 
     var body: some View {
         HStack {
@@ -18,11 +18,9 @@ struct FilledInputView: View {
 
             Spacer()
 
-            if let icon {
-                Image(systemName: icon)
-                    .font(.system(size: Theme.IconSize.medium, weight: .medium))
-                    .foregroundStyle(.secondary)
-            }
+            Image(systemName: icon)
+                .font(.system(size: Theme.IconSize.medium, weight: .medium))
+                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, Theme.Spacing.md)
         .frame(height: 68)

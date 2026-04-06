@@ -21,7 +21,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, Theme.ButtonSize.verticalPadding)
             .background(
                 Capsule()
-                    .stroke(Theme.Colors.separator, lineWidth: 1)
+                    .stroke(Theme.Colors.separator, lineWidth: 2)
             )
             .opacity(configuration.isPressed ? 0.7 : 1.0)
     }
@@ -56,7 +56,7 @@ struct ActionCircleButtonStyle: ButtonStyle {
             .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
             .overlay(
                 Circle()
-                    .stroke(Theme.Colors.separator, lineWidth: 1)
+                    .stroke(Theme.Colors.separator, lineWidth: 2)
             )
             .opacity(configuration.isPressed ? 0.6 : 1.0)
     }
