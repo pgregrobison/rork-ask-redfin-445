@@ -206,7 +206,7 @@ struct RedfinDetailView: View {
 
     private var mediaSegmentedControl: some View {
         HStack(spacing: 0) {
-            mediaTabItem(icon: "play.fill", label: "Photos", tab: 0)
+            mediaTabItem(icon: "play.fill", label: "Media", tab: 0)
             mediaTabItem(icon: "map.fill", label: "Map", tab: 1)
             mediaTabItem(icon: "cube.fill", label: "3D", tab: 2)
             mediaTabItem(icon: "binoculars.fill", label: "Street", tab: 3)
