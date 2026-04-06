@@ -32,6 +32,12 @@ enum Theme {
         static let fill = Color(.tertiarySystemFill)
         static let separator = Color(.separator)
 
+        static let inset = Color(UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 0.12)
+                : UIColor(red: 56/255, green: 52/255, blue: 48/255, alpha: 0.06)
+        })
+
         enum Chat {
             static let userBubbleLight = Color(.systemGray6)
             static let userBubbleDark = Color(red: 254/255, green: 254/255, blue: 254/255).opacity(0.12)
@@ -186,7 +192,7 @@ enum Theme {
         static let horizontalPadding: CGFloat = Spacing.xs
         static let verticalPadding: CGFloat = Spacing.xxs
         static let cornerRadius: CGFloat = Radius.xs
-        static let background: Color = Colors.tertiaryBackground
+        static let background: Color = Colors.inset
         static let gridMinimum: CGFloat = 100
         static let gridSpacing: CGFloat = Spacing.xs
         static let rowSpacing: CGFloat = Spacing.xxs + 2
