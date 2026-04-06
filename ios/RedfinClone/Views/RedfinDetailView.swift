@@ -395,21 +395,8 @@ struct RedfinDetailView: View {
     private var highlightsSection: some View {
         Group {
             if !listing.tags.isEmpty {
-                VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: Theme.Spacing.xs)], alignment: .leading, spacing: Theme.Spacing.xs) {
-                        ForEach(listing.tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(Theme.Typography.secondary)
-                                .padding(.horizontal, Theme.Spacing.sm + 2)
-                                .padding(.vertical, Theme.Spacing.xs)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: Theme.Radius.xl)
-                                        .stroke(Theme.Colors.separator, lineWidth: 1)
-                                )
-                        }
-                    }
-                }
-                .padding(.vertical, Theme.Spacing.xs)
+                TagGrid(tags: listing.tags)
+                    .padding(.vertical, Theme.Spacing.xs)
             }
         }
     }

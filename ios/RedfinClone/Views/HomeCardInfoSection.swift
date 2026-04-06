@@ -44,19 +44,7 @@ struct HomeCardInfoSection: View {
     }
 
     private var tagsRow: some View {
-        HStack(spacing: Theme.Spacing.xxs + 2) {
-            ForEach(listing.tags.prefix(3), id: \.self) { tag in
-                Text(tag)
-                    .font(size.tagFont)
-                    .lineLimit(1)
-                    .padding(.horizontal, Theme.Spacing.xs)
-                    .padding(.vertical, Theme.Spacing.xxs)
-                    .background(Theme.Colors.tertiaryBackground)
-                    .clipShape(Capsule())
-            }
-        }
-        .lineLimit(1)
-        .fixedSize(horizontal: false, vertical: true)
+        TagRow(tags: listing.tags)
     }
 
     private var cardActions: some View {

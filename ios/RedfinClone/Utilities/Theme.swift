@@ -180,4 +180,16 @@ enum Theme {
         static let horizontalPadding: CGFloat = 10
         static let outerPadding: CGFloat = 2
     }
+
+    enum Tag {
+        static let font: Font = Typography.caption
+        static let horizontalPadding: CGFloat = Spacing.xs
+        static let verticalPadding: CGFloat = Spacing.xxs
+        static let cornerRadius: CGFloat = Radius.xs
+        static let background: Color = Colors.tertiaryBackground
+        static let gridMinimum: CGFloat = 100
+        static let gridSpacing: CGFloat = Spacing.xs
+        static let rowSpacing: CGFloat = Spacing.xxs + 2
+        static let rowMaxCount: Int = 3
+    }
 }

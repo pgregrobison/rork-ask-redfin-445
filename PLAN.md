@@ -1,40 +1,31 @@
-# Phase 4: Migrate Remaining Views & Add Missing Theme Tokens
+# Create a reusable Tag component using theme tokens
 
-## Scope
+## What's changing
 
-Final migration pass — tokenize the remaining hardcoded values across detail pages, tab bar, map pins, and scattered one-offs. Same goal: everything looks identical, but uses the design system.
+A new reusable **Tag** component will be created and applied everywhere tags/chips appear in the app. All styling will use theme tokens — no hardcoded values.
 
-### New Theme tokens to add
+### Tag Design
+- **Background:** Filled with the tertiary background color
+- **Corner radius:** Uses the smallest theme radius (`xs` = 4pt)
+- **Font:** Single universal size — caption weight
+- **Padding:** Horizontal `xs` (8pt), vertical `xxs` (4pt)
+- **Shape:** Rounded rectangle (not capsule), using the `xs` radius
 
-- **Tab bar sizes** — icon size (19pt), FAB size (62pt), tab padding (11pt)
-- **Tab bar clearance** — bottom padding (100pt) used by scrollable pages to clear the floating tab bar
-- **Map pin** — font size (13pt), horizontal padding (10pt)
-- **Detail page** — large decorative font sizes for empty states/hero numbers (48pt, 40pt, 36pt, 32pt, 28pt)
-- **Divider inset** — standard leading inset for step indicators (48pt) and detail rows (42pt)
+### New Theme Tokens
+- A `Tag` section inside the Theme for tag-specific spacing and styling tokens (font, horizontal padding, vertical padding, radius, background color, grid minimum width, grid spacing) so everything is centralized
 
-### Files to update
+### New Reusable Component
+- **`TagView`** — a single tag pill showing one text label, fully styled from theme tokens
+- **`TagGrid`** — a wrapping grid layout of tags (used on detail pages where tags wrap into multiple rows)
+- **`TagRow`** — a horizontal row of tags with a max count (used on home cards where space is limited)
 
-**Detail Pages (2 files):**
-- **Listing Detail** — replace hardcoded padding values (10, 14, 42), `Color(.systemGray3)` dot indicator, font size 14 with tokens
-- **Redfin Detail** — replace hardcoded padding (60, 10, 5, 14), hero number font sizes (32, 28, 48, 40, 36) with tokens
+### Where it gets applied
+1. **Home cards** (list view & map overlay) — replace the inline tag styling in `HomeCardInfoSection` with `TagRow`
+2. **`ListingDetailView`** highlights section — replace inline tag grid with `TagGrid`
+3. **`RedfinDetailView`** highlights section — replace inline outlined tag grid with `TagGrid`
+4. **Any other places** with similar patterns (e.g. `ListingCardOverlay` if applicable)
 
-**Tab Bar & Navigation (1 file):**
-- **Custom Tab Bar** — replace hardcoded icon size (19), FAB frame (62), vertical padding (11) with tokens
-
-**Map (1 file):**
-- **Map Pin** — replace hardcoded font size (13), padding (10, 2) with tokens
-
-**Scrollable Pages (4 files):**
-- **Find List, For You, Saved, My Home** — replace `padding(.bottom, 100)` with a `Theme.Spacing.tabBarClearance` token
-
-**Remaining one-offs in already-migrated files (~6 files):**
-- **Tour Scheduler / Mortgage Widget** — remaining hardcoded divider padding (48), font sizes (11, 12, 28)
-- **Location Menu** — remaining font sizes (20, 9, 13)
-- **Filter Sheet** — font size 9
-- **Find Pill Overlay** — font size 14
-- **My Home** — `Color(white: 0.15)` → `Theme.Colors.stepIndicator`
-
-### What stays as-is
-- `.foregroundStyle(.white)` on dark overlays/badges — these are intentional contrast colors, not theme-dependent
-- Debug Panel — developer tool, not user-facing
-- Animation-specific frame sizes in VoiceModeView — tied to animation logic, not design tokens
+### Visual result
+- Home cards look the same (filled tags, small size, horizontal row)
+- Detail pages will now use the **filled + xs radius** style consistently (replacing the outlined style on `RedfinDetailView`)
+- All tags across the app will look unified

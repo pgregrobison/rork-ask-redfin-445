@@ -51,13 +51,6 @@ enum HomeCardSize {
         }
     }
 
-    var tagFont: Font {
-        switch self {
-        case .large, .medium: Theme.Typography.caption
-        case .compact: Theme.Typography.micro
-        }
-    }
-
     var infoPadding: EdgeInsets {
         switch self {
         case .large: Theme.CardSize.InfoPadding.large

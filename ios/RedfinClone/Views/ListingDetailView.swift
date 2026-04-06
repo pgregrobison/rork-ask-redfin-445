@@ -536,16 +536,7 @@ struct ListingDetailView: View {
             Text("Highlights")
                 .font(Theme.Typography.cardTitle)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: Theme.Spacing.xs)], alignment: .leading, spacing: Theme.Spacing.xs) {
-                ForEach(listing.tags, id: \.self) { tag in
-                    Text(tag)
-                        .font(Theme.Typography.secondary)
-                        .padding(.horizontal, Theme.Spacing.sm + 2)
-                        .padding(.vertical, Theme.Spacing.xs)
-                        .background(Theme.Colors.secondaryBackground)
-                        .clipShape(Capsule())
-                }
-            }
+            TagGrid(tags: listing.tags)
         }
     }
 
