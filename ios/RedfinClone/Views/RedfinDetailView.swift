@@ -55,21 +55,24 @@ struct RedfinDetailView: View {
         UIScreen.main.bounds.height * 0.5
     }
 
+    private let featureIcons: [String] = ["shower", "door.garage.closed", "oven", "bed.double", "hanger", "umbrella"]
+
     private var featureHighlights: [(icon: String, label: String)] {
         var highlights: [(icon: String, label: String)] = []
 
-        for tag in listing.tags.prefix(6) {
-            highlights.append((icon: iconForTag(tag), label: tag))
+        for (index, tag) in listing.tags.prefix(6).enumerated() {
+            let icon = index < featureIcons.count ? featureIcons[index] : featureIcons[index % featureIcons.count]
+            highlights.append((icon: icon, label: tag))
         }
 
         if highlights.count < 6 {
             let generated: [(icon: String, label: String)] = [
                 ("bed.double", "\(listing.beds) bedrooms"),
-                ("bathtub", "\(listing.bathsFormatted) bathrooms"),
-                ("square.resize", "\(listing.sqft.formatted()) sq ft"),
-                ("calendar", "Built in \(listing.yearBuilt)"),
-                ("ruler", listing.lotSize + " lot"),
-                ("house", listing.propertyType)
+                ("shower", "\(listing.bathsFormatted) bathrooms"),
+                ("oven", "\(listing.sqft.formatted()) sq ft"),
+                ("door.garage.closed", "Built in \(listing.yearBuilt)"),
+                ("hanger", listing.lotSize + " lot"),
+                ("umbrella", listing.propertyType)
             ]
             for item in generated {
                 guard highlights.count < 6 else { break }
@@ -108,7 +111,6 @@ struct RedfinDetailView: View {
 
             askRedfinFAB
                 .padding(.trailing, Theme.Spacing.md)
-                .padding(.bottom, Theme.Spacing.md)
         }
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
@@ -202,24 +204,33 @@ struct RedfinDetailView: View {
         }
     }
 
-    @ViewBuilder
     private var mediaSegmentedControl: some View {
-        let picker = Picker("", selection: $selectedMediaTab) {
-            Label("Media", systemImage: "play.fill").tag(0)
-            Label("Map", systemImage: "mappin.fill").tag(1)
-            Label("3D", systemImage: "cube.fill").tag(2)
-            Label("Street", systemImage: "binoculars.fill").tag(3)
+        HStack(spacing: 0) {
+            mediaTabButton(icon: "play.fill", tab: 0)
+            mediaTabButton(icon: "mappin.fill", tab: 1)
+            mediaTabButton(icon: "cube.fill", tab: 2)
+            mediaTabButton(icon: "binoculars.fill", tab: 3)
         }
-        .pickerStyle(.segmented)
-        .colorMultiply(.white)
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.Radius.medium))
+    }
 
-        if #available(iOS 26.0, *) {
-            picker
-                .glassEffect(in: .capsule)
-        } else {
-            picker
-                .background(.ultraThinMaterial, in: Capsule())
+    private func mediaTabButton(icon: String, tab: Int) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedMediaTab = tab
+            }
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(selectedMediaTab == tab ? .white : .white.opacity(0.5))
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(
+                    selectedMediaTab == tab ? Color.white.opacity(0.2) : Color.clear,
+                    in: .rect(cornerRadius: Theme.Radius.small)
+                )
         }
+        .padding(4)
     }
 
     // MARK: - Main Content
@@ -308,15 +319,15 @@ struct RedfinDetailView: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                 Text("$\(totalMonthly.formatted())/mo")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Theme.Colors.brandGreen)
+                    .foregroundStyle(.primary)
 
                 HStack(spacing: Theme.Spacing.xxs) {
                     Text("Rates dropped")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(Theme.Colors.brandGreen)
+                        .foregroundStyle(.primary)
                     Image(systemName: "info.circle")
                         .font(.system(size: 13))
-                        .foregroundStyle(Theme.Colors.brandGreen)
+                        .foregroundStyle(.primary)
                 }
             }
 
@@ -361,11 +372,12 @@ struct RedfinDetailView: View {
     }
 
     private func propertyDetailRow(icon: String, value: String, label: String) -> some View {
-        HStack(spacing: Theme.Spacing.xs + 2) {
+        HStack(alignment: .top, spacing: Theme.Spacing.xs + 2) {
             Image(systemName: icon)
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28)
+                .padding(.top, 2)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(value)
@@ -522,12 +534,12 @@ struct RedfinDetailView: View {
     private var paymentBreakdownList: some View {
         VStack(spacing: 0) {
             paymentLineItem(color: Theme.Colors.Chart.blue, label: "Principal and interest", amount: principalAndInterest, percent: totalMonthly > 0 ? Int(Double(principalAndInterest) / Double(totalMonthly) * 100) : 0)
-            Divider().padding(.vertical, Theme.Spacing.xs)
+            Divider().padding(.vertical, Theme.Spacing.md)
             paymentLineItem(color: Theme.Colors.Chart.green, label: "Property taxes", amount: propertyTaxes, percent: totalMonthly > 0 ? Int(Double(propertyTaxes) / Double(totalMonthly) * 100) : 0)
-            Divider().padding(.vertical, Theme.Spacing.xs)
+            Divider().padding(.vertical, Theme.Spacing.md)
             paymentLineItem(color: Theme.Colors.Chart.amber, label: "Homeowners insurance", amount: homeInsurance, percent: totalMonthly > 0 ? Int(Double(homeInsurance) / Double(totalMonthly) * 100) : 0)
             if hoaDuesAmount > 0 {
-                Divider().padding(.vertical, Theme.Spacing.xs)
+                Divider().padding(.vertical, Theme.Spacing.md)
                 paymentLineItem(color: Theme.Colors.Chart.purple, label: "HOA dues", amount: hoaDuesAmount, percent: totalMonthly > 0 ? Int(Double(hoaDuesAmount) / Double(totalMonthly) * 100) : 0)
             }
         }

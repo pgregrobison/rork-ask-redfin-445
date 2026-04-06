@@ -1,30 +1,15 @@
-# Detail Page Styling Refinements
+# Detail page styling updates — tabs, alignment, icons, FAB, spacing & colors
 
-A batch of visual polish updates to the James-style detail page:
+**Changes to the James (Redfin) detail page:**
 
-**Segmented Control**
-- Fully round the liquid glass shape on the segmented control (capsule shape instead of rounded rectangle)
+- **Replace segmented control with native tab bar** — Swap the current segmented picker for a tab-style bar with icons (play, map pin, cube, binoculars) that switches content within the same photo area, styled natively without the liquid glass capsule wrapper
 
-**Estimate My Rate Banner**
-- Use the "inset" theme color as the background instead of the current green tint
+- **Property details: top-left align icons** — Change the icon+text rows so the icon sits at the top-left of the text block (aligned to the top of the value text), instead of vertically centered
 
-**Feature Grid Icons**
-- Remove "sparkle" as a fallback icon — always pick a more descriptive alternative symbol (e.g. "star.fill", "wand.and.stars", "bolt.fill", etc.)
+- **Key features icons** — Replace the auto-generated icons with fixed icons: shower, garage door (door.garage.closed), cooktop (oven), bed double, hanger, and umbrella for the 6 feature highlight cells
 
-**Outline Buttons**
-- Increase border thickness on all outline/secondary buttons from 1pt to 2pt
+- **Move Ask Redfin FAB down** — Position the floating button flush with the bottom safe area (0pt from safe area inset) while keeping the current 16pt trailing edge spacing
 
-**Payment Calculator**
-- Add thin dividers between each line item (Principal & interest, Property taxes, etc.)
-- Keep 2pt gap between the colored bars in the payment breakdown bar
-- Remove corner radius from individual bar segments — only round the outer corners of the entire bar
-- All three input fields show the pencil (edit) icon on the right side
-- Down payment shows shorthand dollar amounts (e.g. "$464K" instead of "$464,000")
-- Move the "Takes about 3 minutes / Won't affect your credit score" checkmarks into the payment calculator container, filling the full width
+- **Payment breakdown spacing** — Increase vertical padding on dividers between Principal & Interest, Property Taxes, etc. from 8pt to 16pt (Theme.Spacing.md)
 
-**Tour Illustration**
-- Increase the illustration image size for more visual presence
-
-**Ask Redfin Section**
-- Use brand red color on the sparkle icon
-- Shorten button text to just "Ask about [street address]"
+- **Estimate my rate banner colors** — Change the monthly amount text and "Rates dropped" text + info icon from green to system primary color (white in dark mode, black in light mode)
