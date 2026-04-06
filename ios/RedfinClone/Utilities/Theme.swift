@@ -192,4 +192,18 @@ enum Theme {
         static let rowSpacing: CGFloat = Spacing.xxs + 2
         static let rowMaxCount: Int = 3
     }
+
+    enum Container {
+        static let radius: CGFloat = Radius.xl
+        static let padding: CGFloat = Spacing.xl
+        static let spacing: CGFloat = Spacing.md
+        static let borderColor: Color = Colors.separator
+        static let borderWidth: CGFloat = 0.5
+    }
+
+    enum IconTag {
+        static let iconSize: CGFloat = 32
+        static let gridSpacing: CGFloat = Spacing.md
+        static let iconColor: Color = Color.secondary
+    }
 }
