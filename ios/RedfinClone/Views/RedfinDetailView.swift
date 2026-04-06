@@ -4,8 +4,10 @@ import MapKit
 struct RedfinDetailView: View {
     let listing: Listing
     let isSaved: Bool
+    let useZoomTransition: Bool
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
+    @Environment(\.dismiss) private var dismiss
     @State private var currentPhotoIndex: Int = 0
     @State private var showFullDescription: Bool = false
     @State private var scrollOffset: CGFloat = 0
@@ -81,8 +83,18 @@ struct RedfinDetailView: View {
         }
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(useZoomTransition)
         .toolbarBackground(scrollOffset < -(photoCarouselHeight - 100) ? .visible : .hidden, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if useZoomTransition {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(scrollOffset < -(photoCarouselHeight - 100) ? Color.primary : Color.white)
+                    }
+                }
+            }
             ToolbarItem(placement: .principal) {
                 if scrollOffset < -(photoCarouselHeight - 100) {
                     Text(listing.address)

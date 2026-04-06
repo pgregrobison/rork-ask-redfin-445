@@ -138,6 +138,7 @@ struct ContentView: View {
             ListingDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
+                useZoomTransition: debugSettings.cardTransition == .zoom,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )
@@ -145,6 +146,7 @@ struct ContentView: View {
             RedfinDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
+                useZoomTransition: debugSettings.cardTransition == .zoom,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )

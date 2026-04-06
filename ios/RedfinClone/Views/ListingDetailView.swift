@@ -4,6 +4,7 @@ import MapKit
 struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
+    let useZoomTransition: Bool
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -55,6 +56,7 @@ struct ListingDetailView: View {
         .ignoresSafeArea()
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(useZoomTransition || focusedPhotoIndex != nil)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 if focusedPhotoIndex != nil {
@@ -67,6 +69,11 @@ struct ListingDetailView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                             .foregroundStyle(.white)
+                    }
+                } else if useZoomTransition {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }
                 }
             }
@@ -96,7 +103,6 @@ struct ListingDetailView: View {
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
-        .navigationBarBackButtonHidden(focusedPhotoIndex != nil)
         .onDisappear {
             focusedPhotoIndex = nil
             focusVisible = false
