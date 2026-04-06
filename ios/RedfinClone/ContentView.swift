@@ -92,21 +92,28 @@ struct ContentView: View {
 
     @ViewBuilder
     private var tabContent: some View {
-        switch selectedTab {
-        case .find:
+        ZStack {
             FindView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
-        case .forYou:
+            .opacity(selectedTab == .find ? 1 : 0)
+            .allowsHitTesting(selectedTab == .find)
+
             ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
-        case .saved:
+            .opacity(selectedTab == .forYou ? 1 : 0)
+            .allowsHitTesting(selectedTab == .forYou)
+
             SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace) { listing in
                 navigateToListing(listing)
             }
-        case .myHome:
+            .opacity(selectedTab == .saved ? 1 : 0)
+            .allowsHitTesting(selectedTab == .saved)
+
             MyHomeView(debugSettings: debugSettings)
+                .opacity(selectedTab == .myHome ? 1 : 0)
+                .allowsHitTesting(selectedTab == .myHome)
         }
     }
 
