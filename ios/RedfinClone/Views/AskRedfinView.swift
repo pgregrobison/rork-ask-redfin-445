@@ -26,7 +26,7 @@ struct AskRedfinView: View {
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
         .presentationDetents(mapFocusActive ? [.fraction(0.7), .large] : [.large], selection: $selectedDetent)
-        .presentationContentInteraction(.scrolls)
+        .presentationContentInteraction(mapFocusActive && selectedDetent != .large ? .resizes : .scrolls)
         .presentationBackgroundInteraction(mapFocusActive ? .enabled(upThrough: .fraction(0.7)) : .automatic)
     }
 

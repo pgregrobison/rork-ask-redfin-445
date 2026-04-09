@@ -1,7 +1,14 @@
-# Single-city chat results & 70% map detent
+# Prevent chat scrolling in smaller sheet detent
 
-**Changes**
+**What changes:**
 
-- **Single-city search results**: When the chat returns home listings, results will be limited to homes from one city at a time. If the user mentions a specific area (e.g. "Seattle", "Brooklyn"), only homes in that city are returned. If no city is mentioned, results default to the most common city in the matched set. This ensures map pins cluster in a realistic geographic area instead of scattering across the country.
+- In the smaller (70%) sheet position, swiping up on the chat will pull the sheet up to full height instead of scrolling the messages
+- Once the sheet reaches full height, scrolling works normally as it does today
+- If the user drags the sheet back down to the smaller position, scrolling is disabled again
 
-- **70% height chat sheet**: The map-focus chat sheet will now sit at 70% screen height (up from 50%), giving more room to browse chat results while still showing map pins above.
+**How it works:**
+
+- The sheet dynamically switches between "resize first" and "scroll first" behavior based on the current detent position
+- At the 70% detent → swipe gestures resize the sheet
+- At the full-height detent → swipe gestures scroll the chat content
+
