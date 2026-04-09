@@ -121,6 +121,8 @@ class ListingsViewModel {
         panToListing(listing)
     }
 
+    private let headerFraction: CGFloat = 0.12
+
     func fitListings(_ listings: [Listing], sheetFraction: CGFloat = 0) {
         guard !listings.isEmpty else { return }
         if listings.count == 1, let only = listings.first {
@@ -144,17 +146,12 @@ class ListingsViewModel {
         let pinCenterLat = (minLat + maxLat) / 2
         let pinCenterLon = (minLon + maxLon) / 2
 
-        let latDelta: Double
-        let centerLat: Double
-        if sheetFraction > 0 {
-            let visibleFraction = max(1.0 - sheetFraction, 0.15)
-            latDelta = pinLatDelta / visibleFraction
-            let visibleMidOffset = (1.0 - visibleFraction) / 2.0 * latDelta
-            centerLat = pinCenterLat - visibleMidOffset
-        } else {
-            latDelta = pinLatDelta
-            centerLat = pinCenterLat
-        }
+        let totalOccluded = sheetFraction + headerFraction
+        let visibleFraction = max(1.0 - totalOccluded, 0.15)
+        let latDelta = pinLatDelta / visibleFraction
+        let bottomOffset = sheetFraction / 2.0 * latDelta
+        let topOffset = headerFraction / 2.0 * latDelta
+        let centerLat = pinCenterLat - bottomOffset + topOffset
 
         let center = CLLocationCoordinate2D(latitude: centerLat, longitude: pinCenterLon)
         let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
@@ -171,14 +168,9 @@ class ListingsViewModel {
 
     func panToListing(_ listing: Listing, sheetFraction: CGFloat = 0) {
         let coord = listing.coordinate
-        let adjustedLat: Double
-        if sheetFraction > 0 {
-            let visibleFraction = max(1.0 - sheetFraction, 0.15)
-            let visibleMidOffset = (1.0 - visibleFraction) / 2.0 * currentSpan.latitudeDelta
-            adjustedLat = coord.latitude - visibleMidOffset
-        } else {
-            adjustedLat = coord.latitude
-        }
+        let bottomOffset = sheetFraction / 2.0 * currentSpan.latitudeDelta
+        let topOffset = headerFraction / 2.0 * currentSpan.latitudeDelta
+        let adjustedLat = coord.latitude - bottomOffset + topOffset
         isAnimatingCamera = true
         withAnimation(.easeInOut(duration: 0.35)) {
             mapPosition = .region(MKCoordinateRegion(

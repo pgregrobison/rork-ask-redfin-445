@@ -1,8 +1,11 @@
-# Offset map camera to account for chat sheet
+# Account for header when fitting map pins
 
-When the chat sheet appears at the 70% detent after a search, the map pins currently get hidden behind the sheet. This change will adjust the map camera so all pins are visible in the upper portion of the screen above the sheet.
+**What's changing**
 
-**What changes:**
-- When fitting pins with the map focus sheet active, the map will zoom out more and shift the center point upward so all pins sit comfortably in the visible area above the sheet
-- The same offset logic applies when fitting a single listing — it will also account for the sheet
-- No visual or design changes to the sheet itself — just smarter map camera positioning
+When the map zooms to fit search result pins, some pins near the top of the screen can end up hidden behind the navigation bar and the location pill overlay. This update adds a top inset to the map fitting calculations so all pins remain comfortably visible below the header.
+
+**Details**
+
+- Add a top header fraction (accounting for the status bar, navigation bar, and the floating pill) to the `fitListings` and `panToListing` functions
+- This works alongside the existing bottom sheet offset — pins will be positioned in the truly visible area between the header and the sheet
+- The offset shifts the map center upward slightly so the topmost pin clears the header with comfortable padding
