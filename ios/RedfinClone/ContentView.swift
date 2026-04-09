@@ -87,7 +87,7 @@ struct ContentView: View {
             }
             Task {
                 try? await Task.sleep(for: .milliseconds(350))
-                viewModel.fitListings(results)
+                viewModel.fitListings(results, sheetFraction: 0.7)
             }
         }
         .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in

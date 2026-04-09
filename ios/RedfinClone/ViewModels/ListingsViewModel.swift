@@ -121,10 +121,10 @@ class ListingsViewModel {
         panToListing(listing)
     }
 
-    func fitListings(_ listings: [Listing]) {
+    func fitListings(_ listings: [Listing], sheetFraction: CGFloat = 0) {
         guard !listings.isEmpty else { return }
         if listings.count == 1, let only = listings.first {
-            panToListing(only)
+            panToListing(only, sheetFraction: sheetFraction)
             return
         }
         var minLat = Double.greatestFiniteMagnitude
@@ -139,12 +139,24 @@ class ListingsViewModel {
             maxLon = max(maxLon, coord.longitude)
         }
         let padding = 1.3
-        let latDelta = max((maxLat - minLat) * padding, 0.01)
+        let pinLatDelta = max((maxLat - minLat) * padding, 0.01)
         let lonDelta = max((maxLon - minLon) * padding, 0.01)
-        let center = CLLocationCoordinate2D(
-            latitude: (minLat + maxLat) / 2,
-            longitude: (minLon + maxLon) / 2
-        )
+        let pinCenterLat = (minLat + maxLat) / 2
+        let pinCenterLon = (minLon + maxLon) / 2
+
+        let latDelta: Double
+        let centerLat: Double
+        if sheetFraction > 0 {
+            let visibleFraction = max(1.0 - sheetFraction, 0.15)
+            latDelta = pinLatDelta / visibleFraction
+            let visibleMidOffset = (1.0 - visibleFraction) / 2.0 * latDelta
+            centerLat = pinCenterLat - visibleMidOffset
+        } else {
+            latDelta = pinLatDelta
+            centerLat = pinCenterLat
+        }
+
+        let center = CLLocationCoordinate2D(latitude: centerLat, longitude: pinCenterLon)
         let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
         isAnimatingCamera = true
         withAnimation(.easeInOut(duration: 0.5)) {
@@ -157,11 +169,20 @@ class ListingsViewModel {
         }
     }
 
-    func panToListing(_ listing: Listing) {
+    func panToListing(_ listing: Listing, sheetFraction: CGFloat = 0) {
+        let coord = listing.coordinate
+        let adjustedLat: Double
+        if sheetFraction > 0 {
+            let visibleFraction = max(1.0 - sheetFraction, 0.15)
+            let visibleMidOffset = (1.0 - visibleFraction) / 2.0 * currentSpan.latitudeDelta
+            adjustedLat = coord.latitude - visibleMidOffset
+        } else {
+            adjustedLat = coord.latitude
+        }
         isAnimatingCamera = true
         withAnimation(.easeInOut(duration: 0.35)) {
             mapPosition = .region(MKCoordinateRegion(
-                center: listing.coordinate,
+                center: CLLocationCoordinate2D(latitude: adjustedLat, longitude: coord.longitude),
                 span: currentSpan
             ))
         }

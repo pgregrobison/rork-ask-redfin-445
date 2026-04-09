@@ -1,10 +1,8 @@
-# Fix scroll lock on fraction detent
+# Offset map camera to account for chat sheet
 
-**Problem:** When the chat sheet is at the 70% detent, attempting to scroll still engages the ScrollView. You have to scroll all the way to the top before the drag gesture transitions to pulling the sheet up.
-
-**Fix:** Completely disable scrolling on the chat's ScrollView when the sheet is at the fraction detent. This ensures any vertical drag immediately pulls the sheet up to the large detent, rather than fighting with the scroll position. Once at the large detent, scrolling re-enables as normal.
+When the chat sheet appears at the 70% detent after a search, the map pins currently get hidden behind the sheet. This change will adjust the map camera so all pins are visible in the upper portion of the screen above the sheet.
 
 **What changes:**
-- The chat message list will be non-scrollable when the sheet is in its smaller (70%) position
-- Dragging up on the chat content will immediately expand the sheet to full height
-- Once expanded, scrolling works exactly as it does today
+- When fitting pins with the map focus sheet active, the map will zoom out more and shift the center point upward so all pins sit comfortably in the visible area above the sheet
+- The same offset logic applies when fitting a single listing — it will also account for the sheet
+- No visual or design changes to the sheet itself — just smarter map camera positioning
