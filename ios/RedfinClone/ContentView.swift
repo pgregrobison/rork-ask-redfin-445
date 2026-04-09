@@ -78,7 +78,7 @@ struct ContentView: View {
             guard let results, !results.isEmpty, isMapFocusEligible else { return }
             chatViewModel.searchResultsJustArrived = nil
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                chatDetent = .medium
+                chatDetent = .fraction(0.7)
             }
             Task {
                 try? await Task.sleep(for: .milliseconds(350))

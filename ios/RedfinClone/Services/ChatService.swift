@@ -67,6 +67,12 @@ class ChatService {
             }
         }
 
+        if !results.isEmpty {
+            let cityCounts = Dictionary(grouping: results, by: { $0.city })
+            let topCity = cityCounts.max(by: { $0.value.count < $1.value.count })!.key
+            results = results.filter { $0.city == topCity }
+        }
+
         return results
     }
 

@@ -25,9 +25,9 @@ struct AskRedfinView: View {
         .background(Theme.Colors.background)
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
-        .presentationDetents(mapFocusActive ? [.medium, .large] : [.large], selection: $selectedDetent)
+        .presentationDetents(mapFocusActive ? [.fraction(0.7), .large] : [.large], selection: $selectedDetent)
         .presentationContentInteraction(.scrolls)
-        .presentationBackgroundInteraction(mapFocusActive ? .enabled(upThrough: .medium) : .automatic)
+        .presentationBackgroundInteraction(mapFocusActive ? .enabled(upThrough: .fraction(0.7)) : .automatic)
     }
 
     private var headerBar: some View {
