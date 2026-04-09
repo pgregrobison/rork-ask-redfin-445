@@ -150,6 +150,7 @@ struct AskRedfinView: View {
             .safeAreaInset(edge: .top, spacing: 0) {
                 headerBar
             }
+            .scrollDisabled(mapFocusActive && selectedDetent != .large)
             .scrollDismissesKeyboard(.interactively)
             .onAppear {
                 guard !hasRestoredScroll else { return }
