@@ -10,6 +10,11 @@ nonisolated enum DetailPageStyle: String, CaseIterable, Codable, Sendable {
     case james = "James"
 }
 
+nonisolated enum SearchBehavior: String, CaseIterable, Codable, Sendable {
+    case `default` = "Default"
+    case mapFocus = "Map Focus"
+}
+
 @Observable
 class DebugSettings {
     var cardTransition: CardTransitionStyle {
@@ -20,10 +25,16 @@ class DebugSettings {
         didSet { UserDefaults.standard.set(detailPageStyle.rawValue, forKey: "debug_detailPageStyle") }
     }
 
+    var searchBehavior: SearchBehavior {
+        didSet { UserDefaults.standard.set(searchBehavior.rawValue, forKey: "debug_searchBehavior") }
+    }
+
     init() {
         let stored = UserDefaults.standard.string(forKey: "debug_cardTransition") ?? ""
         self.cardTransition = CardTransitionStyle(rawValue: stored) ?? .nativePush
         let storedStyle = UserDefaults.standard.string(forKey: "debug_detailPageStyle") ?? ""
         self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .current
+        let storedBehavior = UserDefaults.standard.string(forKey: "debug_searchBehavior") ?? ""
+        self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .default
     }
 }

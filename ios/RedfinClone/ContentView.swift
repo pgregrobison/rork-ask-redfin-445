@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
     @State private var showLocationMenu: Bool = false
+    @State private var chatDetent: PresentationDetent = .large
     @Namespace private var zoomNamespace
 
     var body: some View {
@@ -47,6 +48,7 @@ struct ContentView: View {
                 pendingMapListings = nil
                 viewModel.fitListings(listings)
             }
+            chatDetent = .large
         }) {
             AskRedfinView(
                 chatViewModel: chatViewModel,
@@ -67,8 +69,21 @@ struct ContentView: View {
                     viewModel.showChat = false
                     viewModel.markSeen(listing)
                     navigationPath.append(listing)
-                }
+                },
+                mapFocusActive: isMapFocusEligible,
+                selectedDetent: $chatDetent
             )
+        }
+        .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
+            guard let results, !results.isEmpty, isMapFocusEligible else { return }
+            chatViewModel.searchResultsJustArrived = nil
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                chatDetent = .medium
+            }
+            Task {
+                try? await Task.sleep(for: .milliseconds(350))
+                viewModel.fitListings(results)
+            }
         }
         .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in
             guard let listingID = newID else { return }
@@ -151,6 +166,12 @@ struct ContentView: View {
                 onAskRedfin: { viewModel.showChat = true }
             )
         }
+    }
+
+    private var isMapFocusEligible: Bool {
+        debugSettings.searchBehavior == .mapFocus
+            && selectedTab == .find
+            && !viewModel.showListView
     }
 
     private func navigateToListing(_ listing: Listing) {

@@ -8,6 +8,8 @@ struct AskRedfinView: View {
     let onDismiss: () -> Void
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
+    var mapFocusActive: Bool = false
+    @Binding var selectedDetent: PresentationDetent
     @FocusState private var isInputFocused: Bool
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
@@ -23,7 +25,9 @@ struct AskRedfinView: View {
         .background(Theme.Colors.background)
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)
-        .presentationDetents([.large])
+        .presentationDetents(mapFocusActive ? [.medium, .large] : [.large], selection: $selectedDetent)
+        .presentationContentInteraction(.scrolls)
+        .presentationBackgroundInteraction(mapFocusActive ? .enabled(upThrough: .medium) : .automatic)
     }
 
     private var headerBar: some View {

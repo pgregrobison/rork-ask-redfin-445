@@ -68,6 +68,37 @@ struct DebugPanelView: View {
                 } footer: {
                     Text("Controls the layout and design of the listing detail page.")
                 }
+
+                Section {
+                    ForEach(SearchBehavior.allCases, id: \.self) { behavior in
+                        Button {
+                            settings.searchBehavior = behavior
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(behavior.rawValue)
+                                        .font(.body)
+                                        .foregroundStyle(.primary)
+                                    Text(behavior.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if settings.searchBehavior == behavior {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("Search Behavior")
+                } footer: {
+                    Text("Controls how chat interacts with the map when searching for homes.")
+                }
             }
             .navigationTitle("Debug")
             .navigationBarTitleDisplayMode(.inline)
@@ -95,6 +126,15 @@ extension DetailPageStyle {
         switch self {
         case .current: "Bottom sheet over photos"
         case .james: "Full vertical scroll layout"
+        }
+    }
+}
+
+extension SearchBehavior {
+    var subtitle: String {
+        switch self {
+        case .default: "Full sheet chat, manual show on map"
+        case .mapFocus: "Chat drops to half-sheet on search, pins auto-fit"
         }
     }
 }
