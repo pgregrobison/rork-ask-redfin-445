@@ -14,17 +14,20 @@ struct MyHomeView: View {
 
                 Spacer().frame(height: Theme.Spacing.md)
 
-                debugButton
             }
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
         .navigationTitle(isActive ? "My Home" : "")
         .navigationBarTitleDisplayMode(isActive ? .large : .inline)
+        .sheet(isPresented: $showDebugPanel) {
+            DebugPanelView(settings: debugSettings)
+                .presentationDetents([.medium])
+        }
         .toolbar {
             if isActive {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {} label: {
+                    Button { showDebugPanel = true } label: {
                         Image(systemName: "person.crop.circle")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }
@@ -106,22 +109,5 @@ struct MyHomeView: View {
         .clipShape(.rect(cornerRadius: Theme.Radius.medium))
     }
 
-    private var debugButton: some View {
-        Button { showDebugPanel = true } label: {
-            HStack(spacing: Theme.Spacing.xs) {
-                Image(systemName: "wrench.and.screwdriver")
-                    .font(Theme.Typography.secondary.weight(.medium))
-                Text("Debug Panel")
-                    .font(Theme.Typography.secondary.weight(.medium))
-            }
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Theme.Spacing.sm)
-        }
-        .buttonStyle(.plain)
-        .sheet(isPresented: $showDebugPanel) {
-            DebugPanelView(settings: debugSettings)
-                .presentationDetents([.medium])
-        }
-    }
+
 }

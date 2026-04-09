@@ -1,6 +1,7 @@
-# Add 2-second minimum "Thinking" time to chat
+# Move Debug Panel to Profile Button
 
-**What changes:**
-- When you send a message in the Ask Redfin chat, the "Thinking" indicator will always display for at least 2 seconds before the response starts streaming
-- This makes the chat feel more natural and realistic, as if the AI is genuinely processing your question
-- No visual or design changes — only the minimum duration of the thinking state is extended
+**Changes**
+
+- Remove the debug panel button from the bottom of the My Home page
+- Tapping the profile icon (top-right of My Home) will now open the debug panel as a sheet
+- Everything else on the My Home page stays the same
