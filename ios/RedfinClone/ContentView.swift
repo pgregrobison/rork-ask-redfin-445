@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var pendingMapListings: [Listing]?
     @State private var showLocationMenu: Bool = false
     @State private var chatDetent: PresentationDetent = .large
+    @State private var showDebugPanel: Bool = false
     @Namespace private var zoomNamespace
 
     var body: some View {
@@ -43,6 +44,10 @@ struct ContentView: View {
             }
         }
         .tint(.primary)
+        .sheet(isPresented: $showDebugPanel) {
+            DebugPanelView(settings: debugSettings)
+                .presentationDetents([.medium, .large])
+        }
         .sheet(isPresented: $viewModel.showChat, onDismiss: {
             if let listings = pendingMapListings {
                 pendingMapListings = nil
@@ -108,25 +113,25 @@ struct ContentView: View {
     @ViewBuilder
     private var tabContent: some View {
         ZStack {
-            FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find) { listing in
+            FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }) { listing in
                 navigateToListing(listing)
             }
             .opacity(selectedTab == .find ? 1 : 0)
             .allowsHitTesting(selectedTab == .find)
 
-            ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou) { listing in
+            ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
                 navigateToListing(listing)
             }
             .opacity(selectedTab == .forYou ? 1 : 0)
             .allowsHitTesting(selectedTab == .forYou)
 
-            SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved) { listing in
+            SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: { showDebugPanel = true }) { listing in
                 navigateToListing(listing)
             }
             .opacity(selectedTab == .saved ? 1 : 0)
             .allowsHitTesting(selectedTab == .saved)
 
-            MyHomeView(debugSettings: debugSettings, isActive: selectedTab == .myHome)
+            MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
                 .opacity(selectedTab == .myHome ? 1 : 0)
                 .allowsHitTesting(selectedTab == .myHome)
         }

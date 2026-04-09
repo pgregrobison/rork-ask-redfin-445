@@ -4,6 +4,7 @@ struct SavedView: View {
     let viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
     let isActive: Bool
+    let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -39,7 +40,7 @@ struct SavedView: View {
         .toolbar {
             if isActive {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {} label: {
+                    Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }

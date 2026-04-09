@@ -4,6 +4,7 @@ struct ForYouView: View {
     let viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
     let isActive: Bool
+    let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -30,7 +31,7 @@ struct ForYouView: View {
         .toolbar {
             if isActive {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {} label: {
+                    Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }

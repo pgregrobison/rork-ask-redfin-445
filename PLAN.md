@@ -1,14 +1,13 @@
-# Prevent chat scrolling in smaller sheet detent
+# Make debug panel accessible from all tabs with large detent
 
 **What changes:**
 
-- In the smaller (70%) sheet position, swiping up on the chat will pull the sheet up to full height instead of scrolling the messages
-- Once the sheet reaches full height, scrolling works normally as it does today
-- If the user drags the sheet back down to the smaller position, scrolling is disabled again
+- The profile icon button (top-right) on **every tab** (Find, For You, Saved, My Home) will open the debug panel — not just My Home
+- The debug panel sheet will support both **medium** and **large** heights, so you can pull it up to see all options as you add more
 
 **How it works:**
 
-- The sheet dynamically switches between "resize first" and "scroll first" behavior based on the current detent position
-- At the 70% detent → swipe gestures resize the sheet
-- At the full-height detent → swipe gestures scroll the chat content
+- The debug panel sheet moves to the main app level so it's shared across all tabs
+- Each tab's existing profile button gets wired up to open it
+- The sheet starts at medium height and can be pulled up to large
 

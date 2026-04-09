@@ -2,9 +2,8 @@ import SwiftUI
 
 struct MyHomeView: View {
     @Environment(\.colorScheme) private var colorScheme
-    let debugSettings: DebugSettings
     let isActive: Bool
-    @State private var showDebugPanel: Bool = false
+    let onProfileTap: () -> Void
 
     var body: some View {
         ScrollView {
@@ -20,14 +19,10 @@ struct MyHomeView: View {
         .background(Theme.Colors.background)
         .navigationTitle(isActive ? "My Home" : "")
         .navigationBarTitleDisplayMode(isActive ? .large : .inline)
-        .sheet(isPresented: $showDebugPanel) {
-            DebugPanelView(settings: debugSettings)
-                .presentationDetents([.medium])
-        }
         .toolbar {
             if isActive {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showDebugPanel = true } label: {
+                    Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }
