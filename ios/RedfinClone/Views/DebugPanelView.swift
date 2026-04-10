@@ -104,10 +104,10 @@ struct DebugPanelView: View {
                     Toggle("Use Spring", isOn: $settings.panUseSpring)
 
                     if settings.panUseSpring {
-                        AnimationSliderRow(label: "Response", value: $settings.panSpringResponse, range: 0.1...1.0)
+                        AnimationSliderRow(label: "Response", value: $settings.panSpringResponse, range: 0.1...2.0)
                         AnimationSliderRow(label: "Damping", value: $settings.panSpringDamping, range: 0.1...1.0)
                     } else {
-                        AnimationSliderRow(label: "Duration", value: $settings.panDuration, range: 0.1...1.0)
+                        AnimationSliderRow(label: "Duration", value: $settings.panDuration, range: 0.1...2.0)
                     }
                 } header: {
                     Text("Camera Pan")
@@ -116,7 +116,7 @@ struct DebugPanelView: View {
                 }
 
                 Section {
-                    AnimationSliderRow(label: "Response", value: $settings.overlaySpringResponse, range: 0.1...1.0)
+                    AnimationSliderRow(label: "Response", value: $settings.overlaySpringResponse, range: 0.1...2.0)
                     AnimationSliderRow(label: "Damping", value: $settings.overlaySpringDamping, range: 0.1...1.0)
                 } header: {
                     Text("Card Overlay Entrance")
@@ -125,7 +125,7 @@ struct DebugPanelView: View {
                 }
 
                 Section {
-                    AnimationSliderRow(label: "Response", value: $settings.dismissSpringResponse, range: 0.1...1.0)
+                    AnimationSliderRow(label: "Response", value: $settings.dismissSpringResponse, range: 0.1...2.0)
                     AnimationSliderRow(label: "Damping", value: $settings.dismissSpringDamping, range: 0.1...1.0)
                 } header: {
                     Text("Card Overlay Dismiss")

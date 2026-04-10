@@ -33,7 +33,9 @@ class ListingsViewModel {
     let locationService = LocationService()
     let notificationService = NotificationService()
     private var currentSpan = MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
+    private var currentCenter = CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855)
     private var isAnimatingCamera: Bool = false
+    private var cameraAnimationTask: Task<Void, Never>?
     var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855),
         span: MKCoordinateSpan(latitudeDelta: 0.12, longitudeDelta: 0.12)
@@ -181,17 +183,24 @@ class ListingsViewModel {
             let cardOffset = cardOverlayFraction / 2.0 * spanLat
             adjustedLat = coord.latitude - cardOffset
         }
-        isAnimatingCamera = true
-        let anim = debugSettings?.panAnimation ?? .easeInOut(duration: 0.35)
-        withAnimation(anim) {
-            mapPosition = .region(MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: adjustedLat, longitude: coord.longitude),
-                span: currentSpan
-            ))
-        }
-        Task {
-            try? await Task.sleep(for: .milliseconds(400))
-            isAnimatingCamera = false
+        let targetRegion = MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: adjustedLat, longitude: coord.longitude),
+            span: currentSpan
+        )
+        let startRegion = MKCoordinateRegion(center: currentCenter, span: currentSpan)
+        let settings = debugSettings
+        let useSpring = settings?.panUseSpring ?? false
+        if useSpring {
+            animateCameraSpring(
+                from: startRegion, to: targetRegion,
+                response: settings?.panSpringResponse ?? 0.35,
+                damping: settings?.panSpringDamping ?? 0.8
+            )
+        } else {
+            animateCameraEaseInOut(
+                from: startRegion, to: targetRegion,
+                duration: settings?.panDuration ?? 0.35
+            )
         }
     }
 
@@ -205,8 +214,88 @@ class ListingsViewModel {
     func persistMapRegion(_ region: MKCoordinateRegion) {
         if !isAnimatingCamera {
             currentSpan = region.span
+            currentCenter = region.center
         }
         locationService.isTrackingUser = false
+    }
+
+    private func animateCameraEaseInOut(from startRegion: MKCoordinateRegion, to endRegion: MKCoordinateRegion, duration: Double) {
+        cameraAnimationTask?.cancel()
+        isAnimatingCamera = true
+        let steps = max(Int(duration * 60), 2)
+        let sleepNano = UInt64(duration / Double(steps) * 1_000_000_000)
+
+        cameraAnimationTask = Task {
+            for i in 1...steps {
+                guard !Task.isCancelled else { break }
+                let t = Double(i) / Double(steps)
+                let eased = t < 0.5 ? 2.0 * t * t : 1.0 - pow(-2.0 * t + 2.0, 2.0) / 2.0
+                mapPosition = .region(interpolateRegion(from: startRegion, to: endRegion, t: eased))
+                try? await Task.sleep(nanoseconds: sleepNano)
+            }
+            mapPosition = .region(endRegion)
+            currentCenter = endRegion.center
+            currentSpan = endRegion.span
+            isAnimatingCamera = false
+        }
+    }
+
+    private func animateCameraSpring(from startRegion: MKCoordinateRegion, to endRegion: MKCoordinateRegion, response: Double, damping: Double) {
+        cameraAnimationTask?.cancel()
+        isAnimatingCamera = true
+
+        var positions = [startRegion.center.latitude, startRegion.center.longitude,
+                         startRegion.span.latitudeDelta, startRegion.span.longitudeDelta]
+        let targets = [endRegion.center.latitude, endRegion.center.longitude,
+                       endRegion.span.latitudeDelta, endRegion.span.longitudeDelta]
+        var velocities = [0.0, 0.0, 0.0, 0.0]
+        let omega = 2.0 * .pi / response
+
+        cameraAnimationTask = Task {
+            let dt = 1.0 / 60.0
+            var totalTime = 0.0
+            let maxTime = max(response * 6.0, 1.5)
+
+            while !Task.isCancelled && totalTime < maxTime {
+                var settled = true
+                for i in 0..<4 {
+                    let accel = omega * omega * (targets[i] - positions[i]) - 2.0 * damping * omega * velocities[i]
+                    velocities[i] += accel * dt
+                    positions[i] += velocities[i] * dt
+                    let range = abs(targets[i] - [startRegion.center.latitude, startRegion.center.longitude,
+                                                   startRegion.span.latitudeDelta, startRegion.span.longitudeDelta][i])
+                    let threshold = max(range * 0.002, 0.00001)
+                    if abs(positions[i] - targets[i]) > threshold || abs(velocities[i]) > threshold * 5 {
+                        settled = false
+                    }
+                }
+
+                mapPosition = .region(MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: positions[0], longitude: positions[1]),
+                    span: MKCoordinateSpan(latitudeDelta: max(positions[2], 0.001), longitudeDelta: max(positions[3], 0.001))
+                ))
+
+                totalTime += dt
+                if settled { break }
+                try? await Task.sleep(nanoseconds: 16_000_000)
+            }
+
+            mapPosition = .region(endRegion)
+            currentCenter = endRegion.center
+            currentSpan = endRegion.span
+            isAnimatingCamera = false
+        }
+    }
+
+    private func interpolateRegion(from: MKCoordinateRegion, to: MKCoordinateRegion, t: Double) -> MKCoordinateRegion {
+        let lat = from.center.latitude + (to.center.latitude - from.center.latitude) * t
+        let lon = from.center.longitude + (to.center.longitude - from.center.longitude) * t
+        let latD = from.span.latitudeDelta + (to.span.latitudeDelta - from.span.latitudeDelta) * t
+        let lonD = from.span.longitudeDelta + (to.span.longitudeDelta - from.span.longitudeDelta) * t
+        return MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+            span: MKCoordinateSpan(latitudeDelta: max(latD, 0.001), longitudeDelta: max(lonD, 0.001))
+        )
     }
 
     var compassListings: [Listing] {
