@@ -166,11 +166,20 @@ class ListingsViewModel {
         }
     }
 
+    private let cardOverlayFraction: CGFloat = 0.30
+
     func panToListing(_ listing: Listing, sheetFraction: CGFloat = 0) {
         let coord = listing.coordinate
-        let bottomOffset = sheetFraction / 2.0 * currentSpan.latitudeDelta
-        let topOffset = headerFraction / 2.0 * currentSpan.latitudeDelta
-        let adjustedLat = coord.latitude - bottomOffset + topOffset
+        let spanLat = currentSpan.latitudeDelta
+        let adjustedLat: Double
+        if sheetFraction > 0 {
+            let bottomOffset = sheetFraction / 2.0 * spanLat
+            let topOffset = headerFraction / 2.0 * spanLat
+            adjustedLat = coord.latitude - bottomOffset + topOffset
+        } else {
+            let cardOffset = cardOverlayFraction / 2.0 * spanLat
+            adjustedLat = coord.latitude + cardOffset
+        }
         isAnimatingCamera = true
         withAnimation(.easeInOut(duration: 0.35)) {
             mapPosition = .region(MKCoordinateRegion(
