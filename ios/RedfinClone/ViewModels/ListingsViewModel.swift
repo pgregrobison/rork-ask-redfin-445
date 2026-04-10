@@ -178,7 +178,7 @@ class ListingsViewModel {
             adjustedLat = coord.latitude - bottomOffset + topOffset
         } else {
             let cardOffset = cardOverlayFraction / 2.0 * spanLat
-            adjustedLat = coord.latitude + cardOffset
+            adjustedLat = coord.latitude - cardOffset
         }
         isAnimatingCamera = true
         withAnimation(.easeInOut(duration: 0.35)) {
