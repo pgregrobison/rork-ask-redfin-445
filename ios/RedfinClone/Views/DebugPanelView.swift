@@ -99,6 +99,46 @@ struct DebugPanelView: View {
                 } footer: {
                     Text("Controls how chat interacts with the map when searching for homes.")
                 }
+
+                Section {
+                    Toggle("Use Spring", isOn: $settings.panUseSpring)
+
+                    if settings.panUseSpring {
+                        AnimationSliderRow(label: "Response", value: $settings.panSpringResponse, range: 0.1...1.0)
+                        AnimationSliderRow(label: "Damping", value: $settings.panSpringDamping, range: 0.1...1.0)
+                    } else {
+                        AnimationSliderRow(label: "Duration", value: $settings.panDuration, range: 0.1...1.0)
+                    }
+                } header: {
+                    Text("Camera Pan")
+                } footer: {
+                    Text("Animation when the map pans to a selected pin.")
+                }
+
+                Section {
+                    AnimationSliderRow(label: "Response", value: $settings.overlaySpringResponse, range: 0.1...1.0)
+                    AnimationSliderRow(label: "Damping", value: $settings.overlaySpringDamping, range: 0.1...1.0)
+                } header: {
+                    Text("Card Overlay Entrance")
+                } footer: {
+                    Text("Spring animation when the listing card slides up.")
+                }
+
+                Section {
+                    AnimationSliderRow(label: "Response", value: $settings.dismissSpringResponse, range: 0.1...1.0)
+                    AnimationSliderRow(label: "Damping", value: $settings.dismissSpringDamping, range: 0.1...1.0)
+                } header: {
+                    Text("Card Overlay Dismiss")
+                } footer: {
+                    Text("Spring animation when the listing card slides away.")
+                }
+
+                Section {
+                    Button("Reset Animation Defaults") {
+                        settings.resetAnimationDefaults()
+                    }
+                    .foregroundStyle(.red)
+                }
             }
             .navigationTitle("Debug")
             .navigationBarTitleDisplayMode(.inline)
@@ -127,6 +167,27 @@ extension DetailPageStyle {
         case .current: "Bottom sheet over photos"
         case .james: "Full vertical scroll layout"
         }
+    }
+}
+
+private struct AnimationSliderRow: View {
+    let label: String
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack {
+                Text(label)
+                    .font(.body)
+                Spacer()
+                Text(String(format: "%.2f", value))
+                    .font(.body.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: $value, in: range, step: 0.01)
+        }
+        .padding(.vertical, 2)
     }
 }
 

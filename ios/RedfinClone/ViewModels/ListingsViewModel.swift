@@ -14,6 +14,7 @@ nonisolated enum SortOption: String, CaseIterable, Sendable {
 @Observable
 @MainActor
 class ListingsViewModel {
+    var debugSettings: DebugSettings?
     var listings: [Listing] = MockData.listings
     var savedListingIDs: Set<String> = []
     var seenListingIDs: Set<String> = []
@@ -181,7 +182,8 @@ class ListingsViewModel {
             adjustedLat = coord.latitude - cardOffset
         }
         isAnimatingCamera = true
-        withAnimation(.easeInOut(duration: 0.35)) {
+        let anim = debugSettings?.panAnimation ?? .easeInOut(duration: 0.35)
+        withAnimation(anim) {
             mapPosition = .region(MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: adjustedLat, longitude: coord.longitude),
                 span: currentSpan
@@ -194,7 +196,8 @@ class ListingsViewModel {
     }
 
     func dismissOverlay() {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+        let anim = debugSettings?.dismissAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)
+        withAnimation(anim) {
             selectedListing = nil
         }
     }

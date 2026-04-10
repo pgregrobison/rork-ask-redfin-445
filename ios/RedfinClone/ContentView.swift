@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var chatViewModel = ChatViewModel()
     @State private var debugSettings = DebugSettings()
     @State private var selectedTab: AppTab = .find
+
     @State private var navigationPath = NavigationPath()
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
@@ -44,6 +45,7 @@ struct ContentView: View {
             }
         }
         .tint(.primary)
+        .onAppear { viewModel.debugSettings = debugSettings }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)
                 .presentationDetents([.medium, .large])

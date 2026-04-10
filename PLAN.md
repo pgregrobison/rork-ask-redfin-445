@@ -1,7 +1,22 @@
-# Fix pin offset direction when selecting a map pin
+# Add map animation tuning sliders to Debug Panel
 
-**What's wrong:** When you tap a map pin, the map pans in the wrong direction, pushing the pin behind the listing card at the bottom of the screen instead of keeping it visible above the card.
+**Features**
+- New "Map Pin Animation" section in the Debug Panel with live-adjustable sliders
+- Sliders for the **map camera pan** animation: duration, and an option to switch between ease-in-out and spring
+- Sliders for the **card overlay entrance** spring animation: response and damping fraction
+- Sliders for the **card overlay dismiss** spring animation: response and damping fraction
+- Current values displayed next to each slider for precision
+- All values persist across app launches so you don't lose your tuning
+- A "Reset to Defaults" button to snap everything back to the original values
 
-**Fix:** Reverse the offset direction in the `panToListing` function so the pin shifts upward on screen (away from the card) instead of downward (behind the card).
+**Design**
+- Matches the existing Debug Panel style — standard List sections with sliders
+- Each slider shows its current numeric value inline
+- Grouped into clear sub-sections: "Camera Pan" and "Card Overlay"
 
-Specifically, change `coord.latitude + cardOffset` to `coord.latitude - cardOffset` on the non-sheet code path.
+**Slider Ranges**
+- **Pan duration**: 0.1 – 1.0s (default 0.35)
+- **Overlay spring response**: 0.1 – 1.0s (default 0.35)
+- **Overlay spring damping**: 0.1 – 1.0 (default 0.8)
+- **Dismiss spring response**: 0.1 – 1.0s (default 0.35)
+- **Dismiss spring damping**: 0.1 – 1.0 (default 0.8)

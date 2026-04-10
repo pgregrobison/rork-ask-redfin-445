@@ -57,7 +57,7 @@ struct FindMapView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
+            .animation(viewModel.debugSettings?.overlayAnimation ?? .spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
         }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
