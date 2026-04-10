@@ -1,14 +1,11 @@
-# Fix debug animation controls for map camera movement
+# Fix card overlay and map pan animation sync + dismiss animation
 
-**Problem**
-The map camera pan animation ignores the debug slider values because SwiftUI's `Map` doesn't respect `withAnimation` timing parameters — it always uses its own fixed internal animation for camera movement.
+Two fixes for the listing card overlay animations:
 
-**Fix**
-- Replace the `withAnimation` approach for map camera panning with MapKit's native `MKMapView.animate` via a `UIViewRepresentable` wrapper, which gives direct control over animation duration and spring parameters
-- Alternatively, use a step-based camera interpolation with `Timer`/`DisplayLink` so the debug sliders actually control how long and how bouncy the pan feels
-- Ensure the overlay card and dismiss animations are also properly wired (these should already work since they're pure SwiftUI)
+**Fix 1 — Card and map pan start together**
+- Currently the card appears via a SwiftUI `.animation()` modifier while the map pan runs as a separate manual frame-by-frame animation — they start at slightly different times
+- Switch to a single `withAnimation` block that shows the card, then immediately kick off the map pan in the same frame so both feel simultaneous
 
-**What you'll notice after the fix**
-- Changing the pan duration slider will visibly slow down or speed up the map camera movement when tapping a pin
-- Toggling spring mode and adjusting response/damping will change how the camera settles into position
-- Overlay and dismiss spring sliders will also work as expected
+**Fix 2 — Card dismiss animates out instead of vanishing**
+- Currently there are two competing animation sources (a `withAnimation` in the dismiss function AND an `.animation()` modifier on the card container) — they conflict and the card disappears instantly
+- Remove the `.animation()` modifier and use explicit `withAnimation` for both show and dismiss, so the slide-out transition plays correctly

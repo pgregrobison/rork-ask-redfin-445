@@ -119,7 +119,10 @@ class ListingsViewModel {
             dismissOverlay()
             return
         }
-        selectedListing = listing
+        let overlayAnim = debugSettings?.overlayAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)
+        withAnimation(overlayAnim) {
+            selectedListing = listing
+        }
         markSeen(listing)
         panToListing(listing)
     }
