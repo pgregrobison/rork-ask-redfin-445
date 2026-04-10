@@ -40,7 +40,6 @@ struct ListingCardOverlay: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     private var photoCarousel: some View {

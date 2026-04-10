@@ -44,21 +44,20 @@ struct FindMapView: View {
             }
 
 
-            Group {
-                if let listing = viewModel.selectedListing {
-                    ListingCardOverlay(
-                        listing: listing,
-                        isSaved: viewModel.isSaved(listing),
-                        zoomNamespace: zoomNamespace,
-                        onDismiss: { viewModel.dismissOverlay() },
-                        onToggleSave: { viewModel.toggleSaved(listing) },
-                        onTap: { onListingTap(listing) }
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+            if let listing = viewModel.selectedListing {
+                ListingCardOverlay(
+                    listing: listing,
+                    isSaved: viewModel.isSaved(listing),
+                    zoomNamespace: zoomNamespace,
+                    onDismiss: { viewModel.dismissOverlay() },
+                    onToggleSave: { viewModel.toggleSaved(listing) },
+                    onTap: { onListingTap(listing) }
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()

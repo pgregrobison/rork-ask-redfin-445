@@ -1,11 +1,9 @@
-# Fix card overlay and map pan animation sync + dismiss animation
+# Fix map card dismiss animation
 
-Two fixes for the listing card overlay animations:
+**Problem**
+Tapping the X on the listing card makes it vanish instantly instead of sliding down with a smooth animation.
 
-**Fix 1 — Card and map pan start together**
-- Currently the card appears via a SwiftUI `.animation()` modifier while the map pan runs as a separate manual frame-by-frame animation — they start at slightly different times
-- Switch to a single `withAnimation` block that shows the card, then immediately kick off the map pan in the same frame so both feel simultaneous
-
-**Fix 2 — Card dismiss animates out instead of vanishing**
-- Currently there are two competing animation sources (a `withAnimation` in the dismiss function AND an `.animation()` modifier on the card container) — they conflict and the card disappears instantly
-- Remove the `.animation()` modifier and use explicit `withAnimation` for both show and dismiss, so the slide-out transition plays correctly
+**Fix**
+- Add an explicit animation tied to the card's visibility state so the slide-out transition always fires, even when the Map view interferes with the animation context.
+- Remove the redundant duplicate transition (it's defined both on the card overlay itself and at the usage site) to keep things clean.
+- The dismiss spring settings from the debug panel will continue to work.
