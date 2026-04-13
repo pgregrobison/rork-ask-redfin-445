@@ -1,10 +1,13 @@
-# Fix map card dismiss animation
+# Fix map card dismiss animation — slide out reliably
 
-**Problem:** Tapping the X button on the map listing card makes it vanish instantly instead of sliding down with a spring animation.
+**Problem**: Tapping X on the map listing card makes it instantly disappear instead of sliding down with a spring animation (the reverse of how it entered).
 
-**Root cause:** The `matchedTransitionSource` modifier on the card likely consumes the removal transition, and having both `.animation()` on the parent and `withAnimation` in the dismiss function creates a conflict.
+**Root Cause**: The card uses a conditional `if let` with `.transition()`, which is unreliable for removal animations with Observable state. SwiftUI often skips removal transitions.
 
-**Fix:**
-- Remove the `matchedTransitionSource` modifier from the overlay card (it's meant for navigation zoom transitions, not for the card's entrance/exit)
-- Remove the explicit `.animation()` modifier from the parent ZStack so `withAnimation` in `dismissOverlay()` is the sole animation driver — this prevents conflicts
-- Wrap the card's conditional block so the `withAnimation` from `dismissOverlay()` cleanly drives the slide-down + fade transition
+**Fix**:
+- Instead of conditionally showing/hiding the card (which relies on fragile `.transition()`), keep the card in the view hierarchy and animate it in/out using a vertical **offset**
+- Add a separate `isCardVisible` flag to the view model that controls the slide position
+- When showing the card: set the listing data, then animate `isCardVisible = true` (card slides up)
+- When dismissing: animate `isCardVisible = false` (card slides down), then clear the listing data after the animation completes
+- This guarantees the slide-down animation plays every time because the view is never removed mid-animation
+- The entrance and dismiss animations will use the same spring values from the debug panel

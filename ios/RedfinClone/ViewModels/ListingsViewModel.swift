@@ -19,6 +19,8 @@ class ListingsViewModel {
     var savedListingIDs: Set<String> = []
     var seenListingIDs: Set<String> = []
     var selectedListing: Listing?
+    var isCardVisible: Bool = false
+    private var dismissTask: Task<Void, Never>?
     var sortOption: SortOption = .recommended
     var showListView: Bool = false
     var showChat: Bool = false
@@ -119,9 +121,12 @@ class ListingsViewModel {
             dismissOverlay()
             return
         }
+        dismissTask?.cancel()
+        dismissTask = nil
+        selectedListing = listing
         let overlayAnim = debugSettings?.overlayAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)
         withAnimation(overlayAnim) {
-            selectedListing = listing
+            isCardVisible = true
         }
         markSeen(listing)
         panToListing(listing)
@@ -208,8 +213,16 @@ class ListingsViewModel {
     }
 
     func dismissOverlay() {
+        dismissTask?.cancel()
         let anim = debugSettings?.dismissAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)
         withAnimation(anim) {
+            isCardVisible = false
+        }
+        dismissTask = Task {
+            let response = debugSettings?.dismissSpringResponse ?? 0.35
+            let settleTime = response * 2.5
+            try? await Task.sleep(for: .seconds(max(settleTime, 0.4)))
+            guard !Task.isCancelled else { return }
             selectedListing = nil
         }
     }
