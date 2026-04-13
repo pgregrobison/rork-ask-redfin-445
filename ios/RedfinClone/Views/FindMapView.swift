@@ -44,9 +44,6 @@ struct FindMapView: View {
 
 
             if let listing = viewModel.selectedListing {
-                let cardAnim: Animation = viewModel.isCardVisible
-                    ? (viewModel.debugSettings?.overlayAnimation ?? .spring(response: 0.35, dampingFraction: 0.8))
-                    : (viewModel.debugSettings?.dismissAnimation ?? .spring(response: 0.35, dampingFraction: 0.8))
                 ListingCardOverlay(
                     listing: listing,
                     isSaved: viewModel.isSaved(listing),
@@ -54,11 +51,9 @@ struct FindMapView: View {
                     onToggleSave: { viewModel.toggleSaved(listing) },
                     onTap: { onListingTap(listing) }
                 )
-                .transaction { $0.animation = nil }
                 .compositingGroup()
                 .offset(y: viewModel.isCardVisible ? 0 : UIScreen.main.bounds.height)
                 .opacity(viewModel.isCardVisible ? 1 : 0)
-                .animation(cardAnim, value: viewModel.isCardVisible)
             }
 
         }

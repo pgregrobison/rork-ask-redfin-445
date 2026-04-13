@@ -129,7 +129,9 @@ class ListingsViewModel {
         panToListing(listing)
         Task {
             try? await Task.sleep(for: .milliseconds(16))
-            isCardVisible = true
+            withAnimation(debugSettings?.overlayAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)) {
+                isCardVisible = true
+            }
         }
     }
 
@@ -215,7 +217,9 @@ class ListingsViewModel {
 
     func dismissOverlay() {
         dismissTask?.cancel()
-        isCardVisible = false
+        withAnimation(debugSettings?.dismissAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)) {
+            isCardVisible = false
+        }
         dismissTask = Task {
             let response = debugSettings?.dismissSpringResponse ?? 0.35
             let settleTime = response * 2.5
