@@ -30,9 +30,9 @@ struct ContentView: View {
                 }
             }
             .ignoresSafeArea(.keyboard)
-            .onChange(of: viewModel.selectedListing?.id) { _, newValue in
+            .onChange(of: viewModel.isCardVisible) { _, visible in
                 withAnimation(.easeInOut(duration: 0.25)) {
-                    showTabBar = newValue == nil
+                    showTabBar = !visible
                 }
             }
             .navigationDestination(for: Listing.self) { listing in
@@ -144,7 +144,7 @@ struct ContentView: View {
         let detail = detailView(for: listing)
             .toolbar(.hidden, for: .tabBar)
             .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
-            .onDisappear { if viewModel.selectedListing == nil { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
+            .onDisappear { if !viewModel.isCardVisible { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
 
         if debugSettings.cardTransition == .zoom {
             detail.navigationTransition(.zoom(sourceID: listing.id, in: zoomNamespace))
