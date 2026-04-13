@@ -51,6 +51,7 @@ struct FindMapView: View {
                     onToggleSave: { viewModel.toggleSaved(listing) },
                     onTap: { onListingTap(listing) }
                 )
+                .compositingGroup()
                 .offset(y: viewModel.isCardVisible ? 0 : UIScreen.main.bounds.height)
                 .opacity(viewModel.isCardVisible ? 1 : 0)
             }

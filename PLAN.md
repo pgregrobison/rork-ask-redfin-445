@@ -1,7 +1,9 @@
-# Fix tab bar delay after dismissing map card
+# Fix map card tags animating separately from the card
 
-**Problem:** When you dismiss the map home card, the tab bar waits too long to slide back in because it's tied to a delayed property (`selectedListing` becoming nil) instead of the immediate card visibility state.
+**Problem**
+When the map home card slides up, the tags (and potentially other sub-elements) spring-bounce independently from the card itself, creating a staggered/jittery look.
 
-**Fix:** Change the tab bar visibility trigger in ContentView from watching `selectedListing` to watching `isCardVisible`, so the tab bar starts sliding back in at the same time the card starts sliding out.
-
-This is a one-line change — swap `viewModel.selectedListing?.id` for `viewModel.isCardVisible` in the `.onChange` that controls `showTabBar`.
+**Fix**
+- Add a compositing group to the card so it animates as a single visual unit instead of each child element animating on its own
+- This is applied to the card container in the map view, right before the offset/opacity modifiers
+- No visual or behavioral changes — the card just moves as one cohesive piece now
