@@ -43,7 +43,7 @@ struct FindMapView: View {
             }
 
 
-            if let listing = viewModel.selectedListing {
+            if let listing = viewModel.cardListing {
                 ListingCardOverlay(
                     listing: listing,
                     isSaved: viewModel.isSaved(listing),

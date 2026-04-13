@@ -1,5 +1,12 @@
-# Fix pin staying selected too long after card dismissal
+# Deselect map pin immediately on dismiss
 
-**Problem:** After dismissing the map home card, the map pin stays highlighted/selected for about 1 extra second before deselecting.
+**What changes**
 
-**Fix:** Reduce the delay between the card sliding out and the pin deselecting. Currently the delay is ~0.875 seconds (way longer than the actual slide-out animation). Will reduce it to ~0.35 seconds to match the spring animation duration, so the pin deselects right as the card finishes sliding away.
+Right now, the map pin stays highlighted (red) during the entire card slide-out animation. The fix will make the pin deselect instantly the moment you tap the X button, while the card still slides out smoothly.
+
+**How it works**
+
+- A new internal property will hold the card data while it animates out, separate from the pin selection
+- When you tap X: the pin unhighlights immediately, and the card begins sliding down
+- After the slide-out finishes, the card data is cleaned up
+- No visual change to the slide-out animation itself — just the pin reacts faster

@@ -19,6 +19,7 @@ class ListingsViewModel {
     var savedListingIDs: Set<String> = []
     var seenListingIDs: Set<String> = []
     var selectedListing: Listing?
+    private(set) var dismissingListing: Listing?
     var isCardVisible: Bool = false
     private var dismissTask: Task<Void, Never>?
     var sortOption: SortOption = .recommended
@@ -123,6 +124,7 @@ class ListingsViewModel {
         }
         dismissTask?.cancel()
         dismissTask = nil
+        dismissingListing = nil
         isCardVisible = false
         selectedListing = listing
         markSeen(listing)
@@ -215,8 +217,14 @@ class ListingsViewModel {
         }
     }
 
+    var cardListing: Listing? {
+        selectedListing ?? dismissingListing
+    }
+
     func dismissOverlay() {
         dismissTask?.cancel()
+        dismissingListing = selectedListing
+        selectedListing = nil
         withAnimation(debugSettings?.dismissAnimation ?? .spring(response: 0.35, dampingFraction: 0.8)) {
             isCardVisible = false
         }
@@ -224,7 +232,7 @@ class ListingsViewModel {
             let response = debugSettings?.dismissSpringResponse ?? 0.35
             try? await Task.sleep(for: .seconds(response))
             guard !Task.isCancelled else { return }
-            selectedListing = nil
+            dismissingListing = nil
         }
     }
 
