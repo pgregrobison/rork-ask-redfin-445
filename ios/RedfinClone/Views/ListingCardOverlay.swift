@@ -4,7 +4,6 @@ import UIKit
 struct ListingCardOverlay: View {
     let listing: Listing
     let isSaved: Bool
-    var zoomNamespace: Namespace.ID
     let onDismiss: () -> Void
     let onToggleSave: () -> Void
     let onTap: () -> Void
@@ -34,7 +33,6 @@ struct ListingCardOverlay: View {
                 .background(Theme.Colors.secondaryBackground)
                 .clipShape(.rect(cornerRadius: cardCornerRadius, style: .continuous))
                 .shadow(color: Theme.Shadow.overlayColor, radius: Theme.Shadow.overlayRadius, y: Theme.Shadow.overlayY)
-                .matchedTransitionSource(id: listing.id, in: zoomNamespace)
                 .padding(.horizontal, cardInset)
                 .padding(.bottom, max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0))
             }

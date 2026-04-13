@@ -3,7 +3,6 @@ import MapKit
 
 struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
-    var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -48,7 +47,6 @@ struct FindMapView: View {
                 ListingCardOverlay(
                     listing: listing,
                     isSaved: viewModel.isSaved(listing),
-                    zoomNamespace: zoomNamespace,
                     onDismiss: { viewModel.dismissOverlay() },
                     onToggleSave: { viewModel.toggleSaved(listing) },
                     onTap: { onListingTap(listing) }
@@ -57,7 +55,7 @@ struct FindMapView: View {
             }
 
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: viewModel.selectedListing?.id)
+
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()
