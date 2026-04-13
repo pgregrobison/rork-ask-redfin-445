@@ -222,8 +222,7 @@ class ListingsViewModel {
         }
         dismissTask = Task {
             let response = debugSettings?.dismissSpringResponse ?? 0.35
-            let settleTime = response * 2.5
-            try? await Task.sleep(for: .seconds(max(settleTime, 0.4)))
+            try? await Task.sleep(for: .seconds(response))
             guard !Task.isCancelled else { return }
             selectedListing = nil
         }
