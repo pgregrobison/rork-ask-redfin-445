@@ -123,10 +123,14 @@ class ListingsViewModel {
         }
         dismissTask?.cancel()
         dismissTask = nil
+        isCardVisible = false
         selectedListing = listing
-        isCardVisible = true
         markSeen(listing)
         panToListing(listing)
+        Task {
+            try? await Task.sleep(for: .milliseconds(16))
+            isCardVisible = true
+        }
     }
 
     private let headerFraction: CGFloat = 0.12

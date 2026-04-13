@@ -1,12 +1,9 @@
-# Fix tags bouncing independently inside map home card
+# Restore slide-in and slide-out animation for map home card
 
 **Problem**
-When the map home card slides in, the tags (and other child elements) each animate with their own independent spring bounce, instead of moving rigidly with the card as a single unit.
-
-**Root Cause**
-The spring animation wrapping `isCardVisible` propagates into all child views. Each tag in the row receives its own spring, making them visually "jiggle" separately.
+The card appears instantly because the listing and the "visible" flag are set at the same time. By the time the card renders, it's already in its final position — no animation plays.
 
 **Fix**
-- Remove the `withAnimation` wrapper from `selectListing` and `dismissOverlay` in the view model — stop the spring from propagating globally
-- Instead, apply an explicit `.animation(.spring(...), value: isCardVisible)` **only** to the `.offset` and `.opacity` modifiers on the card overlay in `FindMapView`
-- This ensures only the card's position and opacity animate with the spring — the card's internal content (tags, text, etc.) stays rigid and moves as one solid unit
+- When a pin is tapped, set the listing first (so the card view enters the tree at the off-screen position), then on the next frame flip the "visible" flag to trigger the slide-in spring animation
+- This ensures the animation modifier sees the value change from "hidden" to "visible" and plays the slide-up spring
+- The slide-out (dismiss) should already work since the flag changes while the card is still on screen — but I'll verify and fix if needed
