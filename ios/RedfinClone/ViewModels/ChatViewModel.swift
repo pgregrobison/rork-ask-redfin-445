@@ -32,6 +32,7 @@ class ChatViewModel {
     var voiceTranscriptMessageId: String?
     var voiceScrollToTopId: String?
     var searchResultsJustArrived: [Listing]?
+    var debugSettings: DebugSettings?
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
@@ -217,7 +218,11 @@ class ChatViewModel {
         switch response {
         case .listings(let text, let filters):
             thinkingState = .searching
-            try? await Task.sleep(for: .milliseconds(Int.random(in: 300...600)))
+            if debugSettings?.realisticModeEnabled == true {
+                try? await Task.sleep(for: .seconds(8))
+            } else {
+                try? await Task.sleep(for: .milliseconds(Int.random(in: 300...600)))
+            }
             if Task.isCancelled { return }
             responseText = text
             searchFilters = filters
@@ -235,7 +240,7 @@ class ChatViewModel {
         }
 
         let elapsed = ContinuousClock.now - thinkingStart
-        let minimumThinking: Duration = .seconds(2)
+        let minimumThinking: Duration = (debugSettings?.realisticModeEnabled == true && searchFilters != nil) ? .seconds(8) : .seconds(2)
         if elapsed < minimumThinking {
             try? await Task.sleep(for: minimumThinking - elapsed)
             if Task.isCancelled { return }

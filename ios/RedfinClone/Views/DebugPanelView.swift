@@ -101,6 +101,41 @@ struct DebugPanelView: View {
                 }
 
                 Section {
+                    Toggle("Realistic Mode", isOn: $settings.realisticModeEnabled)
+
+                    if settings.realisticModeEnabled {
+                        ForEach(RealisticSyncMode.allCases, id: \.self) { mode in
+                            Button {
+                                settings.realisticSyncMode = mode
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(mode.rawValue)
+                                            .font(.body)
+                                            .foregroundStyle(.primary)
+                                        Text(mode.subtitle)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if settings.realisticSyncMode == mode {
+                                        Image(systemName: "checkmark")
+                                            .font(.body.weight(.semibold))
+                                            .foregroundStyle(.primary)
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                } header: {
+                    Text("Realistic Mode")
+                } footer: {
+                    Text("Stretches home-search thinking to 8 seconds and lets you test how chat syncs with the Find surface.")
+                }
+
+                Section {
                     Toggle("Use Spring", isOn: $settings.panUseSpring)
 
                     if settings.panUseSpring {
@@ -196,6 +231,15 @@ extension SearchBehavior {
         switch self {
         case .default: "Full sheet chat, manual show on map"
         case .mapFocus: "Chat drops to half-sheet on search, pins auto-fit"
+        }
+    }
+}
+
+extension RealisticSyncMode {
+    var subtitle: String {
+        switch self {
+        case .bidirectional: "Chat updates the map and list live as results arrive"
+        case .oneWay: "Chat only updates Find when you tap Show on map"
         }
     }
 }

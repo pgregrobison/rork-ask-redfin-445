@@ -15,6 +15,11 @@ nonisolated enum SearchBehavior: String, CaseIterable, Codable, Sendable {
     case mapFocus = "Map Focus"
 }
 
+nonisolated enum RealisticSyncMode: String, CaseIterable, Codable, Sendable {
+    case bidirectional = "Bi-directional sync"
+    case oneWay = "One-way sync"
+}
+
 @Observable
 class DebugSettings {
     var cardTransition: CardTransitionStyle {
@@ -27,6 +32,14 @@ class DebugSettings {
 
     var searchBehavior: SearchBehavior {
         didSet { UserDefaults.standard.set(searchBehavior.rawValue, forKey: "debug_searchBehavior") }
+    }
+
+    var realisticModeEnabled: Bool {
+        didSet { UserDefaults.standard.set(realisticModeEnabled, forKey: "debug_realisticModeEnabled") }
+    }
+
+    var realisticSyncMode: RealisticSyncMode {
+        didSet { UserDefaults.standard.set(realisticSyncMode.rawValue, forKey: "debug_realisticSyncMode") }
     }
 
     var panDuration: Double {
@@ -88,6 +101,9 @@ class DebugSettings {
         self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .current
         let storedBehavior = UserDefaults.standard.string(forKey: "debug_searchBehavior") ?? ""
         self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .default
+        self.realisticModeEnabled = UserDefaults.standard.object(forKey: "debug_realisticModeEnabled") as? Bool ?? false
+        let storedSync = UserDefaults.standard.string(forKey: "debug_realisticSyncMode") ?? ""
+        self.realisticSyncMode = RealisticSyncMode(rawValue: storedSync) ?? .bidirectional
 
         let ud = UserDefaults.standard
         self.panDuration = ud.object(forKey: "debug_panDuration") as? Double ?? 0.35

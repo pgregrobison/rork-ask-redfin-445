@@ -1,24 +1,36 @@
-# Fix zoom transition for map and chat home cards
+# Add "Realistic Mode" with bi-directional vs one-way sync to the debug panel
 
-## The Problem
+## New debug section: Realistic Mode
 
-The zoom transition is set up for list/grid cards (Find list, For You, Saved), but two spots were never wired up:
+Adds a new section to the debug panel (below "Search Behavior") for testing how chat and the Find page should interact.
 
-- **Map home card** — the card that appears at the bottom of the map when you tap a pin has no zoom anchor, so tapping it falls back to a plain slide-in.
-- **Chat home cards** — the horizontal cards inside the Ask Redfin chat also have no zoom anchor.
+### Features
 
-On top of that, the map card slides away the moment you tap it, so even if we added the anchor, there would be nothing for the detail view to zoom back into on return.
+- **Realistic Mode toggle** — off by default. When off, the app behaves exactly as it does today (fast thinking, no auto-context passing).
+- When **on**, two things happen:
+  1. Home-search thinking time is stretched to **8 seconds** so the flow feels closer to a real search.
+  2. A sub-picker appears with two sync options:
+    - **Bi-directional sync** — Entering chat passes the current Find context (map location + filters). After chat finishes thinking and produces listing results (post 8s), the Find surface's map + list are automatically updated to those results. No explicit "Show on map" tap needed.
+    - **One-way sync** — Entering chat passes the current Find context (map location + filters) so chat builds on it. The Find surface does **not** auto-update. The user must tap **Show on map** on a chat result card, which then replaces Find's filters/results with the chat criteria and closes the chat.
 
-## The Fix
+### Design
 
-**Map card — smooth zoom both ways**
-- Give the map card a zoom anchor tied to the listing.
-- Keep the map card visible on screen while the detail view is open, so when you swipe back the detail cleanly zooms back into the card.
-- Only hide/slide the card away after the detail has fully dismissed (or when you explicitly tap the X to dismiss the card itself).
+- New section titled **"Realistic Mode"** appears directly below the existing "Search Behavior" section.
+- Top row: a single toggle switch labeled *Realistic Mode*, with footer text explaining the 8s thinking delay.
+- When toggled on, two selectable rows slide in below with checkmark-style selection (matching the existing debug panel style):
+  - *Bi-directional sync* — subtitle: "Chat updates the map and list live as results arrive"
+  - *One-way sync* — subtitle: "Chat only updates Find when you tap Show on map"
+- No changes to visuals outside the debug panel; behavior changes apply quietly in the background.
 
-**Chat cards — smooth zoom on open**
-- Pass the zoom anchor down into the chat so each horizontal card has a matching source.
-- Opening a listing from chat will zoom smoothly into the detail.
-- Closing the detail will fall back to a normal slide-down, since the chat sheet is already gone by then (as you noted, unavoidable).
+### Behavior details
 
-**No visual changes** — same card designs, same layouts, same dismiss behavior for the user. The only difference is that tapping a card on the map or in chat now produces the same smooth zoom-into-detail animation you already get from the Find list and For You tabs, and the map card zooms back out on return.
+- **Thinking time**: When Realistic Mode is on, home-search requests use an 8-second minimum thinking duration instead of the current shorter randomized timing. Non-search chats are unaffected.
+- **Context into chat (both modes)**: When the user opens chat from Find, the current map viewport/location and applied filters are passed in as starting context for the conversation.
+- **Bi-directional**: Once chat produces a listing result set, Find's map pins and list are replaced with those listings automatically. The "Show on map" button still works but becomes redundant.
+- **One-way**: Find never auto-updates from chat. "Show on map" replaces Find's filters and results with the chat's criteria and dismisses the chat sheet.
+- **No visible context indicator** inside chat for now — the context is passed silently.
+
+### Scope
+
+- Debug-only. No production UI changes. All behavior gated behind the Realistic Mode toggle so the current default experience is untouched when the toggle is off.
+

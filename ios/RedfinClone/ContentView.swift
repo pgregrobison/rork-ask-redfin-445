@@ -45,7 +45,10 @@ struct ContentView: View {
             }
         }
         .tint(.primary)
-        .onAppear { viewModel.debugSettings = debugSettings }
+        .onAppear {
+            viewModel.debugSettings = debugSettings
+            chatViewModel.debugSettings = debugSettings
+        }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)
                 .presentationDetents([.medium, .large])
@@ -83,14 +86,26 @@ struct ContentView: View {
             )
         }
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
-            guard let results, !results.isEmpty, isMapFocusEligible else { return }
-            chatViewModel.searchResultsJustArrived = nil
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                chatDetent = .fraction(0.7)
+            guard let results, !results.isEmpty else { return }
+
+            if isMapFocusEligible {
+                chatViewModel.searchResultsJustArrived = nil
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                    chatDetent = .fraction(0.7)
+                }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(350))
+                    viewModel.fitListings(results, sheetFraction: 0.7)
+                }
+                return
             }
-            Task {
-                try? await Task.sleep(for: .milliseconds(350))
-                viewModel.fitListings(results, sheetFraction: 0.7)
+
+            if debugSettings.realisticModeEnabled && debugSettings.realisticSyncMode == .bidirectional {
+                chatViewModel.searchResultsJustArrived = nil
+                pendingMapListings = results
+                selectedTab = .find
+                viewModel.showListView = false
+                viewModel.dismissOverlay()
             }
         }
         .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in
