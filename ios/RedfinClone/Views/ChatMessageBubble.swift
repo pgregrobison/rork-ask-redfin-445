@@ -6,7 +6,7 @@ struct ChatMessageBubble: View {
     let savedListingIDs: Set<String>
     let onToggleSave: (Listing) -> Void
     let onFeedback: (MessageFeedback) -> Void
-    let onShowOnMap: ([Listing]) -> Void
+    let onShowOnMap: ([Listing], SearchFilters?) -> Void
     let onListingTap: (Listing) -> Void
     @Binding var carouselScrollPosition: String?
     var zoomNamespace: Namespace.ID?
@@ -48,6 +48,7 @@ struct ChatMessageBubble: View {
                     allListings: allListings,
                     savedListingIDs: savedListingIDs,
                     onToggleSave: onToggleSave,
+                    filters: message.searchFilters,
                     onShowOnMap: onShowOnMap,
                     onListingTap: onListingTap,
                     scrolledListingID: $carouselScrollPosition,

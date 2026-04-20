@@ -32,6 +32,7 @@ class ChatViewModel {
     var voiceTranscriptMessageId: String?
     var voiceScrollToTopId: String?
     var searchResultsJustArrived: [Listing]?
+    var searchFiltersJustArrived: SearchFilters?
     var debugSettings: DebugSettings?
 
     private let chatService = ChatService()
@@ -262,7 +263,9 @@ class ChatViewModel {
             let results = chatService.searchListings(filters: filters)
             lastSearchResults = results
             threads[ti].messages[mi].searchResults = results.map { $0.id }
+            threads[ti].messages[mi].searchFilters = filters
             searchResultsJustArrived = results
+            searchFiltersJustArrived = filters
         }
 
         if let tourReq {

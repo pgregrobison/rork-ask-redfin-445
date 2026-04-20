@@ -68,8 +68,13 @@ struct ContentView: View {
                 onDismiss: {
                     viewModel.showChat = false
                 },
-                onShowOnMap: { listings in
-                    pendingMapListings = listings
+                onShowOnMap: { listings, filters in
+                    if let filters, debugSettings.realisticModeEnabled, debugSettings.realisticSyncMode == .oneWay {
+                        viewModel.applyChatFilters(filters, merge: true)
+                        pendingMapListings = viewModel.filteredListings
+                    } else {
+                        pendingMapListings = listings
+                    }
                     selectedTab = .find
                     viewModel.showListView = false
                     viewModel.dismissOverlay()
@@ -87,22 +92,35 @@ struct ContentView: View {
         }
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
             guard let results, !results.isEmpty else { return }
+            let filters = chatViewModel.searchFiltersJustArrived
+            let isBidirectional = debugSettings.realisticModeEnabled && debugSettings.realisticSyncMode == .bidirectional
 
             if isMapFocusEligible {
                 chatViewModel.searchResultsJustArrived = nil
+                chatViewModel.searchFiltersJustArrived = nil
+                if isBidirectional, let filters {
+                    viewModel.applyChatFilters(filters, merge: false)
+                }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                     chatDetent = .fraction(0.7)
                 }
                 Task {
                     try? await Task.sleep(for: .milliseconds(350))
-                    viewModel.fitListings(results, sheetFraction: 0.7)
+                    let targetListings = isBidirectional ? viewModel.filteredListings : results
+                    viewModel.fitListings(targetListings, sheetFraction: 0.7)
                 }
                 return
             }
 
-            if debugSettings.realisticModeEnabled && debugSettings.realisticSyncMode == .bidirectional {
+            if isBidirectional {
                 chatViewModel.searchResultsJustArrived = nil
-                pendingMapListings = results
+                chatViewModel.searchFiltersJustArrived = nil
+                if let filters {
+                    viewModel.applyChatFilters(filters, merge: false)
+                    pendingMapListings = viewModel.filteredListings
+                } else {
+                    pendingMapListings = results
+                }
                 selectedTab = .find
                 viewModel.showListView = false
                 viewModel.dismissOverlay()

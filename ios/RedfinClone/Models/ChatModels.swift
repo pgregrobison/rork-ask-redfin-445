@@ -42,6 +42,7 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
     let timestamp: Date
     var feedback: MessageFeedback?
     var searchResults: [String]?
+    var searchFilters: SearchFilters?
     var tourRequest: TourRequest?
     var mortgageRequest: MortgageRequest?
     var isStreaming: Bool
@@ -55,6 +56,7 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         timestamp: Date = Date(),
         feedback: MessageFeedback? = nil,
         searchResults: [String]? = nil,
+        searchFilters: SearchFilters? = nil,
         tourRequest: TourRequest? = nil,
         mortgageRequest: MortgageRequest? = nil,
         isStreaming: Bool = false,
@@ -67,6 +69,7 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         self.timestamp = timestamp
         self.feedback = feedback
         self.searchResults = searchResults
+        self.searchFilters = searchFilters
         self.tourRequest = tourRequest
         self.mortgageRequest = mortgageRequest
         self.isStreaming = isStreaming

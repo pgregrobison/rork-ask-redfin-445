@@ -87,6 +87,12 @@ struct FindPillOverlay: View {
             FilterSheetView(viewModel: viewModel)
                 .presentationDetents([.medium, .large])
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if !showLocationMenu && viewModel.hasActiveFilters {
+                ActiveFilterChips(viewModel: viewModel)
+                    .padding(.top, 52)
+            }
+        }
     }
 
     private func closeMenu() {

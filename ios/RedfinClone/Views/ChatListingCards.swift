@@ -5,7 +5,8 @@ struct ChatListingCards: View {
     let allListings: [Listing]
     let savedListingIDs: Set<String>
     let onToggleSave: (Listing) -> Void
-    let onShowOnMap: ([Listing]) -> Void
+    let filters: SearchFilters?
+    let onShowOnMap: ([Listing], SearchFilters?) -> Void
     let onListingTap: (Listing) -> Void
     @Binding var scrolledListingID: String?
     var zoomNamespace: Namespace.ID?
@@ -46,7 +47,7 @@ struct ChatListingCards: View {
             if !matchedListings.isEmpty {
                 Button {
                     let nyListings = matchedListings.filter { $0.state == "NY" }
-                    onShowOnMap(nyListings.isEmpty ? matchedListings : nyListings)
+                    onShowOnMap(nyListings.isEmpty ? matchedListings : nyListings, filters)
                 } label: {
                     HStack(spacing: Theme.Spacing.xs) {
                         Image(systemName: "map")

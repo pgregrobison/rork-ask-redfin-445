@@ -31,6 +31,9 @@ class ListingsViewModel {
     var filterMaxPrice: Int? = nil
     var filterMinBeds: Int = 0
     var filterMinBaths: Int = 0
+    var filterPropertyType: String? = nil
+    var filterNeighborhoods: [String] = []
+    var filterIsHotHome: Bool = false
     private var geocodeTask: Task<Void, Never>?
     private let geocoder = CLGeocoder()
     let locationService = LocationService()
@@ -58,7 +61,63 @@ class ListingsViewModel {
         if filterMinBaths > 0 {
             result = result.filter { Int($0.baths) >= filterMinBaths }
         }
+        if let propertyType = filterPropertyType {
+            result = result.filter { $0.propertyType.lowercased() == propertyType.lowercased() }
+        }
+        if !filterNeighborhoods.isEmpty {
+            let lower = filterNeighborhoods.map { $0.lowercased() }
+            result = result.filter { listing in
+                lower.contains(where: { listing.city.lowercased().contains($0) })
+            }
+        }
+        if filterIsHotHome {
+            result = result.filter { $0.isHotHome }
+        }
         return result
+    }
+
+    var hasActiveFilters: Bool {
+        filterMinPrice != nil || filterMaxPrice != nil || filterMinBeds > 0 || filterMinBaths > 0
+            || filterPropertyType != nil || !filterNeighborhoods.isEmpty || filterIsHotHome
+    }
+
+    func clearAllFilters() {
+        filterMinPrice = nil
+        filterMaxPrice = nil
+        filterMinBeds = 0
+        filterMinBaths = 0
+        filterPropertyType = nil
+        filterNeighborhoods = []
+        filterIsHotHome = false
+    }
+
+    func applyChatFilters(_ filters: SearchFilters, merge: Bool) {
+        if !merge {
+            clearAllFilters()
+        }
+        if let v = filters.minBeds { filterMinBeds = max(filterMinBeds, v) }
+        if let v = filters.minBaths { filterMinBaths = max(filterMinBaths, Int(v)) }
+        if let v = filters.minPrice {
+            filterMinPrice = merge ? max(filterMinPrice ?? 0, v) : v
+        }
+        if let v = filters.maxPrice {
+            if merge, let existing = filterMaxPrice {
+                filterMaxPrice = min(existing, v)
+            } else {
+                filterMaxPrice = v
+            }
+        }
+        if let v = filters.propertyType { filterPropertyType = v }
+        if filters.isHotHome == true { filterIsHotHome = true }
+        if let nbhds = filters.neighborhoods, !nbhds.isEmpty {
+            if merge {
+                var combined = filterNeighborhoods
+                for n in nbhds where !combined.contains(n) { combined.append(n) }
+                filterNeighborhoods = combined
+            } else {
+                filterNeighborhoods = nbhds
+            }
+        }
     }
 
     var sortedListings: [Listing] {

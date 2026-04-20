@@ -6,7 +6,7 @@ struct AskRedfinView: View {
     let savedListingIDs: Set<String>
     let onToggleSave: (Listing) -> Void
     let onDismiss: () -> Void
-    let onShowOnMap: ([Listing]) -> Void
+    let onShowOnMap: ([Listing], SearchFilters?) -> Void
     let onListingTap: (Listing) -> Void
     var mapFocusActive: Bool = false
     @Binding var selectedDetent: PresentationDetent
