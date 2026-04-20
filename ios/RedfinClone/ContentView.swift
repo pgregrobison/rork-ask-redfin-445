@@ -102,6 +102,14 @@ struct ContentView: View {
                 zoomNamespace: zoomNamespace
             )
         }
+        .onChange(of: chatViewModel.thinkingState) { _, state in
+            guard state == .searching,
+                  debugSettings.realisticModeEnabled,
+                  isMapFocusEligible else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                chatDetent = .fraction(0.7)
+            }
+        }
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
             guard let results, !results.isEmpty else { return }
             let filters = chatViewModel.searchFiltersJustArrived

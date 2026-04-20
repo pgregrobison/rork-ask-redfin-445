@@ -1,19 +1,9 @@
-# Shimmer loading over map during Realistic Mode thinking
+# Lower chat sheet to mid detent when home search starts in map focus mode
 
-**What will happen**
+**Behavior change**
 
-- While Realistic Mode is on and the chat is thinking/searching for homes, a shimmer effect will animate over the map on the Find tab.
-- The shimmer will appear only when Realistic Mode is enabled AND the chat is in its thinking/searching state.
-- It disappears the moment results arrive (or the user cancels), so the normal map returns instantly.
-
-**Design**
-
-- A soft, Apple-style shimmer sweep (pale gradient band moving diagonally across the map), layered above the map pins but below the chat sheet and overlay buttons.
-- The shimmer uses a subtle white/translucent highlight with a gentle linear gradient, paired with a very light frosted tint so the map still feels alive underneath.
-- Fade-in and fade-out are smooth (~0.25s) so toggling on/off doesn't feel jarring.
-- Pin taps and map gestures are blocked while shimmering, signaling that results are being prepared.
-
-**Where it shows**
-
-- Find tab map view only (not the list view, not inside the chat itself).
-- Active in both bi-directional and one-way sync modes — any time Realistic Mode is on and the chat is thinking or searching.
+- When Realistic Mode is on and the search behavior is set to "Map focus," the chat sheet will automatically drop down to the mid detent (70%) the moment the bot transitions into the "Searching for homes…" state.
+- This gives the user a clear view of the map's shimmer loader during the 8-second thinking window.
+- The sheet stays at mid detent as results settle in (matching the existing post-results behavior).
+- If the user isn't in map focus mode, or Realistic Mode is off, nothing changes.
+- Manually dragging the sheet afterwards still works normally.
