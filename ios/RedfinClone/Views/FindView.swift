@@ -7,13 +7,14 @@ struct FindView: View {
     let isActive: Bool
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
+    var showShimmer: Bool = false
 
     var body: some View {
         Group {
             if viewModel.showListView {
                 FindListView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
             } else {
-                FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
+                FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap, showShimmer: showShimmer)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

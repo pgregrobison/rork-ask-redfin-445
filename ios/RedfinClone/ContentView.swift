@@ -167,9 +167,10 @@ struct ContentView: View {
     @ViewBuilder
     private var tabContent: some View {
         ZStack {
-            FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }) { listing in
+            FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                 navigateToListing(listing)
-            }
+            }, showShimmer: mapShimmerActive)
+            .animation(.easeInOut(duration: 0.25), value: mapShimmerActive)
             .opacity(selectedTab == .find ? 1 : 0)
             .allowsHitTesting(selectedTab == .find)
 
@@ -225,6 +226,10 @@ struct ContentView: View {
                 onAskRedfin: { viewModel.showChat = true }
             )
         }
+    }
+
+    private var mapShimmerActive: Bool {
+        debugSettings.realisticModeEnabled && chatViewModel.thinkingState != .none
     }
 
     private var isMapFocusEligible: Bool {

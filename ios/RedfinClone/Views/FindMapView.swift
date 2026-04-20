@@ -5,6 +5,7 @@ struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
     var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
+    var showShimmer: Bool = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -38,10 +39,20 @@ struct FindMapView: View {
                 viewModel.updateLocationName(for: context.region)
             }
             .ignoresSafeArea()
+            .allowsHitTesting(!showShimmer)
 
-            .overlay(alignment: .topTrailing) {
-                MapActionButtons(viewModel: viewModel)
+            if showShimmer {
+                Color.black.opacity(0.001)
+                    .ignoresSafeArea()
+                MapShimmerOverlay()
+                    .transition(.opacity)
             }
+
+            Color.clear
+                .overlay(alignment: .topTrailing) {
+                    MapActionButtons(viewModel: viewModel)
+                }
+                .allowsHitTesting(!showShimmer)
 
 
             if let listing = viewModel.cardListing {
