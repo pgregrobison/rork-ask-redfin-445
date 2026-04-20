@@ -3,6 +3,7 @@ import MapKit
 
 struct FindMapView: View {
     @Bindable var viewModel: ListingsViewModel
+    var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
 
     var body: some View {
@@ -49,7 +50,8 @@ struct FindMapView: View {
                     isSaved: viewModel.isSaved(listing),
                     onDismiss: { viewModel.dismissOverlay() },
                     onToggleSave: { viewModel.toggleSaved(listing) },
-                    onTap: { onListingTap(listing) }
+                    onTap: { onListingTap(listing) },
+                    zoomNamespace: zoomNamespace
                 )
                 .compositingGroup()
                 .offset(y: viewModel.isCardVisible ? 0 : UIScreen.main.bounds.height)

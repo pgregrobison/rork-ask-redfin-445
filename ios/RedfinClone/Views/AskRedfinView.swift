@@ -10,6 +10,7 @@ struct AskRedfinView: View {
     let onListingTap: (Listing) -> Void
     var mapFocusActive: Bool = false
     @Binding var selectedDetent: PresentationDetent
+    var zoomNamespace: Namespace.ID? = nil
     @FocusState private var isInputFocused: Bool
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
@@ -126,7 +127,8 @@ struct AskRedfinView: View {
                             carouselScrollPosition: Binding(
                                 get: { chatViewModel.carouselScrollPositions[message.id] },
                                 set: { chatViewModel.carouselScrollPositions[message.id] = $0 }
-                            )
+                            ),
+                            zoomNamespace: zoomNamespace
                         )
                         .id(message.id)
                     }

@@ -78,7 +78,8 @@ struct ContentView: View {
                     navigationPath.append(listing)
                 },
                 mapFocusActive: isMapFocusEligible,
-                selectedDetent: $chatDetent
+                selectedDetent: $chatDetent,
+                zoomNamespace: zoomNamespace
             )
         }
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in

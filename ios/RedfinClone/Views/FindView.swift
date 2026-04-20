@@ -13,7 +13,7 @@ struct FindView: View {
             if viewModel.showListView {
                 FindListView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
             } else {
-                FindMapView(viewModel: viewModel, onListingTap: onListingTap)
+                FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

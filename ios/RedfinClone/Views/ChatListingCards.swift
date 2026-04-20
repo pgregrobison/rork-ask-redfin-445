@@ -8,6 +8,7 @@ struct ChatListingCards: View {
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
     @Binding var scrolledListingID: String?
+    var zoomNamespace: Namespace.ID?
     @State private var hasAppeared: Bool = false
 
     private var matchedListings: [Listing] {
@@ -32,6 +33,7 @@ struct ChatListingCards: View {
                         }
                         .buttonStyle(.plain)
                         .id(listing.id)
+                        .matchedTransitionSourceIfAvailable(id: listing.id, in: zoomNamespace)
                     }
                 }
                 .scrollTargetLayout()

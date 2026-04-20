@@ -9,6 +9,7 @@ struct ChatMessageBubble: View {
     let onShowOnMap: ([Listing]) -> Void
     let onListingTap: (Listing) -> Void
     @Binding var carouselScrollPosition: String?
+    var zoomNamespace: Namespace.ID?
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -49,7 +50,8 @@ struct ChatMessageBubble: View {
                     onToggleSave: onToggleSave,
                     onShowOnMap: onShowOnMap,
                     onListingTap: onListingTap,
-                    scrolledListingID: $carouselScrollPosition
+                    scrolledListingID: $carouselScrollPosition,
+                    zoomNamespace: zoomNamespace
                 )
             }
 
