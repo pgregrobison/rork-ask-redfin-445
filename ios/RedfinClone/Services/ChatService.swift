@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum DemoResponseType: Sendable {
-    case listings(text: String, filters: SearchFilters)
+    case listings(text: String, filters: SearchFilters, addNeighborhoods: Bool)
     case tour(text: String, request: TourRequest)
     case mortgage(text: String, request: MortgageRequest)
     case fallback(text: String)
@@ -13,10 +13,11 @@ class ChatService {
     func matchResponse(for input: String) -> DemoResponseType {
         let lower = input.lowercased()
 
-        if lower.containsAny(["home", "house", "apartment", "condo", "listing", "find", "search", "property", "place", "buy"]) {
+        if lower.containsAny(["home", "house", "apartment", "condo", "listing", "find", "search", "property", "place", "buy", "bed", "br", "studio"]) {
             let filters = extractFilters(from: lower)
+            let addNbhd = detectsAddNeighborhood(in: lower) && filters.neighborhoods != nil
             let text = buildListingsResponse(from: lower, filters: filters)
-            return .listings(text: text, filters: filters)
+            return .listings(text: text, filters: filters, addNeighborhoods: addNbhd)
         }
 
         if lower.containsAny(["mortgage", "prequalified", "prequalify", "pre-qualified", "afford", "loan", "financing"]) {
@@ -61,27 +62,55 @@ class ChatService {
         if let propertyType = filters.propertyType { results = results.filter { $0.propertyType.lowercased() == propertyType.lowercased() } }
         if let isHotHome = filters.isHotHome, isHotHome { results = results.filter { $0.isHotHome } }
         if let neighborhoods = filters.neighborhoods, !neighborhoods.isEmpty {
-            let lower = neighborhoods.map { $0.lowercased() }
+            let keys = neighborhoods.map { $0.lowercased() }
             results = results.filter { listing in
-                lower.contains(where: { listing.city.lowercased().contains($0) })
+                let nbhd = listing.neighborhood?.lowercased() ?? ""
+                let city = listing.city.lowercased()
+                return keys.contains(where: { k in nbhd == k || city == k || nbhd.contains(k) || city.contains(k) })
             }
         }
 
-        if !results.isEmpty {
-            let cityCounts = Dictionary(grouping: results, by: { $0.city })
-            let topCity = cityCounts.max(by: { $0.value.count < $1.value.count })!.key
-            results = results.filter { $0.city == topCity }
-        }
-
         return results
+    }
+
+    nonisolated func mergeFilters(current: SearchFilters, incoming: SearchFilters, addNeighborhoods: Bool) -> SearchFilters {
+        var out = current
+        if let v = incoming.minBeds { out.minBeds = v }
+        if let v = incoming.maxBeds { out.maxBeds = v }
+        if let v = incoming.minBaths { out.minBaths = v }
+        if let v = incoming.maxBaths { out.maxBaths = v }
+        if let v = incoming.minPrice { out.minPrice = v }
+        if let v = incoming.maxPrice { out.maxPrice = v }
+        if let v = incoming.minSqft { out.minSqft = v }
+        if let v = incoming.maxSqft { out.maxSqft = v }
+        if let v = incoming.propertyType { out.propertyType = v }
+        if incoming.isHotHome == true { out.isHotHome = true }
+        if let nbhds = incoming.neighborhoods, !nbhds.isEmpty {
+            if addNeighborhoods {
+                var combined = out.neighborhoods ?? []
+                for n in nbhds where !combined.contains(n) { combined.append(n) }
+                out.neighborhoods = combined
+            } else {
+                out.neighborhoods = nbhds
+            }
+        }
+        return out
+    }
+
+    private func detectsAddNeighborhood(in input: String) -> Bool {
+        let addPhrases = ["also ", "add ", "include ", "plus ", "and show", "and also", "as well"]
+        return addPhrases.contains { input.contains($0) }
     }
 
     private func extractFilters(from input: String) -> SearchFilters {
         var filters = SearchFilters()
 
         let bedroomPatterns: [(String, Int)] = [
-            ("studio", 0), ("1 bed", 1), ("1 br", 1), ("one bed", 1), ("2 bed", 2), ("2 br", 2),
-            ("two bed", 2), ("3 bed", 3), ("3 br", 3), ("three bed", 3), ("4 bed", 4), ("4 br", 4)
+            ("studio", 0), ("1 bed", 1), ("1 br", 1), ("1-bed", 1), ("one bed", 1),
+            ("2 bed", 2), ("2 br", 2), ("2-bed", 2), ("two bed", 2),
+            ("3 bed", 3), ("3 br", 3), ("3-bed", 3), ("three bed", 3),
+            ("4 bed", 4), ("4 br", 4), ("4-bed", 4), ("four bed", 4),
+            ("5 bed", 5), ("5 br", 5), ("5-bed", 5)
         ]
         for (pattern, beds) in bedroomPatterns {
             if input.contains(pattern) {
@@ -90,10 +119,24 @@ class ChatService {
             }
         }
 
+        let bathPatterns: [(String, Double)] = [
+            ("1 bath", 1), ("1 ba", 1), ("one bath", 1),
+            ("2 bath", 2), ("2 ba", 2), ("two bath", 2),
+            ("3 bath", 3), ("3 ba", 3), ("three bath", 3)
+        ]
+        for (pattern, baths) in bathPatterns {
+            if input.contains(pattern) {
+                filters.minBaths = baths
+                break
+            }
+        }
+
         if input.contains("under 1m") || input.contains("under $1m") || input.contains("below 1m") {
             filters.maxPrice = 1_000_000
         } else if input.contains("under 2m") || input.contains("under $2m") || input.contains("below 2m") {
             filters.maxPrice = 2_000_000
+        } else if input.contains("under 3m") || input.contains("under $3m") {
+            filters.maxPrice = 3_000_000
         } else if input.contains("under 500") || input.contains("under $500") {
             filters.maxPrice = 500_000
         }
@@ -101,21 +144,43 @@ class ChatService {
         if input.contains("condo") { filters.propertyType = "Condo" }
         else if input.contains("townhouse") { filters.propertyType = "Townhouse" }
         else if input.contains("co-op") || input.contains("coop") { filters.propertyType = "Co-op" }
+        else if input.contains("loft") { filters.propertyType = "Loft" }
 
         if input.containsAny(["hot home", "hot listing", "trending", "popular"]) {
             filters.isHotHome = true
         }
 
         let neighborhoods: [(String, String)] = [
-            ("manhattan", "Manhattan"), ("brooklyn", "Brooklyn"), ("queens", "Queens"),
-            ("lic", "Long Island City"), ("long island city", "Long Island City"),
-            ("astoria", "Astoria"), ("williamsburg", "Williamsburg"),
-            ("upper west", "Upper West Side"), ("upper east", "Upper East Side"),
-            ("tribeca", "Tribeca"), ("soho", "SoHo")
+            ("upper west side", "Upper West Side"), ("upper west", "Upper West Side"), ("uws", "Upper West Side"),
+            ("upper east side", "Upper East Side"), ("upper east", "Upper East Side"), ("ues", "Upper East Side"),
+            ("hudson yards", "Hudson Yards"),
+            ("hell's kitchen", "Hell's Kitchen"), ("hells kitchen", "Hell's Kitchen"),
+            ("murray hill", "Murray Hill"),
+            ("financial district", "Financial District"), ("fidi", "Financial District"),
+            ("tribeca", "Tribeca"),
+            ("soho", "SoHo"),
+            ("west village", "West Village"),
+            ("east village", "East Village"),
+            ("midtown", "Midtown"),
+            ("chelsea", "Chelsea"),
+            ("harlem", "Harlem"),
+            ("williamsburg", "Williamsburg"),
+            ("bushwick", "Bushwick"),
+            ("park slope", "Park Slope"),
+            ("dumbo", "DUMBO"),
+            ("long island city", "Long Island City"), ("lic", "Long Island City"),
+            ("astoria", "Astoria"),
+            ("brooklyn", "Brooklyn"),
+            ("queens", "Queens"),
+            ("manhattan", "Manhattan"),
+            ("eastlake", "Eastlake"),
+            ("seattle", "Seattle")
         ]
         var matched: [String] = []
         for (keyword, name) in neighborhoods {
-            if input.contains(keyword) { matched.append(name) }
+            if input.contains(keyword) && !matched.contains(name) {
+                matched.append(name)
+            }
         }
         if !matched.isEmpty { filters.neighborhoods = matched }
 

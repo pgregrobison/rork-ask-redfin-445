@@ -33,7 +33,9 @@ class ChatViewModel {
     var voiceScrollToTopId: String?
     var searchResultsJustArrived: [Listing]?
     var searchFiltersJustArrived: SearchFilters?
+    var searchAddNeighborhoodsJustArrived: Bool = false
     var debugSettings: DebugSettings?
+    var currentFindFiltersProvider: (() -> SearchFilters)?
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
@@ -216,8 +218,9 @@ class ChatViewModel {
         var tourReq: TourRequest?
         var mortgageReq: MortgageRequest?
 
+        var addNbhd = false
         switch response {
-        case .listings(let text, let filters):
+        case .listings(let text, let filters, let add):
             thinkingState = .searching
             if debugSettings?.realisticModeEnabled == true {
                 try? await Task.sleep(for: .seconds(8))
@@ -227,6 +230,7 @@ class ChatViewModel {
             if Task.isCancelled { return }
             responseText = text
             searchFilters = filters
+            addNbhd = add
 
         case .tour(let text, let request):
             responseText = text
@@ -260,12 +264,15 @@ class ChatViewModel {
               let mi = threads[ti].messages.firstIndex(where: { $0.id == msgId }) else { return }
 
         if let filters = searchFilters {
-            let results = chatService.searchListings(filters: filters)
+            let currentFilters = currentFindFiltersProvider?() ?? SearchFilters()
+            let merged = chatService.mergeFilters(current: currentFilters, incoming: filters, addNeighborhoods: addNbhd)
+            let results = chatService.searchListings(filters: merged)
             lastSearchResults = results
             threads[ti].messages[mi].searchResults = results.map { $0.id }
-            threads[ti].messages[mi].searchFilters = filters
+            threads[ti].messages[mi].searchFilters = merged
             searchResultsJustArrived = results
-            searchFiltersJustArrived = filters
+            searchFiltersJustArrived = merged
+            searchAddNeighborhoodsJustArrived = addNbhd
         }
 
         if let tourReq {

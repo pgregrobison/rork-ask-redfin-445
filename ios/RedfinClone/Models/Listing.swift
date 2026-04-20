@@ -6,6 +6,7 @@ nonisolated struct Listing: Identifiable, Hashable, Codable, Sendable {
     let price: Int
     let address: String
     let city: String
+    let neighborhood: String?
     let state: String
     let zip: String
     let beds: Int
@@ -25,6 +26,58 @@ nonisolated struct Listing: Identifiable, Hashable, Codable, Sendable {
     let buyerAgentFee: String
     var isListedByRedfin: Bool = false
     var isCompassComingSoon: Bool = false
+
+    init(
+        id: String,
+        price: Int,
+        address: String,
+        city: String,
+        neighborhood: String? = nil,
+        state: String,
+        zip: String,
+        beds: Int,
+        baths: Double,
+        sqft: Int,
+        latitude: Double,
+        longitude: Double,
+        photos: [String],
+        description: String,
+        yearBuilt: Int,
+        lotSize: String,
+        propertyType: String,
+        isHotHome: Bool,
+        tags: [String],
+        daysOnMarket: Int,
+        hoaDues: String,
+        buyerAgentFee: String,
+        isListedByRedfin: Bool = false,
+        isCompassComingSoon: Bool = false
+    ) {
+        self.id = id
+        self.price = price
+        self.address = address
+        self.city = city
+        self.neighborhood = neighborhood
+        self.state = state
+        self.zip = zip
+        self.beds = beds
+        self.baths = baths
+        self.sqft = sqft
+        self.latitude = latitude
+        self.longitude = longitude
+        self.photos = photos
+        self.description = description
+        self.yearBuilt = yearBuilt
+        self.lotSize = lotSize
+        self.propertyType = propertyType
+        self.isHotHome = isHotHome
+        self.tags = tags
+        self.daysOnMarket = daysOnMarket
+        self.hoaDues = hoaDues
+        self.buyerAgentFee = buyerAgentFee
+        self.isListedByRedfin = isListedByRedfin
+        self.isCompassComingSoon = isCompassComingSoon
+    }
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

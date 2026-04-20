@@ -1,25 +1,44 @@
-# Chat-to-Find filter sync in Realistic Mode
+# Make chat filters actually filter results and sync with Find
 
-When Realistic Mode is on, the chat will actually understand what you're asking for and apply real filters to the Find surface — beds, baths, price range, property type, and neighborhood — based on the two sync modes you defined.
+## Problem
 
-**Bi-directional sync mode**
-- After the 8-second "Searching homes" completes and results arrive in chat, the Find map and list automatically update to reflect those exact filters.
-- Example: typing "3 bed in upper west side" in chat → after thinking completes, Find switches to show only 3+ bed homes, the map fits to the Upper West Side listings, and the filter chips above the map show "Upper West Side" and "3+ beds."
-- If you're already on the map with chat overlaid (map focus mode), filters apply as the chat results settle — same timing as today.
+Right now when you say something like "3 bed in Upper West Side" in chat, the criteria is extracted but the home cards shown in chat don't reliably reflect it, and the Find page isn't updated to match either. Neighborhoods in particular don't work because listings only store a city ("New York"), not a neighborhood, so Upper West Side never matches.
 
-**One-way sync mode**
-- Nothing on Find changes automatically, no matter how much you chat.
-- When you tap "Show on map" in a chat result, the chat's filters are merged on top of whatever filters you already had on Find (e.g. if Find had "max $2M" set and chat derived "3 bed, Upper West Side," the result is all three combined).
-- The map fits to the merged results and filter chips update to show the full set.
+## Behavior after this change
 
-**Natural language understanding**
-The chat already extracts beds, price caps, property type, neighborhoods, and "hot homes" from messages. This same extraction now drives the Find filters — nothing new to learn on your end. Supported neighborhoods include Manhattan, Brooklyn, Queens, LIC, Astoria, Williamsburg, Upper West Side, Upper East Side, Tribeca, and SoHo.
+**In chat (home cards shown inside the thread):**
+- Chat results always reflect the **combined** filter set: current Find filters + filters from the new message.
+- Works identically in bi-directional and one-way sync — both modes preview the same combined result set inside chat.
+- Filters are flexible: "3 beds" → 3+ bedrooms, "under $1M" → max $1M, "Upper West Side" → that neighborhood, etc.
 
-**Visual feedback on Find**
-- Active filter chips appear above the map the same way they do when you set filters manually — no special "from chat" label.
-- The home count pill updates to reflect the filtered results.
-- The map animates to fit the filtered listings.
+**Conflict resolution when chat overlaps existing Find filters:**
+- Beds, baths, property type, hot homes: chat **replaces** the existing value.
+- Price range: chat replaces (3 beds under $2M replaces prior price ceiling).
+- Neighborhoods: **replace by default**. If the message includes words like "add", "also", "include", or "plus" (e.g. "also show Tribeca"), the neighborhood(s) are **added** to the existing set instead.
 
-**Out of scope**
-- Non-realistic mode behavior is unchanged.
-- Baths and sqft extraction from chat aren't part of today's chat parser; only filter types the chat already extracts will sync. (If you want baths/sqft understood from chat too, that's a follow-up.)
+**Applying to Find:**
+- **Bi-directional sync:** As soon as chat results are ready, Find's filter chips and map/list update to match the combined set. The map camera recenters to the neighborhood bounds if one was mentioned.
+- **One-way sync:** Find doesn't change until you tap "Show on map". When you do, the same combined filters and map recenter are applied.
+
+**Map recenter:**
+- When a neighborhood is mentioned (Upper West Side, Tribeca, Brooklyn, etc.), the map camera zooms to that neighborhood's approximate bounds.
+- If multiple neighborhoods are mentioned, the map fits them all.
+- If no neighborhood is mentioned, the camera fits the resulting listings as it does today.
+
+## Under-the-hood fixes this requires
+
+1. **Listings need a neighborhood concept.** Today listings only store a city, so "Upper West Side" never matches anything. I'll tag each mock listing with a neighborhood derived from its address/description (Upper West Side, Upper East Side, Tribeca, SoHo, Hudson Yards, West Village, Midtown, Williamsburg, Bushwick, LIC, Astoria, etc.). Both chat and Find will filter on this field.
+
+2. **Chat search should respect current Find filters.** Chat's search will merge the message's filters into the current Find filter state using the conflict rules above, then return the listings matching the combined set. The "narrow to top city only" behavior in chat search will be removed — it currently drops valid matches.
+
+3. **Neighborhood bounds table.** A small lookup mapping each known neighborhood name to an approximate lat/lon region, used to recenter the map.
+
+4. **"Add vs replace" detection for neighborhoods.** Simple keyword check on the user's message ("also", "add", "include", "plus", "and show").
+
+5. **One-way preview without mutating Find.** Chat will compute the preview set by running the merge on a temporary copy of the current filters, so Find state stays untouched until Show on map is tapped.
+
+## What doesn't change
+
+- Realistic Mode, its 8-second thinking time, and the bi-directional / one-way toggle stay exactly as they are.
+- Tour and mortgage flows are untouched.
+- Non-Realistic Mode behavior is unchanged (chat still returns standalone results with no Find syncing).

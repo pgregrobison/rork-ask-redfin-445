@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var navigationPath = NavigationPath()
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
+    @State private var pendingNeighborhoodFocus: [String]?
     @State private var showLocationMenu: Bool = false
     @State private var chatDetent: PresentationDetent = .large
     @State private var showDebugPanel: Bool = false
@@ -48,15 +49,24 @@ struct ContentView: View {
         .onAppear {
             viewModel.debugSettings = debugSettings
             chatViewModel.debugSettings = debugSettings
+            chatViewModel.currentFindFiltersProvider = { [weak viewModel] in
+                viewModel?.currentSearchFilters ?? SearchFilters()
+            }
         }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)
                 .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.showChat, onDismiss: {
+            let nbhds = pendingNeighborhoodFocus
+            pendingNeighborhoodFocus = nil
             if let listings = pendingMapListings {
                 pendingMapListings = nil
-                viewModel.fitListings(listings)
+                if let nbhds, !nbhds.isEmpty {
+                    viewModel.fitNeighborhoods(nbhds)
+                } else {
+                    viewModel.fitListings(listings)
+                }
             }
             chatDetent = .large
         }) {
@@ -69,9 +79,11 @@ struct ContentView: View {
                     viewModel.showChat = false
                 },
                 onShowOnMap: { listings, filters in
-                    if let filters, debugSettings.realisticModeEnabled, debugSettings.realisticSyncMode == .oneWay {
-                        viewModel.applyChatFilters(filters, merge: true)
+                    let addNbhd = chatViewModel.searchAddNeighborhoodsJustArrived
+                    if let filters, debugSettings.realisticModeEnabled {
+                        viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
                         pendingMapListings = viewModel.filteredListings
+                        pendingNeighborhoodFocus = filters.neighborhoods
                     } else {
                         pendingMapListings = listings
                     }
@@ -93,21 +105,26 @@ struct ContentView: View {
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
             guard let results, !results.isEmpty else { return }
             let filters = chatViewModel.searchFiltersJustArrived
+            let addNbhd = chatViewModel.searchAddNeighborhoodsJustArrived
             let isBidirectional = debugSettings.realisticModeEnabled && debugSettings.realisticSyncMode == .bidirectional
 
             if isMapFocusEligible {
                 chatViewModel.searchResultsJustArrived = nil
                 chatViewModel.searchFiltersJustArrived = nil
                 if isBidirectional, let filters {
-                    viewModel.applyChatFilters(filters, merge: false)
+                    viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
                 }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                     chatDetent = .fraction(0.7)
                 }
                 Task {
                     try? await Task.sleep(for: .milliseconds(350))
-                    let targetListings = isBidirectional ? viewModel.filteredListings : results
-                    viewModel.fitListings(targetListings, sheetFraction: 0.7)
+                    if isBidirectional, let nbhds = filters?.neighborhoods, !nbhds.isEmpty {
+                        viewModel.fitNeighborhoods(nbhds, sheetFraction: 0.7)
+                    } else {
+                        let targetListings = isBidirectional ? viewModel.filteredListings : results
+                        viewModel.fitListings(targetListings, sheetFraction: 0.7)
+                    }
                 }
                 return
             }
@@ -116,8 +133,9 @@ struct ContentView: View {
                 chatViewModel.searchResultsJustArrived = nil
                 chatViewModel.searchFiltersJustArrived = nil
                 if let filters {
-                    viewModel.applyChatFilters(filters, merge: false)
+                    viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
                     pendingMapListings = viewModel.filteredListings
+                    pendingNeighborhoodFocus = filters.neighborhoods
                 } else {
                     pendingMapListings = results
                 }

@@ -67,7 +67,9 @@ class ListingsViewModel {
         if !filterNeighborhoods.isEmpty {
             let lower = filterNeighborhoods.map { $0.lowercased() }
             result = result.filter { listing in
-                lower.contains(where: { listing.city.lowercased().contains($0) })
+                let nbhd = listing.neighborhood?.lowercased() ?? ""
+                let city = listing.city.lowercased()
+                return lower.contains(where: { key in nbhd == key || city == key || nbhd.contains(key) || city.contains(key) })
             }
         }
         if filterIsHotHome {
@@ -91,32 +93,72 @@ class ListingsViewModel {
         filterIsHotHome = false
     }
 
-    func applyChatFilters(_ filters: SearchFilters, merge: Bool) {
-        if !merge {
-            clearAllFilters()
-        }
-        if let v = filters.minBeds { filterMinBeds = max(filterMinBeds, v) }
-        if let v = filters.minBaths { filterMinBaths = max(filterMinBaths, Int(v)) }
-        if let v = filters.minPrice {
-            filterMinPrice = merge ? max(filterMinPrice ?? 0, v) : v
-        }
-        if let v = filters.maxPrice {
-            if merge, let existing = filterMaxPrice {
-                filterMaxPrice = min(existing, v)
-            } else {
-                filterMaxPrice = v
-            }
-        }
+    func applyChatFilters(_ filters: SearchFilters, addNeighborhoods: Bool) {
+        if let v = filters.minBeds { filterMinBeds = v }
+        if let v = filters.minBaths { filterMinBaths = Int(v) }
+        if let v = filters.minPrice { filterMinPrice = v }
+        if let v = filters.maxPrice { filterMaxPrice = v }
         if let v = filters.propertyType { filterPropertyType = v }
         if filters.isHotHome == true { filterIsHotHome = true }
         if let nbhds = filters.neighborhoods, !nbhds.isEmpty {
-            if merge {
+            if addNeighborhoods {
                 var combined = filterNeighborhoods
                 for n in nbhds where !combined.contains(n) { combined.append(n) }
                 filterNeighborhoods = combined
             } else {
                 filterNeighborhoods = nbhds
             }
+        }
+    }
+
+    var currentSearchFilters: SearchFilters {
+        SearchFilters(
+            minBeds: filterMinBeds > 0 ? filterMinBeds : nil,
+            minBaths: filterMinBaths > 0 ? Double(filterMinBaths) : nil,
+            minPrice: filterMinPrice,
+            maxPrice: filterMaxPrice,
+            propertyType: filterPropertyType,
+            isHotHome: filterIsHotHome ? true : nil,
+            neighborhoods: filterNeighborhoods.isEmpty ? nil : filterNeighborhoods
+        )
+    }
+
+    func fitNeighborhoods(_ names: [String], sheetFraction: CGFloat = 0) {
+        let regions = names.compactMap { NeighborhoodBounds.region(for: $0) }
+        guard !regions.isEmpty else { return }
+        var minLat = Double.greatestFiniteMagnitude
+        var maxLat = -Double.greatestFiniteMagnitude
+        var minLon = Double.greatestFiniteMagnitude
+        var maxLon = -Double.greatestFiniteMagnitude
+        for r in regions {
+            minLat = min(minLat, r.center.latitude - r.span.latitudeDelta / 2)
+            maxLat = max(maxLat, r.center.latitude + r.span.latitudeDelta / 2)
+            minLon = min(minLon, r.center.longitude - r.span.longitudeDelta / 2)
+            maxLon = max(maxLon, r.center.longitude + r.span.longitudeDelta / 2)
+        }
+        let pinLatDelta = max(maxLat - minLat, 0.02)
+        let lonDelta = max(maxLon - minLon, 0.02)
+        let pinCenterLat = (minLat + maxLat) / 2
+        let pinCenterLon = (minLon + maxLon) / 2
+
+        let totalOccluded = sheetFraction + headerFraction
+        let visibleFraction = max(1.0 - totalOccluded, 0.15)
+        let latDelta = pinLatDelta / visibleFraction
+        let bottomOffset = sheetFraction / 2.0 * latDelta
+        let topOffset = headerFraction / 2.0 * latDelta
+        let centerLat = pinCenterLat - bottomOffset + topOffset
+
+        let center = CLLocationCoordinate2D(latitude: centerLat, longitude: pinCenterLon)
+        let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
+        isAnimatingCamera = true
+        withAnimation(.easeInOut(duration: 0.6)) {
+            mapPosition = .region(MKCoordinateRegion(center: center, span: span))
+        }
+        currentSpan = span
+        currentCenter = center
+        Task {
+            try? await Task.sleep(for: .milliseconds(650))
+            isAnimatingCamera = false
         }
     }
 
