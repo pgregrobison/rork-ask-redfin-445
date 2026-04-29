@@ -75,13 +75,12 @@ struct HybridDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
             .background(Theme.Colors.background)
-            .overlay(alignment: .bottomTrailing) {
-                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                    .padding(Theme.Spacing.md)
-                    .padding(.bottom, collapsedPeekHeight + Theme.Spacing.md)
-            }
             .sheet(isPresented: .constant(true)) {
                 sheetContent
+                    .overlay(alignment: .bottomTrailing) {
+                        GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                            .padding(Theme.Spacing.md)
+                    }
                     .presentationDetents([.height(collapsedPeekHeight), .large])
                     .presentationBackground(.thickMaterial)
                     .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
@@ -151,9 +150,10 @@ struct HybridDetailView: View {
                                 .allowsHitTesting(false)
                             }
                             .clipped()
-                            .matchedTransitionSource(id: index, in: photoNamespace)
+                            .contentShape(.rect)
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: index, in: photoNamespace)
                 }
 
                 Color.clear.frame(height: collapsedPeekHeight + 80)
