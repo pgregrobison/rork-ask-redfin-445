@@ -16,10 +16,11 @@ struct HybridDetailView: View {
     @State private var sheetSnap: HybridSheetSnap = .collapsed
     @State private var dragStartOffset: CGFloat = 0
     @State private var scrolledToTop: Bool = true
+    @GestureState private var dragStartedAtTop: Bool = false
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
-    private let collapsedPeekHeight: CGFloat = 280
+    private let collapsedPeekHeight: CGFloat = 220
 
     private var safeAreaTop: CGFloat {
         UIApplication.shared.connectedScenes
@@ -258,17 +259,15 @@ struct HybridDetailView: View {
             VStack(spacing: Theme.Container.spacing) {
                 priceAndAddressSection
 
-                if sheetSnap == .expanded {
-                    rateSummarySection
-                    requestShowingSection
+                rateSummarySection
+                requestShowingSection
 
-                    sectionContainer { propertyDetailsContent }
-                    sectionContainer { featureAndDescriptionContent }
-                    sectionContainer(accent: true) { ratePaymentContent }
-                    sectionContainer { takeTourContent }
-                    sectionContainer { askRedfinContent }
-                    sectionContainer { lifestyleContent }
-                }
+                sectionContainer { propertyDetailsContent }
+                sectionContainer { featureAndDescriptionContent }
+                sectionContainer(accent: true) { ratePaymentContent }
+                sectionContainer { takeTourContent }
+                sectionContainer { askRedfinContent }
+                sectionContainer { lifestyleContent }
 
                 Color.clear.frame(height: 100)
             }
@@ -285,19 +284,23 @@ struct HybridDetailView: View {
         }
         .coordinateSpace(name: "hybridSheetScroll")
         .onPreferenceChange(HybridScrollOffsetKey.self) { value in
-            scrolledToTop = value >= -1
+            scrolledToTop = value >= 0
         }
         .scrollDisabled(sheetSnap == .collapsed)
         .scrollIndicators(.hidden)
         .simultaneousGesture(
-            sheetSnap == .expanded && scrolledToTop ?
+            sheetSnap == .expanded ?
             DragGesture(minimumDistance: 10)
+                .updating($dragStartedAtTop) { _, state, _ in
+                    if !state && scrolledToTop { state = true }
+                }
                 .onChanged { value in
-                    guard value.translation.height > 0 else { return }
+                    guard dragStartedAtTop, value.translation.height > 0 else { return }
                     let progress = min(value.translation.height / maxSheetTravel, 1.0)
                     sheetOffset = maxSheetTravel * (1.0 - progress)
                 }
                 .onEnded { value in
+                    guard dragStartedAtTop else { return }
                     let threshold: CGFloat = 80
                     if value.translation.height > threshold || value.predictedEndTranslation.height > 200 {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
