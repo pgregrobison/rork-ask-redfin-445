@@ -233,6 +233,14 @@ struct ContentView: View {
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )
+        case .hybrid:
+            HybridDetailView(
+                listing: listing,
+                isSaved: viewModel.isSaved(listing),
+                useZoomTransition: debugSettings.cardTransition == .zoom,
+                onToggleSave: { viewModel.toggleSaved(listing) },
+                onAskRedfin: { viewModel.showChat = true }
+            )
         }
     }
 

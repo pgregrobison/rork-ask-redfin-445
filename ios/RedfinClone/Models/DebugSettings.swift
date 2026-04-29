@@ -8,6 +8,7 @@ nonisolated enum CardTransitionStyle: String, CaseIterable, Codable, Sendable {
 nonisolated enum DetailPageStyle: String, CaseIterable, Codable, Sendable {
     case current = "Current"
     case james = "James"
+    case hybrid = "Hybrid"
 }
 
 nonisolated enum SearchBehavior: String, CaseIterable, Codable, Sendable {

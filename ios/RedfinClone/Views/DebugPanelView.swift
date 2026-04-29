@@ -201,6 +201,7 @@ extension DetailPageStyle {
         switch self {
         case .current: "Bottom sheet over photos"
         case .james: "Full vertical scroll layout"
+        case .hybrid: "Vertical photos + James detail sections"
         }
     }
 }
