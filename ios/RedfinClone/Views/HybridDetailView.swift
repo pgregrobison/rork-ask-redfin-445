@@ -12,33 +12,10 @@ struct HybridDetailView: View {
     @State private var downPaymentPercent: Double = 20
     @State private var focusedPhotoIndex: Int? = nil
     @State private var focusVisible: Bool = false
-    @State private var sheetOffset: CGFloat = 0
-    @State private var sheetSnap: HybridSheetSnap = .collapsed
-    @State private var dragStartOffset: CGFloat = 0
-    @State private var scrolledToTop: Bool = true
-    @GestureState private var dragStartedAtTop: Bool = false
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
     private let collapsedPeekHeight: CGFloat = 220
-
-    private var safeAreaTop: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.top ?? 0
-    }
-
-    private var safeAreaBottom: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.bottom ?? 0
-    }
-
-    private var sheetTopStop: CGFloat { safeAreaTop + 52 + 8 }
-
-    private var maxSheetTravel: CGFloat {
-        UIScreen.main.bounds.height - sheetTopStop - collapsedPeekHeight
-    }
 
     private var monthlyPayment: Int {
         let principal = Double(listing.price) * (1.0 - downPaymentPercent / 100.0)
@@ -94,21 +71,28 @@ struct HybridDetailView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                photoScroll
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ZStack {
+            photoScroll
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                detailSheet(in: geo)
-
-                if focusedPhotoIndex != nil {
-                    focusOverlay
-                }
-
-                stickyFooter
+            if focusedPhotoIndex != nil {
+                focusOverlay
             }
         }
         .ignoresSafeArea()
+        .sheet(isPresented: .constant(focusedPhotoIndex == nil)) {
+            sheetContent
+                .overlay(alignment: .bottomTrailing) {
+                    GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                        .padding(Theme.Spacing.md)
+                }
+                .presentationDetents([.height(collapsedPeekHeight), .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
+                .presentationDragIndicator(.visible)
+                .presentationBackground(Theme.Colors.background)
+                .presentationCornerRadius(Theme.Radius.large)
+                .interactiveDismissDisabled()
+        }
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(useZoomTransition || focusedPhotoIndex != nil)
@@ -202,58 +186,6 @@ struct HybridDetailView: View {
 
     // MARK: - Detail Sheet
 
-    private func detailSheet(in geo: GeometryProxy) -> some View {
-        let screenH = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
-
-        return VStack(spacing: 0) {
-            sheetDragHandle
-            sheetContent
-        }
-        .frame(maxWidth: .infinity)
-        .background(Theme.Colors.background)
-        .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
-        .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
-        .offset(y: screenH - collapsedPeekHeight - sheetOffset)
-        .gesture(sheetDrag)
-    }
-
-    private var sheetDragHandle: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(Color(.systemGray3))
-                .frame(width: 36, height: 5)
-                .padding(.top, Theme.Spacing.xs + 2)
-                .padding(.bottom, Theme.Spacing.sm)
-        }
-        .frame(maxWidth: .infinity)
-        .contentShape(Rectangle())
-    }
-
-    private var sheetDrag: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                let translation = -value.translation.height
-                let newOffset = dragStartOffset + translation
-                sheetOffset = max(0, min(maxSheetTravel, newOffset))
-            }
-            .onEnded { value in
-                let velocity = -value.predictedEndTranslation.height / max(1, abs(value.translation.height)) * abs(value.translation.height)
-                let projected = sheetOffset + velocity * 0.2
-                let midPoint = maxSheetTravel * 0.4
-
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                    if projected > midPoint {
-                        sheetOffset = maxSheetTravel
-                        sheetSnap = .expanded
-                    } else {
-                        sheetOffset = 0
-                        sheetSnap = .collapsed
-                    }
-                }
-                dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
-            }
-    }
-
     private var sheetContent: some View {
         ScrollView {
             VStack(spacing: Theme.Container.spacing) {
@@ -273,64 +205,8 @@ struct HybridDetailView: View {
             }
             .padding(.horizontal, Theme.Spacing.md)
             .padding(.top, Theme.Spacing.sm)
-            .background(
-                GeometryReader { inner in
-                    Color.clear.preference(
-                        key: HybridScrollOffsetKey.self,
-                        value: inner.frame(in: .named("hybridSheetScroll")).minY
-                    )
-                }
-            )
         }
-        .coordinateSpace(name: "hybridSheetScroll")
-        .onPreferenceChange(HybridScrollOffsetKey.self) { value in
-            scrolledToTop = value >= 0
-        }
-        .scrollDisabled(sheetSnap == .collapsed)
         .scrollIndicators(.hidden)
-        .simultaneousGesture(
-            sheetSnap == .expanded ?
-            DragGesture(minimumDistance: 10)
-                .updating($dragStartedAtTop) { _, state, _ in
-                    if !state && scrolledToTop { state = true }
-                }
-                .onChanged { value in
-                    guard dragStartedAtTop, value.translation.height > 0 else { return }
-                    let progress = min(value.translation.height / maxSheetTravel, 1.0)
-                    sheetOffset = maxSheetTravel * (1.0 - progress)
-                }
-                .onEnded { value in
-                    guard dragStartedAtTop else { return }
-                    let threshold: CGFloat = 80
-                    if value.translation.height > threshold || value.predictedEndTranslation.height > 200 {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                            sheetOffset = 0
-                            sheetSnap = .collapsed
-                        }
-                        dragStartOffset = 0
-                    } else {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                            sheetOffset = maxSheetTravel
-                        }
-                        dragStartOffset = maxSheetTravel
-                    }
-                }
-            : nil
-        )
-    }
-
-    // MARK: - Sticky Footer (Ask Redfin only)
-
-    private var stickyFooter: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            HStack {
-                Spacer()
-                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-            }
-            .padding(.trailing, Theme.Spacing.md)
-            .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))
-        }
     }
 
     // MARK: - Focus Photo Overlay
@@ -703,14 +579,4 @@ struct HybridDetailView: View {
     }
 }
 
-private enum HybridSheetSnap {
-    case collapsed
-    case expanded
-}
 
-private struct HybridScrollOffsetKey: PreferenceKey {
-    nonisolated static let defaultValue: CGFloat = 0
-    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
