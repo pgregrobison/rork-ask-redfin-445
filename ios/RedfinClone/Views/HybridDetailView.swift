@@ -10,8 +10,7 @@ struct HybridDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
     @State private var downPaymentPercent: Double = 20
-    @State private var focusedPhotoIndex: Int? = nil
-    @State private var focusVisible: Bool = false
+    @State private var focusedPhoto: FocusedPhoto?
     @Namespace private var photoNamespace
 
     private let redfinRed = Theme.Colors.brandRed
@@ -72,84 +71,60 @@ struct HybridDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            photoScroll
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            if focusedPhotoIndex != nil {
-                focusOverlay
-                    .overlay(alignment: .bottomTrailing) {
-                        GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                            .padding(Theme.Spacing.md)
-                            .padding(.bottom, Theme.Spacing.md)
-                    }
+        photoScroll
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea()
+            .background(Theme.Colors.background)
+            .overlay(alignment: .bottomTrailing) {
+                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                    .padding(Theme.Spacing.md)
+                    .padding(.bottom, collapsedPeekHeight + Theme.Spacing.md)
             }
-        }
-        .ignoresSafeArea()
-        .sheet(isPresented: .constant(focusedPhotoIndex == nil)) {
-            sheetContent
-                .overlay(alignment: .bottomTrailing) {
-                    GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                        .padding(Theme.Spacing.md)
-                }
-                .presentationDetents([.height(collapsedPeekHeight), .large])
-                .presentationBackground(.thickMaterial)
-                .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
-                .presentationDragIndicator(.visible)
-                .interactiveDismissDisabled()
-        }
-        .background(Theme.Colors.background)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(useZoomTransition || focusedPhotoIndex != nil)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                if focusedPhotoIndex != nil {
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                            focusVisible = false
-                            focusedPhotoIndex = nil
+            .sheet(isPresented: .constant(true)) {
+                sheetContent
+                    .presentationDetents([.height(collapsedPeekHeight), .large])
+                    .presentationBackground(.thickMaterial)
+                    .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
+                    .presentationDragIndicator(.visible)
+                    .interactiveDismissDisabled()
+            }
+            .fullScreenCover(item: $focusedPhoto) { photo in
+                PhotoFocusView(
+                    listing: listing,
+                    initialIndex: photo.id,
+                    namespace: photoNamespace,
+                    onAskRedfin: onAskRedfin
+                )
+                .navigationTransition(.zoom(sourceID: photo.id, in: photoNamespace))
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(useZoomTransition)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if useZoomTransition {
+                        Button { dismiss() } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .foregroundStyle(.white)
-                    }
-                } else if useZoomTransition {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                     }
                 }
-            }
-            ToolbarItem(placement: .principal) {
-                if let index = focusedPhotoIndex {
-                    Text("\(index + 1) of \(listing.photos.count)")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { onToggleSave() } label: {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .contentTransition(.symbolEffect(.replace))
+                            .foregroundStyle(isSaved ? .red : .primary)
+                    }
+                    .sensoryFeedback(.selection, trigger: isSaved)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: listing.shareText) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { onToggleSave() } label: {
-                    Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                        .foregroundStyle(isSaved ? .red : (focusedPhotoIndex != nil ? .white : .primary))
-                }
-                .sensoryFeedback(.selection, trigger: isSaved)
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: listing.shareText) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
-                }
-            }
-        }
-        .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
-        .onDisappear {
-            focusedPhotoIndex = nil
-            focusVisible = false
-        }
     }
 
     // MARK: - Photo Scroll
@@ -159,10 +134,7 @@ struct HybridDetailView: View {
             VStack(spacing: 2) {
                 ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
                     Button {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                            focusedPhotoIndex = index
-                            focusVisible = true
-                        }
+                        focusedPhoto = FocusedPhoto(id: index)
                     } label: {
                         Theme.Colors.tertiaryBackground
                             .frame(height: 300)
@@ -179,7 +151,7 @@ struct HybridDetailView: View {
                                 .allowsHitTesting(false)
                             }
                             .clipped()
-                            .matchedGeometryEffect(id: "photo-\(index)", in: photoNamespace, isSource: focusedPhotoIndex != index)
+                            .matchedTransitionSource(id: index, in: photoNamespace)
                     }
                     .buttonStyle(.plain)
                 }
@@ -213,40 +185,6 @@ struct HybridDetailView: View {
             .padding(.top, Theme.Spacing.xxl)
         }
         .scrollIndicators(.hidden)
-    }
-
-    // MARK: - Focus Photo Overlay
-
-    private var focusOverlay: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            if let index = focusedPhotoIndex, focusVisible {
-                TabView(selection: Binding(
-                    get: { index },
-                    set: { focusedPhotoIndex = $0 }
-                )) {
-                    ForEach(Array(listing.photos.enumerated()), id: \.offset) { i, url in
-                        AsyncImage(url: URL(string: url)) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } else if phase.error != nil {
-                                Color.clear
-                            } else {
-                                ProgressView().tint(.white)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .matchedGeometryEffect(id: "photo-\(i)", in: photoNamespace, isSource: i == index)
-                        .tag(i)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-            }
-        }
-        .allowsHitTesting(focusVisible)
     }
 
     // MARK: - James' Sections
@@ -585,4 +523,69 @@ struct HybridDetailView: View {
     }
 }
 
+struct FocusedPhoto: Identifiable, Hashable {
+    let id: Int
+}
 
+private struct PhotoFocusView: View {
+    let listing: Listing
+    let initialIndex: Int
+    let namespace: Namespace.ID
+    let onAskRedfin: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var index: Int
+
+    init(listing: Listing, initialIndex: Int, namespace: Namespace.ID, onAskRedfin: @escaping () -> Void) {
+        self.listing = listing
+        self.initialIndex = initialIndex
+        self.namespace = namespace
+        self.onAskRedfin = onAskRedfin
+        self._index = State(initialValue: initialIndex)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+
+                TabView(selection: $index) {
+                    ForEach(Array(listing.photos.enumerated()), id: \.offset) { i, url in
+                        AsyncImage(url: URL(string: url)) { phase in
+                            if let image = phase.image {
+                                image.resizable().aspectRatio(contentMode: .fit)
+                            } else if phase.error != nil {
+                                Color.clear
+                            } else {
+                                ProgressView().tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .tag(i)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+            }
+            .overlay(alignment: .bottomTrailing) {
+                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                    .padding(Theme.Spacing.md)
+                    .padding(.bottom, Theme.Spacing.md)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("\(index + 1) of \(listing.photos.count)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+    }
+}
