@@ -89,8 +89,6 @@ struct HybridDetailView: View {
                 .presentationDetents([.height(collapsedPeekHeight), .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
                 .presentationDragIndicator(.visible)
-                .presentationBackground(Theme.Colors.background)
-                .presentationCornerRadius(Theme.Radius.large)
                 .interactiveDismissDisabled()
         }
         .background(Theme.Colors.background)
