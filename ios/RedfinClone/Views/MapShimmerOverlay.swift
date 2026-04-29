@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MapShimmerOverlay: View {
-    @State private var phase: CGFloat = -1.1
+    @State private var phase: CGFloat = -1.2
 
     var body: some View {
         GeometryReader { geo in
@@ -12,23 +12,25 @@ struct MapShimmerOverlay: View {
             LinearGradient(
                 stops: [
                     .init(color: .white.opacity(0), location: 0.0),
-                    .init(color: .white.opacity(0), location: 0.485),
-                    .init(color: .white.opacity(0.18), location: 0.5),
-                    .init(color: .white.opacity(0), location: 0.515),
+                    .init(color: .white.opacity(0), location: 0.492),
+                    .init(color: .white.opacity(0.06), location: 0.497),
+                    .init(color: .white.opacity(0.16), location: 0.500),
+                    .init(color: .white.opacity(0.06), location: 0.503),
+                    .init(color: .white.opacity(0), location: 0.508),
                     .init(color: .white.opacity(0), location: 1.0)
                 ],
                 startPoint: .leading,
                 endPoint: .trailing
             )
-            .frame(width: diag * 1.8, height: diag * 1.8)
+            .frame(width: diag * 2.0, height: diag * 2.0)
             .rotationEffect(.degrees(45))
             .offset(x: phase * diag)
             .blendMode(.plusLighter)
             .allowsHitTesting(false)
             .onAppear {
-                phase = -1.1
-                withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: false)) {
-                    phase = 1.1
+                phase = -1.2
+                withAnimation(.easeInOut(duration: 3.6).repeatForever(autoreverses: false)) {
+                    phase = 1.2
                 }
             }
         }
