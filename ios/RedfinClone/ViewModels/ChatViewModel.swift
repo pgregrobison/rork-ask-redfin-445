@@ -38,8 +38,6 @@ class ChatViewModel {
     var currentFindFiltersProvider: (() -> SearchFilters)?
 
     private let chatService = ChatService()
-    private let aiService = AIService()
-    private let toolExecutor: ToolExecutor
     private let storageKey = "chatThreads_v2"
     private var streamTask: Task<Void, Never>?
     private var voiceSimTask: Task<Void, Never>?
@@ -62,7 +60,6 @@ class ChatViewModel {
     }
 
     init() {
-        self.toolExecutor = ToolExecutor(chatService: chatService)
         UserDefaults.standard.removeObject(forKey: "chatThreads")
         loadThreads()
         if threads.isEmpty {
@@ -210,192 +207,107 @@ class ChatViewModel {
     private func generateResponse(for input: String) async {
         thinkingState = .thinking
         let thinkingStart = ContinuousClock.now
-        let realistic = debugSettings?.realisticModeEnabled == true
 
-        let history = activeMessages.dropLast()
-        let currentFilters = currentFindFiltersProvider?() ?? SearchFilters()
-        var aiMessages: [AIMessage] = [
-            AIMessage(role: "system", content: ChatPromptBuilder.systemPrompt(currentFilters: currentFilters))
-        ]
-        aiMessages.append(contentsOf: ChatPromptBuilder.buildHistory(messages: Array(history)))
-        aiMessages.append(AIMessage(role: "user", content: input))
+        let response = chatService.matchResponse(for: input)
+
+        try? await Task.sleep(for: .milliseconds(Int.random(in: 500...900)))
+        if Task.isCancelled { return }
+
+        let responseText: String
+        var searchFilters: SearchFilters?
+        var tourReq: TourRequest?
+        var mortgageReq: MortgageRequest?
+
+        var addNbhd = false
+        switch response {
+        case .listings(let text, let filters, let add):
+            thinkingState = .searching
+            if debugSettings?.realisticModeEnabled == true {
+                try? await Task.sleep(for: .seconds(8))
+            } else {
+                try? await Task.sleep(for: .milliseconds(Int.random(in: 300...600)))
+            }
+            if Task.isCancelled { return }
+            responseText = text
+            searchFilters = filters
+            addNbhd = add
+
+        case .tour(let text, let request):
+            responseText = text
+            tourReq = request
+
+        case .mortgage(let text, let request):
+            responseText = text
+            mortgageReq = request
+
+        case .fallback(let text):
+            responseText = text
+        }
+
+        let elapsed = ContinuousClock.now - thinkingStart
+        let minimumThinking: Duration = (debugSettings?.realisticModeEnabled == true && searchFilters != nil) ? .seconds(8) : .seconds(2)
+        if elapsed < minimumThinking {
+            try? await Task.sleep(for: minimumThinking - elapsed)
+            if Task.isCancelled { return }
+        }
+
+        thinkingState = .none
 
         let assistantMsg = ChatMessage(role: .assistant, content: "", isStreaming: true)
         appendMessage(assistantMsg)
         let msgId = assistantMsg.id
 
-        var completedToolCalls: [ToolCallRecord] = []
-        var finalSearchFilters: SearchFilters?
-        var finalSearchResults: [Listing]?
-        var finalAddNbhd = false
-        var finalTour: TourRequest?
-        var finalMortgage: MortgageRequest?
-        var hasStartedTextOutput = false
-        let maxIterations = 4
-
-        for _ in 0..<maxIterations {
-            if Task.isCancelled { break }
-
-            var pendingCalls: [Int: (id: String, name: String, args: String)] = [:]
-            var finishReason: String?
-            var streamedText = ""
-
-            do {
-                for try await event in aiService.stream(messages: aiMessages, tools: ChatPromptBuilder.tools) {
-                    if Task.isCancelled { break }
-                    switch event {
-                    case .textDelta(let chunk):
-                        if !hasStartedTextOutput {
-                            hasStartedTextOutput = true
-                            await enforceMinimumThinking(start: thinkingStart, isSearching: false, realistic: realistic)
-                            if Task.isCancelled { break }
-                            thinkingState = .none
-                        }
-                        streamedText += chunk
-                        let existing = currentMessageContent(msgId) ?? ""
-                        updateMessageContent(msgId, content: existing + chunk)
-                    case .toolCallStart(let index, let id, let name):
-                        pendingCalls[index] = (id: id, name: name, args: "")
-                        if name == "search_homes" {
-                            thinkingState = .searching
-                        }
-                    case .toolCallArgsDelta(let index, let json):
-                        if var existing = pendingCalls[index] {
-                            existing.args += json
-                            pendingCalls[index] = existing
-                        }
-                    case .finish(let reason):
-                        finishReason = reason
-                    }
-                }
-            } catch {
-                if Task.isCancelled { return }
-                let aiErr = (error as? AIError)?.userFacing ?? "Something went wrong, please try again."
-                let existing = currentMessageContent(msgId) ?? ""
-                let body = existing.isEmpty ? aiErr : existing
-                updateMessageContent(msgId, content: body)
-                thinkingState = .none
-                finalizeMessage(msgId)
-                saveThreads()
-                return
-            }
-
-            if Task.isCancelled { return }
-
-            guard finishReason == "tool_calls", !pendingCalls.isEmpty else {
-                break
-            }
-
-            let orderedCalls = pendingCalls.keys.sorted().compactMap { pendingCalls[$0] }
-            let assistantToolCalls = orderedCalls.map {
-                PendingToolCall(id: $0.id, name: $0.name, arguments: $0.args)
-            }
-            aiMessages.append(AIMessage(
-                role: "assistant",
-                content: streamedText.isEmpty ? nil : streamedText,
-                toolCalls: assistantToolCalls
-            ))
-
-            var hasSearch = false
-            for call in orderedCalls {
-                if call.name == "search_homes" { hasSearch = true }
-            }
-            if hasSearch && realistic {
-                let elapsed = ContinuousClock.now - thinkingStart
-                if elapsed < .seconds(8) {
-                    try? await Task.sleep(for: .seconds(8) - elapsed)
-                }
-                if Task.isCancelled { return }
-            }
-
-            for call in orderedCalls {
-                let result = toolExecutor.execute(
-                    name: call.name,
-                    arguments: call.args,
-                    currentFindFilters: currentFilters
-                )
-                completedToolCalls.append(ToolCallRecord(
-                    id: call.id,
-                    name: call.name,
-                    arguments: call.args,
-                    result: result.resultJSON
-                ))
-                aiMessages.append(AIMessage(role: "tool", content: result.resultJSON, toolCallId: call.id))
-
-                if call.name == "search_homes" {
-                    finalSearchFilters = result.searchFilters
-                    finalSearchResults = result.searchResults
-                    finalAddNbhd = result.addNeighborhoods
-                }
-                if let tour = result.tourRequest { finalTour = tour }
-                if let mort = result.mortgageRequest { finalMortgage = mort }
-            }
-        }
-
-        if !hasStartedTextOutput {
-            await enforceMinimumThinking(
-                start: thinkingStart,
-                isSearching: finalSearchResults != nil,
-                realistic: realistic
-            )
-        }
+        await streamText(responseText, toMessageId: msgId)
         if Task.isCancelled { return }
-        thinkingState = .none
 
         guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
               let mi = threads[ti].messages.firstIndex(where: { $0.id == msgId }) else { return }
 
-        if !completedToolCalls.isEmpty {
-            threads[ti].messages[mi].toolCalls = completedToolCalls
-        }
-
-        if let filters = finalSearchFilters, let results = finalSearchResults {
+        if let filters = searchFilters {
+            let currentFilters = currentFindFiltersProvider?() ?? SearchFilters()
+            let merged = chatService.mergeFilters(current: currentFilters, incoming: filters, addNeighborhoods: addNbhd)
+            let results = chatService.searchListings(filters: merged)
             lastSearchResults = results
             threads[ti].messages[mi].searchResults = results.map { $0.id }
-            threads[ti].messages[mi].searchFilters = filters
+            threads[ti].messages[mi].searchFilters = merged
             searchResultsJustArrived = results
-            searchFiltersJustArrived = filters
-            searchAddNeighborhoodsJustArrived = finalAddNbhd
-        }
-        if let tour = finalTour {
-            threads[ti].messages[mi].tourRequest = tour
-        }
-        if let mort = finalMortgage {
-            threads[ti].messages[mi].mortgageRequest = mort
+            searchFiltersJustArrived = merged
+            searchAddNeighborhoodsJustArrived = addNbhd
         }
 
-        if threads[ti].messages[mi].content.isEmpty {
-            let fallback: String
-            if finalSearchResults != nil {
-                fallback = "Here are some homes that match."
-            } else if finalTour != nil {
-                fallback = "Let's get you scheduled for a tour."
-            } else if finalMortgage != nil {
-                fallback = "Let's get you prequalified."
-            } else {
-                fallback = ""
-            }
-            if !fallback.isEmpty {
-                threads[ti].messages[mi].content = fallback
-            }
+        if let tourReq {
+            threads[ti].messages[mi].tourRequest = tourReq
+        }
+
+        if let mortgageReq {
+            threads[ti].messages[mi].mortgageRequest = mortgageReq
         }
 
         finalizeMessage(msgId)
         saveThreads()
     }
 
-    private func enforceMinimumThinking(start: ContinuousClock.Instant, isSearching: Bool, realistic: Bool) async {
-        let elapsed = ContinuousClock.now - start
-        let minimum: Duration = (realistic && isSearching) ? .seconds(8) : .seconds(2)
-        if elapsed < minimum {
-            try? await Task.sleep(for: minimum - elapsed)
-        }
-    }
+    private func streamText(_ text: String, toMessageId msgId: String) async {
+        var streamed = ""
+        let chars = Array(text)
+        var i = 0
 
-    private func currentMessageContent(_ messageId: String) -> String? {
-        guard let ti = threads.firstIndex(where: { $0.id == activeThreadId }),
-              let mi = threads[ti].messages.firstIndex(where: { $0.id == messageId }) else { return nil }
-        return threads[ti].messages[mi].content
+        while i < chars.count {
+            if Task.isCancelled { return }
+
+            let chunkSize = min(Int.random(in: 1...3), chars.count - i)
+            for j in 0..<chunkSize {
+                streamed.append(chars[i + j])
+            }
+            i += chunkSize
+
+            updateMessageContent(msgId, content: streamed)
+
+            let delay = chars[i - 1] == "." || chars[i - 1] == "!" || chars[i - 1] == "?" ? 60 : Int.random(in: 15...35)
+            try? await Task.sleep(for: .milliseconds(delay))
+        }
+
+        updateMessageContent(msgId, content: text)
     }
 
     private func appendMessage(_ message: ChatMessage) {
