@@ -9,11 +9,35 @@ struct HybridDetailView: View {
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showFullDescription: Bool = false
-    @State private var scrollOffset: CGFloat = 0
     @State private var downPaymentPercent: Double = 20
+    @State private var focusedPhotoIndex: Int? = nil
+    @State private var focusVisible: Bool = false
+    @State private var sheetOffset: CGFloat = 0
+    @State private var sheetSnap: HybridSheetSnap = .collapsed
+    @State private var dragStartOffset: CGFloat = 0
+    @State private var scrolledToTop: Bool = true
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
+    private let collapsedPeekHeight: CGFloat = 280
+
+    private var safeAreaTop: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.top ?? 0
+    }
+
+    private var safeAreaBottom: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.bottom ?? 0
+    }
+
+    private var sheetTopStop: CGFloat { safeAreaTop + 52 + 8 }
+
+    private var maxSheetTravel: CGFloat {
+        UIScreen.main.bounds.height - sheetTopStop - collapsedPeekHeight
+    }
 
     private var monthlyPayment: Int {
         let principal = Double(listing.price) * (1.0 - downPaymentPercent / 100.0)
@@ -68,56 +92,50 @@ struct HybridDetailView: View {
         return Array(highlights.prefix(6))
     }
 
-    private let photoHeight: CGFloat = 300
-    private var photoTitleThreshold: CGFloat { -(photoHeight - 80) }
-
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ScrollView {
-                VStack(spacing: 0) {
-                    verticalPhotoStack
-                    mainContent
-                }
-                .background(
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: HybridScrollOffsetKey.self,
-                            value: geo.frame(in: .named("hybridScroll")).minY
-                        )
-                    }
-                )
-            }
-            .coordinateSpace(name: "hybridScroll")
-            .onPreferenceChange(HybridScrollOffsetKey.self) { value in
-                scrollOffset = value
-            }
-            .scrollIndicators(.hidden)
-            .ignoresSafeArea(edges: .top)
+        GeometryReader { geo in
+            ZStack {
+                photoScroll
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                .padding(.trailing, Theme.Spacing.md)
-                .padding(.bottom, Theme.Spacing.md)
+                detailSheet(in: geo)
+
+                if focusedPhotoIndex != nil {
+                    focusOverlay
+                }
+
+                stickyFooter
+            }
         }
+        .ignoresSafeArea()
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(useZoomTransition)
-        .toolbarBackground(scrollOffset < photoTitleThreshold ? .visible : .hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(useZoomTransition || focusedPhotoIndex != nil)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                if useZoomTransition {
+                if focusedPhotoIndex != nil {
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            focusVisible = false
+                            focusedPhotoIndex = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
+                } else if useZoomTransition {
                     Button { dismiss() } label: {
                         Image(systemName: "chevron.down")
                             .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .foregroundStyle(scrollOffset < photoTitleThreshold ? Color.primary : Color.white)
                     }
                 }
             }
             ToolbarItem(placement: .principal) {
-                if scrollOffset < photoTitleThreshold {
-                    Text(listing.address)
+                if let index = focusedPhotoIndex {
+                    Text("\(index + 1) of \(listing.photos.count)")
                         .font(.subheadline.weight(.semibold))
-                        .lineLimit(1)
-                        .transition(.opacity)
+                        .foregroundStyle(.white)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -125,7 +143,7 @@ struct HybridDetailView: View {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
                         .contentTransition(.symbolEffect(.replace))
-                        .foregroundStyle(isSaved ? .red : scrollOffset < photoTitleThreshold ? .primary : .white)
+                        .foregroundStyle(isSaved ? .red : (focusedPhotoIndex != nil ? .white : .primary))
                 }
                 .sensoryFeedback(.selection, trigger: isSaved)
             }
@@ -133,58 +151,220 @@ struct HybridDetailView: View {
                 ShareLink(item: listing.shareText) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(scrollOffset < photoTitleThreshold ? Color.primary : Color.white)
+                        .foregroundStyle(focusedPhotoIndex != nil ? .white : .primary)
                 }
             }
         }
-        .toolbarColorScheme(scrollOffset < photoTitleThreshold ? nil : .dark, for: .navigationBar)
+        .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
+        .onDisappear {
+            focusedPhotoIndex = nil
+            focusVisible = false
+        }
     }
 
-    // MARK: - Vertical Photo Stack (from Current/Default)
+    // MARK: - Photo Scroll
 
-    private var verticalPhotoStack: some View {
-        VStack(spacing: 2) {
-            ForEach(Array(listing.photos.enumerated()), id: \.offset) { _, url in
-                Theme.Colors.tertiaryBackground
-                    .frame(height: photoHeight)
-                    .overlay {
-                        AsyncImage(url: URL(string: url)) { phase in
-                            if let image = phase.image {
-                                image.resizable().aspectRatio(contentMode: .fill)
-                            } else if phase.error != nil {
-                                Theme.Colors.tertiaryBackground
-                            } else {
-                                ProgressView()
-                            }
+    private var photoScroll: some View {
+        ScrollView {
+            VStack(spacing: 2) {
+                ForEach(Array(listing.photos.enumerated()), id: \.offset) { index, url in
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            focusedPhotoIndex = index
+                            focusVisible = true
                         }
-                        .allowsHitTesting(false)
+                    } label: {
+                        Theme.Colors.tertiaryBackground
+                            .frame(height: 300)
+                            .overlay {
+                                AsyncImage(url: URL(string: url)) { phase in
+                                    if let image = phase.image {
+                                        image.resizable().aspectRatio(contentMode: .fill)
+                                    } else if phase.error != nil {
+                                        Theme.Colors.tertiaryBackground
+                                    } else {
+                                        ProgressView()
+                                    }
+                                }
+                                .allowsHitTesting(false)
+                            }
+                            .clipped()
                     }
-                    .clipped()
+                    .buttonStyle(.plain)
+                }
+
+                Color.clear.frame(height: collapsedPeekHeight + 80)
             }
         }
+        .scrollIndicators(.hidden)
     }
 
-    // MARK: - Main Content (from James)
+    // MARK: - Detail Sheet
 
-    private var mainContent: some View {
-        VStack(spacing: Theme.Container.spacing) {
-            priceAndAddressSection
-            rateSummarySection
-            requestShowingSection
+    private func detailSheet(in geo: GeometryProxy) -> some View {
+        let screenH = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
 
-            sectionContainer { propertyDetailsContent }
-            sectionContainer { featureAndDescriptionContent }
-            sectionContainer(accent: true) { ratePaymentContent }
-            sectionContainer { takeTourContent }
-            sectionContainer { askRedfinContent }
-            sectionContainer { lifestyleContent }
-
-            Color.clear.frame(height: 80)
+        return VStack(spacing: 0) {
+            sheetDragHandle
+            sheetContent
         }
-        .padding(.horizontal, Theme.Spacing.md)
-        .padding(.top, Theme.Spacing.lg)
+        .frame(maxWidth: .infinity)
         .background(Theme.Colors.background)
+        .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
+        .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
+        .offset(y: screenH - collapsedPeekHeight - sheetOffset)
+        .gesture(sheetDrag)
     }
+
+    private var sheetDragHandle: some View {
+        VStack(spacing: 0) {
+            Capsule()
+                .fill(Color(.systemGray3))
+                .frame(width: 36, height: 5)
+                .padding(.top, Theme.Spacing.xs + 2)
+                .padding(.bottom, Theme.Spacing.sm)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+    }
+
+    private var sheetDrag: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                let translation = -value.translation.height
+                let newOffset = dragStartOffset + translation
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                let velocity = -value.predictedEndTranslation.height / max(1, abs(value.translation.height)) * abs(value.translation.height)
+                let projected = sheetOffset + velocity * 0.2
+                let midPoint = maxSheetTravel * 0.4
+
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    if projected > midPoint {
+                        sheetOffset = maxSheetTravel
+                        sheetSnap = .expanded
+                    } else {
+                        sheetOffset = 0
+                        sheetSnap = .collapsed
+                    }
+                }
+                dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
+            }
+    }
+
+    private var sheetContent: some View {
+        ScrollView {
+            VStack(spacing: Theme.Container.spacing) {
+                priceAndAddressSection
+
+                if sheetSnap == .expanded {
+                    rateSummarySection
+                    requestShowingSection
+
+                    sectionContainer { propertyDetailsContent }
+                    sectionContainer { featureAndDescriptionContent }
+                    sectionContainer(accent: true) { ratePaymentContent }
+                    sectionContainer { takeTourContent }
+                    sectionContainer { askRedfinContent }
+                    sectionContainer { lifestyleContent }
+                }
+
+                Color.clear.frame(height: 100)
+            }
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.top, Theme.Spacing.sm)
+            .background(
+                GeometryReader { inner in
+                    Color.clear.preference(
+                        key: HybridScrollOffsetKey.self,
+                        value: inner.frame(in: .named("hybridSheetScroll")).minY
+                    )
+                }
+            )
+        }
+        .coordinateSpace(name: "hybridSheetScroll")
+        .onPreferenceChange(HybridScrollOffsetKey.self) { value in
+            scrolledToTop = value >= -1
+        }
+        .scrollDisabled(sheetSnap == .collapsed)
+        .scrollIndicators(.hidden)
+        .simultaneousGesture(
+            sheetSnap == .expanded && scrolledToTop ?
+            DragGesture(minimumDistance: 10)
+                .onChanged { value in
+                    guard value.translation.height > 0 else { return }
+                    let progress = min(value.translation.height / maxSheetTravel, 1.0)
+                    sheetOffset = maxSheetTravel * (1.0 - progress)
+                }
+                .onEnded { value in
+                    let threshold: CGFloat = 80
+                    if value.translation.height > threshold || value.predictedEndTranslation.height > 200 {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            sheetOffset = 0
+                            sheetSnap = .collapsed
+                        }
+                        dragStartOffset = 0
+                    } else {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            sheetOffset = maxSheetTravel
+                        }
+                        dragStartOffset = maxSheetTravel
+                    }
+                }
+            : nil
+        )
+    }
+
+    // MARK: - Sticky Footer (Ask Redfin only)
+
+    private var stickyFooter: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            HStack {
+                Spacer()
+                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+            }
+            .padding(.trailing, Theme.Spacing.md)
+            .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))
+        }
+    }
+
+    // MARK: - Focus Photo Overlay
+
+    private var focusOverlay: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if let index = focusedPhotoIndex, focusVisible {
+                TabView(selection: Binding(
+                    get: { index },
+                    set: { focusedPhotoIndex = $0 }
+                )) {
+                    ForEach(Array(listing.photos.enumerated()), id: \.offset) { i, url in
+                        AsyncImage(url: URL(string: url)) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else if phase.error != nil {
+                                Color.clear
+                            } else {
+                                ProgressView().tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .tag(i)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .transition(.opacity)
+            }
+        }
+        .allowsHitTesting(focusVisible)
+    }
+
+    // MARK: - James' Sections
 
     private func sectionContainer<Content: View>(accent: Bool = false, @ViewBuilder content: () -> Content) -> some View {
         content()
@@ -518,6 +698,11 @@ struct HybridDetailView: View {
                 .foregroundStyle(.tertiary)
         }
     }
+}
+
+private enum HybridSheetSnap {
+    case collapsed
+    case expanded
 }
 
 private struct HybridScrollOffsetKey: PreferenceKey {
