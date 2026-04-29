@@ -12,6 +12,7 @@ struct HybridDetailView: View {
     @State private var downPaymentPercent: Double = 20
     @State private var focusedPhotoIndex: Int? = nil
     @State private var focusVisible: Bool = false
+    @Namespace private var photoNamespace
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
@@ -77,6 +78,11 @@ struct HybridDetailView: View {
 
             if focusedPhotoIndex != nil {
                 focusOverlay
+                    .overlay(alignment: .bottomTrailing) {
+                        GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                            .padding(Theme.Spacing.md)
+                            .padding(.bottom, Theme.Spacing.md)
+                    }
             }
         }
         .ignoresSafeArea()
@@ -87,6 +93,7 @@ struct HybridDetailView: View {
                         .padding(Theme.Spacing.md)
                 }
                 .presentationDetents([.height(collapsedPeekHeight), .large])
+                .presentationBackground(.thickMaterial)
                 .presentationBackgroundInteraction(.enabled(upThrough: .height(collapsedPeekHeight)))
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled()
@@ -172,6 +179,7 @@ struct HybridDetailView: View {
                                 .allowsHitTesting(false)
                             }
                             .clipped()
+                            .matchedGeometryEffect(id: "photo-\(index)", in: photoNamespace, isSource: focusedPhotoIndex != index)
                     }
                     .buttonStyle(.plain)
                 }
@@ -202,7 +210,7 @@ struct HybridDetailView: View {
                 Color.clear.frame(height: 100)
             }
             .padding(.horizontal, Theme.Spacing.md)
-            .padding(.top, Theme.Spacing.sm)
+            .padding(.top, Theme.Spacing.xxl)
         }
         .scrollIndicators(.hidden)
     }
@@ -231,11 +239,11 @@ struct HybridDetailView: View {
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .matchedGeometryEffect(id: "photo-\(i)", in: photoNamespace, isSource: i == index)
                         .tag(i)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .transition(.opacity)
             }
         }
         .allowsHitTesting(focusVisible)
