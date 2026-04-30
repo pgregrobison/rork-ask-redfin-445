@@ -1,13 +1,12 @@
-# Persistent Ask Redfin input bar on hybrid detail page
+# Restore James-style detail sections in hybrid variant
 
-## What changes
+**The problem**
 
-Rebuild the hybrid home detail page to use the same in-page sheet behavior as the current detail page style. This unlocks a floating "Ask anything…" input bar pinned to the bottom that stays visible no matter what — whether you're scrolling photos, expanding the detail sheet, or viewing a photo fullscreen.
+In the hybrid variant, the detail sheet sits over a translucent thick-material background with the photo scroll showing through behind it. This causes the section cards, buttons, illustrations, and icons to look washed out, blended into the photos, and visually broken — instead of looking like the clean, opaque, white-card sections in the James variant.
 
-## Behavior
+**What I'll change**
 
-- **Sheet** — The detail sheet on the hybrid page now drags between a small peek (showing price, address, beds/baths) and fully expanded, with a drag handle and snap-to-position, just like the current detail page.
-- **Persistent Ask input** — A capsule "Ask anything…" bar with a sparkle icon sits fixed at the bottom of the screen across all states: photo scroll, peek sheet, expanded sheet, and fullscreen photo view. Tapping it opens Ask Redfin.
-- **Photo fullscreen** — When a photo is tapped, the fullscreen viewer appears with the Ask input still floating above it. Tapping the input still opens Ask Redfin.
-- **Accessory variant** — In the Accessory variant the in-page input stays hidden (the bottom tab accessory handles it instead), matching today's behavior. The "Request showing" button is also removed in that variant, as before.
-- **Request showing** — In non-Accessory variants, "Request showing" stays inside the scrolling sheet content (not as a sticky footer), so the Ask input is the only persistent bottom element.
+- Switch the hybrid detail sheet background from translucent thick material to a solid app background, so the sections sit on a clean surface — exactly like the James detail page.
+- Ensure section spacing, padding, and the price/address header match the James layout precisely (top padding above the price, consistent horizontal padding, container spacing).
+- Keep all existing hybrid behavior intact: the sheet still slides up from collapsed peek to expanded, dragging still works, the photo scroll still lives behind the collapsed peek, and the floating Ask Redfin input still appears when enabled.
+- Verify the rate summary card, "Request showing" button, property details grid, feature highlights, payment breakdown, "Take a tour" illustration, "Ask Redfin" panel, and Lifestyle grid all render with the same styling, icons, and buttons as the James variant.

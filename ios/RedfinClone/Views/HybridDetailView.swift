@@ -215,7 +215,7 @@ struct HybridDetailView: View {
             sheetContent
         }
         .frame(maxWidth: .infinity)
-        .background(.thickMaterial)
+        .background(Theme.Colors.background)
         .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
         .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
