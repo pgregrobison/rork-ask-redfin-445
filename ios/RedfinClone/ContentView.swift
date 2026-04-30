@@ -191,41 +191,55 @@ struct ContentView: View {
 
     @available(iOS 26.0, *)
     private var accessoryLayout: some View {
-        NavigationStack(path: $navigationPath) {
-            TabView(selection: $selectedTab) {
-                Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+        TabView(selection: $selectedTab) {
+            Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+                NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive)
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
+                    }
                 }
-                Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+            }
+            Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+                NavigationStack {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
                         navigateToListing(listing)
                     }
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
+                    }
                 }
-                Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+            }
+            Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+                NavigationStack {
                     SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: { showDebugPanel = true }) { listing in
                         navigateToListing(listing)
                     }
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
+                    }
                 }
-                Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+            }
+            Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+                NavigationStack {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
                 }
-                Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+            }
+            Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+                NavigationStack {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true })
                 }
             }
-            .tabBarMinimizeBehavior(.onScrollDown)
-            .tabViewBottomAccessory {
-                AskRedfinAccessoryBar {
-                    viewModel.showChat = true
-                }
-            }
-            .ignoresSafeArea(.keyboard)
-            .navigationDestination(for: Listing.self) { listing in
-                listingDetail(for: listing)
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
+            AskRedfinAccessoryBar {
+                viewModel.showChat = true
             }
         }
+        .ignoresSafeArea(.keyboard)
     }
 
     @ViewBuilder
