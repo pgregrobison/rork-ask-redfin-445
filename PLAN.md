@@ -1,19 +1,13 @@
-# Add "Global entrypoint" debug toggle (App nav / Accessory)
+# Persistent Ask Redfin input bar on hybrid detail page
 
-**Goals**
+## What changes
 
-- Add a debug menu option "Global entrypoint" with two values:
-  - **App nav** — current behavior (custom 4-tab bar with Ask Redfin FAB).
-  - **Accessory** — iOS 26 native `TabView` with 5 tabs (Find / For You / Saved / My Home / My Redfin) and `.tabViewBottomAccessory` hosting an Ask Redfin input bar styled identically to the chat sheet's input bar. Tab bar uses `.tabBarMinimizeBehavior(.onScrollDown)` so the bar collapses on scroll and the accessory moves inline next to the minimized tab.
+Rebuild the hybrid home detail page to use the same in-page sheet behavior as the current detail page style. This unlocks a floating "Ask anything…" input bar pinned to the bottom that stays visible no matter what — whether you're scrolling photos, expanding the detail sheet, or viewing a photo fullscreen.
 
-**Approach**
+## Behavior
 
-- [x] Add `GlobalEntrypoint` enum + persisted property to `DebugSettings`.
-- [x] Add `.myRedfin` case to `AppTab` (icon `person.crop.circle`).
-- [x] Add Global entrypoint section to `DebugPanelView`.
-- [x] Create `MyRedfinView.swift` — simple profile-style stub with debug entry point.
-- [x] Create `AskRedfinAccessoryBar.swift` — input bar matching the chat sheet style; tap routes to `viewModel.showChat = true`.
-- [x] In `ContentView`, branch on `globalEntrypoint`:
-  - `.appNav` → existing layout.
-  - `.accessory` (iOS 26 only) → native `TabView` with 5 `Tab`s, `.tabBarMinimizeBehavior(.onScrollDown)`, `.tabViewBottomAccessory { AskRedfinAccessoryBar(...) }`. No floating FAB.
-- [x] Build succeeds.
+- **Sheet** — The detail sheet on the hybrid page now drags between a small peek (showing price, address, beds/baths) and fully expanded, with a drag handle and snap-to-position, just like the current detail page.
+- **Persistent Ask input** — A capsule "Ask anything…" bar with a sparkle icon sits fixed at the bottom of the screen across all states: photo scroll, peek sheet, expanded sheet, and fullscreen photo view. Tapping it opens Ask Redfin.
+- **Photo fullscreen** — When a photo is tapped, the fullscreen viewer appears with the Ask input still floating above it. Tapping the input still opens Ask Redfin.
+- **Accessory variant** — In the Accessory variant the in-page input stays hidden (the bottom tab accessory handles it instead), matching today's behavior. The "Request showing" button is also removed in that variant, as before.
+- **Request showing** — In non-Accessory variants, "Request showing" stays inside the scrolling sheet content (not as a sticky footer), so the Ask input is the only persistent bottom element.
