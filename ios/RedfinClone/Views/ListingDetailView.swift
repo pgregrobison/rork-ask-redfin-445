@@ -51,7 +51,9 @@ struct ListingDetailView: View {
                     focusOverlay
                 }
 
-                stickyFooter
+                if !hideAskRedfinFAB {
+                    stickyFooter
+                }
             }
         }
         .ignoresSafeArea()

@@ -174,7 +174,9 @@ struct HybridDetailView: View {
                 priceAndAddressSection
 
                 rateSummarySection
-                requestShowingSection
+                if !hideAskRedfinFAB {
+                    requestShowingSection
+                }
 
                 sectionContainer { propertyDetailsContent }
                 sectionContainer { featureAndDescriptionContent }

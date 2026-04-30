@@ -201,7 +201,7 @@ struct ContentView: View {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive)
-                    .toolbarVisibility(shouldHideTabBarForMapPan ? .hidden : .automatic, for: .tabBar)
+                    .toolbarVisibility(shouldHideAccessoryTabBar ? .hidden : .automatic, for: .tabBar)
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -341,6 +341,14 @@ struct ContentView: View {
             && !viewModel.showListView
             && navigationPath.isEmpty
             && viewModel.isMapInteracting
+    }
+
+    private var shouldHideAccessoryTabBar: Bool {
+        if shouldHideTabBarForMapPan { return true }
+        return selectedTab == .find
+            && !viewModel.showListView
+            && navigationPath.isEmpty
+            && viewModel.isCardVisible
     }
 
     private func navigateToListing(_ listing: Listing) {

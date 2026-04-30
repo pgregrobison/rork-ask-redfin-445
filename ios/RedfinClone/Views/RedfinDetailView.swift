@@ -248,7 +248,9 @@ struct RedfinDetailView: View {
 
             rateSummarySection
 
-            requestShowingSection
+            if !hideAskRedfinFAB {
+                requestShowingSection
+            }
 
             sectionContainer {
                 propertyDetailsContent
