@@ -240,12 +240,10 @@ struct AskRedfinView: View {
                 .frame(minHeight: 24)
                 .lineLimit(1...4)
                 .focused($isInputFocused)
-                .onAppear {
+                .task {
                     if chatViewModel.focusInputOnAppear {
                         chatViewModel.focusInputOnAppear = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                            isInputFocused = true
-                        }
+                        isInputFocused = true
                     }
                 }
                 .disabled(chatViewModel.isVoiceModeActive)
