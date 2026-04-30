@@ -12,29 +12,11 @@ struct HybridDetailView: View {
     @State private var showFullDescription: Bool = false
     @State private var downPaymentPercent: Double = 20
     @State private var focusedPhoto: FocusedPhoto?
-    @State private var sheetOffset: CGFloat = 0
-    @State private var sheetSnap: HybridSheetSnap = .collapsed
-    @State private var dragStartOffset: CGFloat = 0
-    @State private var scrolledToTop: Bool = true
     @Namespace private var photoNamespace
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
     private let collapsedPeekHeight: CGFloat = 220
-
-    private var safeAreaTop: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.top ?? 0
-    }
-
-    private var sheetTopStop: CGFloat {
-        safeAreaTop + 52 + 8
-    }
-
-    private var maxSheetTravel: CGFloat {
-        UIScreen.main.bounds.height - sheetTopStop - collapsedPeekHeight
-    }
 
     private var monthlyPayment: Int {
         let principal = Double(listing.price) * (1.0 - downPaymentPercent / 100.0)
@@ -90,54 +72,6 @@ struct HybridDetailView: View {
     }
 
     var body: some View {
-        Group {
-            if hideAskRedfinFAB {
-                accessoryModeBody
-            } else {
-                sheetModeBody
-            }
-        }
-        .fullScreenCover(item: $focusedPhoto) { photo in
-                PhotoFocusView(
-                    listing: listing,
-                    initialIndex: photo.id,
-                    namespace: photoNamespace,
-                    hideAskRedfinFAB: hideAskRedfinFAB,
-                    onAskRedfin: onAskRedfin
-                )
-                .navigationTransition(.zoom(sourceID: photo.id, in: photoNamespace))
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(useZoomTransition)
-        .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if useZoomTransition {
-                        Button { dismiss() } label: {
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        }
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { onToggleSave() } label: {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                            .contentTransition(.symbolEffect(.replace))
-                            .foregroundStyle(isSaved ? .red : .primary)
-                    }
-                    .sensoryFeedback(.selection, trigger: isSaved)
-                }
-            ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: listing.shareText) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                        .foregroundStyle(.primary)
-                }
-            }
-        }
-    }
-
-    private var sheetModeBody: some View {
         photoScroll
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
@@ -156,70 +90,43 @@ struct HybridDetailView: View {
                     .presentationDragIndicator(.visible)
                     .interactiveDismissDisabled()
             }
-    }
-
-    private var accessoryModeBody: some View {
-        GeometryReader { geo in
-            ZStack {
-                photoScroll
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                detailSheet(in: geo)
+            .fullScreenCover(item: $focusedPhoto) { photo in
+                PhotoFocusView(
+                    listing: listing,
+                    initialIndex: photo.id,
+                    namespace: photoNamespace,
+                    hideAskRedfinFAB: hideAskRedfinFAB,
+                    onAskRedfin: onAskRedfin
+                )
+                .navigationTransition(.zoom(sourceID: photo.id, in: photoNamespace))
             }
-        }
-        .ignoresSafeArea()
-        .background(Theme.Colors.background)
-    }
-
-    private func detailSheet(in geo: GeometryProxy) -> some View {
-        let screenH = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
-
-        return VStack(spacing: 0) {
-            sheetDragHandle
-            sheetContent
-        }
-        .frame(maxWidth: .infinity)
-        .background(.thickMaterial)
-        .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
-        .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
-        .offset(y: screenH - collapsedPeekHeight - sheetOffset)
-        .gesture(sheetDrag)
-    }
-
-    private var sheetDragHandle: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(Color(.systemGray3))
-                .frame(width: 36, height: 5)
-                .padding(.top, Theme.Spacing.xs + 2)
-                .padding(.bottom, Theme.Spacing.sm)
-        }
-        .frame(maxWidth: .infinity)
-        .contentShape(Rectangle())
-    }
-
-    private var sheetDrag: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                let translation = -value.translation.height
-                let newOffset = dragStartOffset + translation
-                sheetOffset = max(0, min(maxSheetTravel, newOffset))
-            }
-            .onEnded { value in
-                let velocity = -value.predictedEndTranslation.height / max(1, abs(value.translation.height)) * abs(value.translation.height)
-                let projected = sheetOffset + velocity * 0.2
-                let midPoint = maxSheetTravel * 0.4
-
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                    if projected > midPoint {
-                        sheetOffset = maxSheetTravel
-                        sheetSnap = .expanded
-                    } else {
-                        sheetOffset = 0
-                        sheetSnap = .collapsed
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(useZoomTransition)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if useZoomTransition {
+                        Button { dismiss() } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        }
                     }
                 }
-                dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { onToggleSave() } label: {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .contentTransition(.symbolEffect(.replace))
+                            .foregroundStyle(isSaved ? .red : .primary)
+                    }
+                    .sensoryFeedback(.selection, trigger: isSaved)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: listing.shareText) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
+                }
             }
     }
 
@@ -624,11 +531,6 @@ struct HybridDetailView: View {
 
 struct FocusedPhoto: Identifiable, Hashable {
     let id: Int
-}
-
-private enum HybridSheetSnap {
-    case collapsed
-    case expanded
 }
 
 private struct PhotoFocusView: View {
