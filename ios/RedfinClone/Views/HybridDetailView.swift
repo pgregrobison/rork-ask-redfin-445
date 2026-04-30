@@ -212,6 +212,7 @@ struct HybridDetailView: View {
 
         return VStack(spacing: 0) {
             sheetDragHandle
+                .gesture(sheetDrag)
             sheetContent
         }
         .frame(maxWidth: .infinity)
@@ -219,7 +220,6 @@ struct HybridDetailView: View {
         .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
         .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
-        .gesture(sheetDrag)
     }
 
     private var sheetDragHandle: some View {
@@ -231,6 +231,7 @@ struct HybridDetailView: View {
                 .padding(.bottom, Theme.Spacing.sm)
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, Theme.Spacing.lg)
         .contentShape(Rectangle())
     }
 
@@ -291,15 +292,15 @@ struct HybridDetailView: View {
         .scrollIndicators(.hidden)
         .simultaneousGesture(
             sheetSnap == .expanded && scrolledToTop ?
-            DragGesture(minimumDistance: 10)
+            DragGesture(minimumDistance: 20)
                 .onChanged { value in
                     guard value.translation.height > 0 else { return }
                     let progress = min(value.translation.height / maxSheetTravel, 1.0)
                     sheetOffset = maxSheetTravel * (1.0 - progress)
                 }
                 .onEnded { value in
-                    let threshold: CGFloat = 80
-                    if value.translation.height > threshold || value.predictedEndTranslation.height > 200 {
+                    let threshold: CGFloat = 60
+                    if value.translation.height > threshold || value.predictedEndTranslation.height > 150 {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                             sheetOffset = 0
                             sheetSnap = .collapsed
