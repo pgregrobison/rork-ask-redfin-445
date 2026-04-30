@@ -34,6 +34,9 @@ struct FindMapView: View {
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .mapControls { }
+            .onMapCameraChange(frequency: .continuous) { _ in
+                viewModel.noteMapCameraChanging()
+            }
             .onMapCameraChange(frequency: .onEnd) { context in
                 viewModel.persistMapRegion(context.region)
                 viewModel.updateLocationName(for: context.region)

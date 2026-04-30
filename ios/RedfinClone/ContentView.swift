@@ -197,6 +197,7 @@ struct ContentView: View {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive)
+                    .toolbarVisibility(shouldHideTabBarForMapPan ? .hidden : .automatic, for: .tabBar)
                 }
                 Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
@@ -309,6 +310,13 @@ struct ContentView: View {
         debugSettings.searchBehavior == .mapFocus
             && selectedTab == .find
             && !viewModel.showListView
+    }
+
+    private var shouldHideTabBarForMapPan: Bool {
+        selectedTab == .find
+            && !viewModel.showListView
+            && navigationPath.isEmpty
+            && viewModel.isMapInteracting
     }
 
     private func navigateToListing(_ listing: Listing) {

@@ -21,6 +21,8 @@ class ListingsViewModel {
     var selectedListing: Listing?
     private(set) var dismissingListing: Listing?
     var isCardVisible: Bool = false
+    var isMapInteracting: Bool = false
+    private var mapInteractionIdleTask: Task<Void, Never>?
     private var dismissTask: Task<Void, Never>?
     var sortOption: SortOption = .recommended
     var showListView: Bool = false
@@ -186,7 +188,28 @@ class ListingsViewModel {
     }
 
     var justListed: [Listing] {
-        listings.filter { $0.daysOnMarket <= 14 }.sorted { $0.daysOnMarket < $1.daysOnMarket }
+        listings.filter { $0.daysOnMarket <= 14 && $0.daysOnMarket > 0 }.sorted { $0.daysOnMarket < $1.daysOnMarket }
+    }
+
+    var luxuryHomes: [Listing] {
+        listings.filter { $0.price >= 2_000_000 }.sorted { $0.price > $1.price }
+    }
+
+    var bestValueHomes: [Listing] {
+        listings.filter { $0.sqft > 0 }.sorted { $0.pricePerSqFt < $1.pricePerSqFt }.prefix(8).map { $0 }
+    }
+
+    var recentlyReducedHomes: [Listing] {
+        listings.filter { $0.daysOnMarket >= 21 }.sorted { $0.daysOnMarket > $1.daysOnMarket }.prefix(8).map { $0 }
+    }
+
+    var comingSoonHomes: [Listing] {
+        listings.filter { $0.isCompassComingSoon || $0.daysOnMarket == 0 }
+    }
+
+    var openHousesThisWeekend: [Listing] {
+        let pool = listings.filter { $0.daysOnMarket > 0 }
+        return Array(pool.sorted { ($0.id.hashValue ^ 0x5f3759df) < ($1.id.hashValue ^ 0x5f3759df) }.prefix(6))
     }
 
     var savedListings: [Listing] {
@@ -343,6 +366,25 @@ class ListingsViewModel {
             currentCenter = region.center
         }
         locationService.isTrackingUser = false
+    }
+
+    func noteMapCameraChanging() {
+        guard !isAnimatingCamera else { return }
+        if !isMapInteracting {
+            withAnimation(.easeInOut(duration: 0.22)) {
+                isMapInteracting = true
+            }
+        }
+        mapInteractionIdleTask?.cancel()
+        mapInteractionIdleTask = Task {
+            try? await Task.sleep(for: .milliseconds(450))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 0.28)) {
+                    self.isMapInteracting = false
+                }
+            }
+        }
     }
 
     private func animateCameraEaseInOut(from startRegion: MKCoordinateRegion, to endRegion: MKCoordinateRegion, duration: Double) {
