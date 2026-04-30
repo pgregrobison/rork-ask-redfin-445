@@ -294,12 +294,14 @@ struct ContentView: View {
 
     @ViewBuilder
     private func detailView(for listing: Listing) -> some View {
+        let hideFAB = debugSettings.globalEntrypoint == .accessory
         switch debugSettings.detailPageStyle {
         case .current:
             ListingDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
                 useZoomTransition: debugSettings.cardTransition == .zoom,
+                hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )
@@ -308,6 +310,7 @@ struct ContentView: View {
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
                 useZoomTransition: debugSettings.cardTransition == .zoom,
+                hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )
@@ -316,6 +319,7 @@ struct ContentView: View {
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
                 useZoomTransition: debugSettings.cardTransition == .zoom,
+                hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
             )

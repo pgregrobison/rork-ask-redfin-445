@@ -5,6 +5,7 @@ struct RedfinDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let useZoomTransition: Bool
+    var hideAskRedfinFAB: Bool = false
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -109,8 +110,10 @@ struct RedfinDetailView: View {
             .scrollIndicators(.hidden)
             .ignoresSafeArea(edges: .top)
 
-            askRedfinFAB
-                .padding(.trailing, Theme.Spacing.md)
+            if !hideAskRedfinFAB {
+                askRedfinFAB
+                    .padding(.trailing, Theme.Spacing.md)
+            }
         }
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)

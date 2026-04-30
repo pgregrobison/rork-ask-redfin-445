@@ -5,6 +5,7 @@ struct ListingDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let useZoomTransition: Bool
+    var hideAskRedfinFAB: Bool = false
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -354,7 +355,9 @@ struct ListingDetailView: View {
         HStack(spacing: Theme.Spacing.sm) {
             requestShowingButton
 
-            askRedfinButton
+            if !hideAskRedfinFAB {
+                askRedfinButton
+            }
         }
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))

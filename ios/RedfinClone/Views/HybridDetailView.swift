@@ -5,6 +5,7 @@ struct HybridDetailView: View {
     let listing: Listing
     let isSaved: Bool
     let useZoomTransition: Bool
+    var hideAskRedfinFAB: Bool = false
     let onToggleSave: () -> Void
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -78,8 +79,10 @@ struct HybridDetailView: View {
             .sheet(isPresented: .constant(true)) {
                 sheetContent
                     .overlay(alignment: .bottomTrailing) {
-                        GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                            .padding(Theme.Spacing.md)
+                        if !hideAskRedfinFAB {
+                            GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                                .padding(Theme.Spacing.md)
+                        }
                     }
                     .presentationDetents([.height(collapsedPeekHeight), .large])
                     .presentationBackground(.thickMaterial)
@@ -92,6 +95,7 @@ struct HybridDetailView: View {
                     listing: listing,
                     initialIndex: photo.id,
                     namespace: photoNamespace,
+                    hideAskRedfinFAB: hideAskRedfinFAB,
                     onAskRedfin: onAskRedfin
                 )
                 .navigationTransition(.zoom(sourceID: photo.id, in: photoNamespace))
@@ -531,14 +535,16 @@ private struct PhotoFocusView: View {
     let listing: Listing
     let initialIndex: Int
     let namespace: Namespace.ID
+    let hideAskRedfinFAB: Bool
     let onAskRedfin: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var index: Int
 
-    init(listing: Listing, initialIndex: Int, namespace: Namespace.ID, onAskRedfin: @escaping () -> Void) {
+    init(listing: Listing, initialIndex: Int, namespace: Namespace.ID, hideAskRedfinFAB: Bool = false, onAskRedfin: @escaping () -> Void) {
         self.listing = listing
         self.initialIndex = initialIndex
         self.namespace = namespace
+        self.hideAskRedfinFAB = hideAskRedfinFAB
         self.onAskRedfin = onAskRedfin
         self._index = State(initialValue: initialIndex)
     }
@@ -566,9 +572,11 @@ private struct PhotoFocusView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
             .overlay(alignment: .bottomTrailing) {
-                GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
-                    .padding(Theme.Spacing.md)
-                    .padding(.bottom, Theme.Spacing.md)
+                if !hideAskRedfinFAB {
+                    GlassActionButton(icon: "sparkle", action: onAskRedfin, size: 52)
+                        .padding(Theme.Spacing.md)
+                        .padding(.bottom, Theme.Spacing.md)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
