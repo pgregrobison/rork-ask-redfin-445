@@ -200,8 +200,10 @@ struct ContentView: View {
                 NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
-                    }, showShimmer: mapShimmerActive)
-                    .toolbarVisibility(shouldHideAccessoryTabBar ? .hidden : .automatic, for: .tabBar)
+                    }, showShimmer: mapShimmerActive, accessoryMode: true)
+                    .background {
+                        AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
+                    }
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -343,12 +345,11 @@ struct ContentView: View {
             && viewModel.isMapInteracting
     }
 
-    private var shouldHideAccessoryTabBar: Bool {
-        if shouldHideTabBarForMapPan { return true }
-        return selectedTab == .find
-            && !viewModel.showListView
-            && navigationPath.isEmpty
-            && viewModel.isCardVisible
+    private var shouldMinimizeAccessory: Bool {
+        guard selectedTab == .find,
+              !viewModel.showListView,
+              navigationPath.isEmpty else { return false }
+        return viewModel.isCardVisible || viewModel.isMapInteracting
     }
 
     private func navigateToListing(_ listing: Listing) {

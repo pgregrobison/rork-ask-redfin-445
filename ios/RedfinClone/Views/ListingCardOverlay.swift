@@ -8,6 +8,7 @@ struct ListingCardOverlay: View {
     let onToggleSave: () -> Void
     let onTap: () -> Void
     var zoomNamespace: Namespace.ID? = nil
+    var extendsToBottomEdge: Bool = true
     @State private var currentPhotoIndex: Int = 0
 
     private let cardInset: CGFloat = Theme.Spacing.xs
@@ -36,10 +37,10 @@ struct ListingCardOverlay: View {
                 .shadow(color: Theme.Shadow.overlayColor, radius: Theme.Shadow.overlayRadius, y: Theme.Shadow.overlayY)
                 .matchedTransitionSourceIfAvailable(id: listing.id, in: zoomNamespace)
                 .padding(.horizontal, cardInset)
-                .padding(.bottom, max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0))
+                .padding(.bottom, extendsToBottomEdge ? max(deviceEdgeInset - geo.safeAreaInsets.bottom, 0) : deviceEdgeInset)
             }
         }
-        .ignoresSafeArea(edges: .bottom)
+        .ignoresSafeArea(edges: extendsToBottomEdge ? .bottom : [])
     }
 
     private var photoCarousel: some View {

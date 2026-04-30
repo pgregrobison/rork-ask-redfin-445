@@ -6,6 +6,7 @@ struct FindMapView: View {
     var zoomNamespace: Namespace.ID
     let onListingTap: (Listing) -> Void
     var showShimmer: Bool = false
+    var accessoryMode: Bool = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -65,7 +66,8 @@ struct FindMapView: View {
                     onDismiss: { viewModel.dismissOverlay() },
                     onToggleSave: { viewModel.toggleSaved(listing) },
                     onTap: { onListingTap(listing) },
-                    zoomNamespace: zoomNamespace
+                    zoomNamespace: zoomNamespace,
+                    extendsToBottomEdge: !accessoryMode
                 )
                 .compositingGroup()
                 .offset(y: viewModel.isCardVisible ? 0 : UIScreen.main.bounds.height)

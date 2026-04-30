@@ -8,13 +8,14 @@ struct FindView: View {
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
     var showShimmer: Bool = false
+    var accessoryMode: Bool = false
 
     var body: some View {
         Group {
             if viewModel.showListView {
                 FindListView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap)
             } else {
-                FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap, showShimmer: showShimmer)
+                FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap, showShimmer: showShimmer, accessoryMode: accessoryMode)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
