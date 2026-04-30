@@ -16,35 +16,12 @@ struct ContentView: View {
     @Namespace private var zoomNamespace
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ZStack(alignment: .bottom) {
-                tabContent
-
-                if showTabBar {
-                    CustomTabBar(
-                        selectedTab: $selectedTab,
-                        onFABTap: {
-                            viewModel.showChat = true
-                        }
-                    )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+        rootLayout
+            .overlay(alignment: .top) {
+                if selectedTab == .find && navigationPath.isEmpty {
+                    FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
                 }
             }
-            .ignoresSafeArea(.keyboard)
-            .onChange(of: viewModel.isCardVisible) { _, visible in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    showTabBar = !visible
-                }
-            }
-            .navigationDestination(for: Listing.self) { listing in
-                listingDetail(for: listing)
-            }
-        }
-        .overlay(alignment: .top) {
-            if selectedTab == .find && navigationPath.isEmpty {
-                FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
-            }
-        }
         .tint(.primary)
         .onAppear {
             viewModel.debugSettings = debugSettings
@@ -168,6 +145,85 @@ struct ContentView: View {
                 } else {
                     viewModel.selectNearestCompassListing(to: nil)
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rootLayout: some View {
+        if useAccessoryLayout, #available(iOS 26.0, *) {
+            accessoryLayout
+        } else {
+            appNavLayout
+        }
+    }
+
+    private var useAccessoryLayout: Bool {
+        debugSettings.globalEntrypoint == .accessory
+    }
+
+    private var appNavLayout: some View {
+        NavigationStack(path: $navigationPath) {
+            ZStack(alignment: .bottom) {
+                tabContent
+
+                if showTabBar {
+                    CustomTabBar(
+                        selectedTab: $selectedTab,
+                        onFABTap: {
+                            viewModel.showChat = true
+                        }
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .ignoresSafeArea(.keyboard)
+            .onChange(of: viewModel.isCardVisible) { _, visible in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    showTabBar = !visible
+                }
+            }
+            .navigationDestination(for: Listing.self) { listing in
+                listingDetail(for: listing)
+            }
+        }
+    }
+
+    @available(iOS 26.0, *)
+    private var accessoryLayout: some View {
+        NavigationStack(path: $navigationPath) {
+            TabView(selection: $selectedTab) {
+                Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+                    FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
+                        navigateToListing(listing)
+                    }, showShimmer: mapShimmerActive)
+                }
+                Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+                    ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
+                        navigateToListing(listing)
+                    }
+                }
+                Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+                    SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: { showDebugPanel = true }) { listing in
+                        navigateToListing(listing)
+                    }
+                }
+                Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
+                }
+                Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+                    MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true })
+                }
+            }
+            .tabBarMinimizeBehavior(.onScrollDown)
+            .tabViewBottomAccessory {
+                AskRedfinAccessoryBar {
+                    viewModel.showChat = true
+                }
+            }
+            .ignoresSafeArea(.keyboard)
+            .navigationDestination(for: Listing.self) { listing in
+                listingDetail(for: listing)
             }
         }
     }

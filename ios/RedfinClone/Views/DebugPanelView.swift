@@ -8,6 +8,37 @@ struct DebugPanelView: View {
         NavigationStack {
             List {
                 Section {
+                    ForEach(GlobalEntrypoint.allCases, id: \.self) { option in
+                        Button {
+                            settings.globalEntrypoint = option
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(option.rawValue)
+                                        .font(.body)
+                                        .foregroundStyle(.primary)
+                                    Text(option.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if settings.globalEntrypoint == option {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("Global Entrypoint")
+                } footer: {
+                    Text("Controls how Ask Redfin is surfaced across the app. Accessory requires iOS 26.")
+                }
+
+                Section {
                     ForEach(CardTransitionStyle.allCases, id: \.self) { style in
                         Button {
                             settings.cardTransition = style
@@ -232,6 +263,15 @@ extension SearchBehavior {
         switch self {
         case .default: "Full sheet chat, manual show on map"
         case .mapFocus: "Chat drops to half-sheet on search, pins auto-fit"
+        }
+    }
+}
+
+extension GlobalEntrypoint {
+    var subtitle: String {
+        switch self {
+        case .appNav: "Custom tab bar with Ask Redfin FAB"
+        case .accessory: "Native tab bar with Ask Redfin input accessory (iOS 26)"
         }
     }
 }

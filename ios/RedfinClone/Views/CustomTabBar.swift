@@ -5,6 +5,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
     case forYou = 1
     case saved = 2
     case myHome = 3
+    case myRedfin = 4
 
     var title: String {
         switch self {
@@ -12,6 +13,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
         case .forYou: "For You"
         case .saved: "Saved"
         case .myHome: "My Home"
+        case .myRedfin: "My Redfin"
         }
     }
 
@@ -21,6 +23,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
         case .forYou: "square.stack"
         case .saved: "heart"
         case .myHome: "house"
+        case .myRedfin: "person.crop.circle"
         }
     }
 
@@ -30,6 +33,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
         case .forYou: "square.stack.fill"
         case .saved: "heart.fill"
         case .myHome: "house.fill"
+        case .myRedfin: "person.crop.circle.fill"
         }
     }
 }
@@ -92,7 +96,7 @@ struct CustomTabBar: View {
 
     private var tabPillContent: some View {
         HStack(spacing: 0) {
-            ForEach(AppTab.allCases, id: \.rawValue) { tab in
+            ForEach(AppTab.allCases.filter { $0 != .myRedfin }, id: \.rawValue) { tab in
                 Button {
                     withAnimation(.snappy(duration: 0.25)) {
                         selectedTab = tab

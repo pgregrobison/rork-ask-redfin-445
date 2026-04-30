@@ -21,6 +21,11 @@ nonisolated enum RealisticSyncMode: String, CaseIterable, Codable, Sendable {
     case oneWay = "One-way sync"
 }
 
+nonisolated enum GlobalEntrypoint: String, CaseIterable, Codable, Sendable {
+    case appNav = "App nav"
+    case accessory = "Accessory"
+}
+
 @Observable
 class DebugSettings {
     var cardTransition: CardTransitionStyle {
@@ -41,6 +46,10 @@ class DebugSettings {
 
     var realisticSyncMode: RealisticSyncMode {
         didSet { UserDefaults.standard.set(realisticSyncMode.rawValue, forKey: "debug_realisticSyncMode") }
+    }
+
+    var globalEntrypoint: GlobalEntrypoint {
+        didSet { UserDefaults.standard.set(globalEntrypoint.rawValue, forKey: "debug_globalEntrypoint") }
     }
 
     var panDuration: Double {
@@ -105,6 +114,8 @@ class DebugSettings {
         self.realisticModeEnabled = UserDefaults.standard.object(forKey: "debug_realisticModeEnabled") as? Bool ?? false
         let storedSync = UserDefaults.standard.string(forKey: "debug_realisticSyncMode") ?? ""
         self.realisticSyncMode = RealisticSyncMode(rawValue: storedSync) ?? .bidirectional
+        let storedEntry = UserDefaults.standard.string(forKey: "debug_globalEntrypoint") ?? ""
+        self.globalEntrypoint = GlobalEntrypoint(rawValue: storedEntry) ?? .appNav
 
         let ud = UserDefaults.standard
         self.panDuration = ud.object(forKey: "debug_panDuration") as? Double ?? 0.35

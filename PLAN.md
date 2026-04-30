@@ -1,14 +1,19 @@
-# Global persistent FAB + fix photo zoom transition
+# Add "Global entrypoint" debug toggle (App nav / Accessory)
 
 **Goals**
 
-- Ask Redfin FAB stays anchored in the lower-right corner across every surface (Find, detail page, photo viewer) and stays visible even when the Hybrid detail sheet is pulled to .large.
-- Tapping a photo on Hybrid detail opens the photo viewer with a proper zoom transition matching the card→detail zoom feel.
-- FAB opens chat from anywhere via existing `viewModel.showChat = true`.
+- Add a debug menu option "Global entrypoint" with two values:
+  - **App nav** — current behavior (custom 4-tab bar with Ask Redfin FAB).
+  - **Accessory** — iOS 26 native `TabView` with 5 tabs (Find / For You / Saved / My Home / My Redfin) and `.tabViewBottomAccessory` hosting an Ask Redfin input bar styled identically to the chat sheet's input bar. Tab bar uses `.tabBarMinimizeBehavior(.onScrollDown)` so the bar collapses on scroll and the accessory moves inline next to the minimized tab.
 
 **Approach**
 
-- Move the Hybrid detail FAB OUT of the parent overlay (which sits behind the sheet) and INTO an overlay on the sheet content itself. Because the sheet always extends to the screen bottom, a `.overlay(alignment: .bottomTrailing)` on the sheet content places the FAB at the screen's bottom-right at every detent, on top of the sheet.
-- Keep the tab-bar FAB as is for Find/other tabs. They share the same position so the FAB feels persistent.
-- Fix the photo button: add `.contentShape(.rect)` for reliable hit-testing and move `.matchedTransitionSource` to the Button itself.
-- Keep `.fullScreenCover(item:)` + `.navigationTransition(.zoom(sourceID:in:))` — this is the supported iOS 18 zoom path.
+- [x] Add `GlobalEntrypoint` enum + persisted property to `DebugSettings`.
+- [x] Add `.myRedfin` case to `AppTab` (icon `person.crop.circle`).
+- [x] Add Global entrypoint section to `DebugPanelView`.
+- [x] Create `MyRedfinView.swift` — simple profile-style stub with debug entry point.
+- [x] Create `AskRedfinAccessoryBar.swift` — input bar matching the chat sheet style; tap routes to `viewModel.showChat = true`.
+- [x] In `ContentView`, branch on `globalEntrypoint`:
+  - `.appNav` → existing layout.
+  - `.accessory` (iOS 26 only) → native `TabView` with 5 `Tab`s, `.tabBarMinimizeBehavior(.onScrollDown)`, `.tabViewBottomAccessory { AskRedfinAccessoryBar(...) }`. No floating FAB.
+- [x] Build succeeds.
