@@ -7,6 +7,10 @@ struct ContentView: View {
     @State private var selectedTab: AppTab = .find
 
     @State private var navigationPath = NavigationPath()
+    @State private var forYouPath = NavigationPath()
+    @State private var savedPath = NavigationPath()
+    @State private var myHomePath = NavigationPath()
+    @State private var myRedfinPath = NavigationPath()
     @State private var showTabBar: Bool = true
     @State private var pendingMapListings: [Listing]?
     @State private var pendingNeighborhoodFocus: [String]?
@@ -191,40 +195,56 @@ struct ContentView: View {
 
     @available(iOS 26.0, *)
     private var accessoryLayout: some View {
-        NavigationStack(path: $navigationPath) {
-            TabView(selection: $selectedTab) {
-                Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+        TabView(selection: $selectedTab) {
+            Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+                NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive)
                     .toolbarVisibility(shouldHideTabBarForMapPan ? .hidden : .automatic, for: .tabBar)
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
+                    }
                 }
-                Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+            }
+            Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+                NavigationStack(path: $forYouPath) {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
-                        navigateToListing(listing)
+                        viewModel.markSeen(listing)
+                        forYouPath.append(listing)
+                    }
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
                     }
                 }
-                Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+            }
+            Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+                NavigationStack(path: $savedPath) {
                     SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: { showDebugPanel = true }) { listing in
-                        navigateToListing(listing)
+                        viewModel.markSeen(listing)
+                        savedPath.append(listing)
+                    }
+                    .navigationDestination(for: Listing.self) { listing in
+                        listingDetail(for: listing)
                     }
                 }
-                Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+            }
+            Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+                NavigationStack(path: $myHomePath) {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
                 }
-                Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+            }
+            Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+                NavigationStack(path: $myRedfinPath) {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true })
                 }
             }
-            .tabBarMinimizeBehavior(.onScrollDown)
-            .tabViewBottomAccessory {
-                AskRedfinAccessoryBar {
-                    chatViewModel.focusInputOnAppear = true
-                    viewModel.showChat = true
-                }
-            }
-            .navigationDestination(for: Listing.self) { listing in
-                listingDetail(for: listing)
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
+            AskRedfinAccessoryBar {
+                chatViewModel.focusInputOnAppear = true
+                viewModel.showChat = true
             }
         }
         .ignoresSafeArea(.keyboard)
