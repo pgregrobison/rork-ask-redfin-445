@@ -36,6 +36,7 @@ class ChatViewModel {
     var searchAddNeighborhoodsJustArrived: Bool = false
     var debugSettings: DebugSettings?
     var currentFindFiltersProvider: (() -> SearchFilters)?
+    var focusInputOnAppear: Bool = false
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"

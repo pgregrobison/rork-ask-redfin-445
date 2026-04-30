@@ -218,6 +218,7 @@ struct ContentView: View {
             .tabBarMinimizeBehavior(.onScrollDown)
             .tabViewBottomAccessory {
                 AskRedfinAccessoryBar {
+                    chatViewModel.focusInputOnAppear = true
                     viewModel.showChat = true
                 }
             }

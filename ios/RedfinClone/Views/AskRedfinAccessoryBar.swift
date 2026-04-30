@@ -19,7 +19,7 @@ struct AskRedfinAccessoryBar: View {
                         .foregroundStyle(.primary)
                     Spacer()
                 }
-                .padding(.leading, placement == .inline ? Theme.Spacing.xs : Theme.Spacing.md)
+                .padding(.leading, Theme.Spacing.md)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
