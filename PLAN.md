@@ -1,29 +1,29 @@
-# Minimize tab bar + accessory on map pan via scroll driver
+# Rebuild detail page sheet so drag and scroll feel natural
 
-**Behavior**
+## Why it feels broken today
 
-- As soon as the user starts panning or zooming the map (in Find tab, map view, no detail page open), the tab bar collapses into its minimized pill and the Ask Redfin accessory shrinks to its compact form — same look as when a home card is shown.
-- The minimized state stays put while the map is being interacted with, and remains minimized after the user lifts their finger.
-- The tab bar + accessory only restore to full size when the user taps a tab bar icon (or otherwise switches context, e.g. opens the list view, opens a detail, or dismisses to the empty map). Tapping the same Find tab again "resets" it back to expanded.
-- Tapping a map pin keeps things minimized (already wired through the home-card path) and the home card sits above the minimized bar.
+The sheet currently runs two gestures at once: the scroll view is trying to scroll the content, and a custom drag is trying to move the sheet. iOS almost always lets the scroll view win, which is why pulling the sheet up, pulling it down, and the scrolled-down handoff all feel unreliable. The drag handle is also a tiny 5pt-tall capsule, which makes it hard to grab on purpose.
 
-**How it works under the hood**
+We'll keep the inline sheet (so it never covers the Ask Redfin input bar), but make it behave like the sheets in Apple Maps and Find My.
 
-- Reuse the existing hidden `AccessoryScrollDriver` ScrollView — that's what drives Apple's `.tabBarMinimizeBehavior(.onScrollDown)` system collapse.
-- Replace its current "snap to top/bottom on a Bool" logic with a small state machine that owns whether the accessory should be **minimized** or **expanded**, and animates the hidden ScrollView's offset accordingly (down to collapse, back to top to expand). This is the most reliable path because it lets the system tab bar follow naturally.
-- Drive that state from three signals already present in the view model:
-  1. `noteMapCameraChanging` (existing) → set state to minimized. Remove the auto-idle reset so it sticks.
-  2. Home card shown (`isCardVisible`) → minimized.
-  3. Tab tap, navigation push, list view toggle, or returning to a clean map → expanded.
-- Add a tiny "tab tapped" hook on the `TabView` selection binding so reselecting Find (or switching tabs) re-expands.
+## What will change for you
 
-**Edge cases handled**
+- **Pulling the sheet up from collapsed**: anywhere on the sheet works — the handle, the address, the price, the whole top area. One smooth motion lifts it to expanded.
+- **Pulling the sheet down from expanded**: when the content is scrolled to the top, swiping down anywhere on the sheet smoothly drags it toward collapsed. Past the midpoint (or with a flick), it snaps closed.
+- **Scrolled down inside the expanded sheet**: swipe down only scrolls the content back up, exactly like a normal page. Once the content reaches the top, continuing to pull down seamlessly hands off and starts dragging the sheet — no lift-and-retry needed.
+- **The drag handle is always grabbable**: even if the content is scrolled down, dragging directly on the handle pulls the sheet down. The handle itself becomes a much larger, easier-to-hit target (about three times taller hit area) while looking the same.
+- **Snappier feel**: lighter haptic when the sheet locks into collapsed or expanded, and the spring is tuned so flicks resolve quickly instead of drifting.
+- **Ask Redfin input stays put**: the floating Ask Redfin bar at the bottom remains visible and untouched in every state — collapsed, dragging, expanded, scrolled, and photo view.
 
-- If a programmatic camera animation runs (fit listings, fit neighborhoods, compass focus), it won't trigger minimize (already gated by `isAnimatingCamera`).
-- Detail page push/pop continues to use its existing show/hide tab bar logic.
-- Non-accessory layout (legacy tab bar) is unaffected.
+## Where it applies
 
-**Out of scope**
+- The Current detail page
+- The Hybrid detail page
 
-- No visual redesign of the minimized tab bar or accessory — only the trigger logic changes.
-- No changes to detail page sheet behavior or Ask Redfin placeholders.
+Both will share the same interaction model so they feel identical.
+
+## How it works under the hood (in plain terms)
+
+Instead of two gestures fighting, the scroll view itself becomes the source of truth. When you pull the content past its top edge, that overscroll is converted into sheet movement. When you flick or release, the sheet snaps to collapsed or expanded based on distance and velocity. The drag handle keeps its own dedicated gesture so it always works, even mid-scroll.
+
+No changes to layout, colors, content, or the Ask Redfin bar.

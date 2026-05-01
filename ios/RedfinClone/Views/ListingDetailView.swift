@@ -16,7 +16,7 @@ struct ListingDetailView: View {
     @State private var dragStartOffset: CGFloat = 0
     @State private var scrolledToTop: Bool = true
     @State private var focusVisible: Bool = false
-    @State private var contentDragMode: ContentDragMode = .none
+    @State private var minScrollOffsetDuringPhase: CGFloat = 0
     @State private var snapFeedback: Int = 0
     @Environment(\.askRedfinContext) private var askRedfinContext
 
@@ -176,20 +176,36 @@ struct ListingDetailView: View {
         .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
         .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
+        .simultaneousGesture(collapsedSheetDrag)
         .sensoryFeedback(.impact(weight: .light), trigger: snapFeedback)
     }
 
     private var sheetDragHandle: some View {
-        VStack(spacing: 0) {
+        ZStack {
+            Color.clear
+                .frame(height: 44)
+                .contentShape(Rectangle())
             Capsule()
                 .fill(Color(.systemGray3))
                 .frame(width: 36, height: 5)
-                .padding(.top, Theme.Spacing.xs + 2)
-                .padding(.bottom, Theme.Spacing.sm)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, Theme.Spacing.lg)
-        .contentShape(Rectangle())
+    }
+
+    // Drag gesture that only activates when the sheet is collapsed,
+    // so any pull-up on the visible peek expands the sheet.
+    private var collapsedSheetDrag: some Gesture {
+        DragGesture(minimumDistance: 6)
+            .onChanged { value in
+                guard sheetSnap == .collapsed else { return }
+                let translation = -value.translation.height
+                let newOffset = dragStartOffset + translation
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                guard sheetSnap == .collapsed else { return }
+                snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
+            }
     }
 
     private var sheetDrag: some Gesture {
@@ -208,8 +224,8 @@ struct ListingDetailView: View {
         let velocityY = predictedY - translationY
         let projectedOffset = sheetOffset - velocityY * 0.2
         let midPoint = maxSheetTravel * 0.5
-        let fastFlickDown = velocityY > 600
-        let fastFlickUp = velocityY < -600
+        let fastFlickDown = velocityY > 500
+        let fastFlickUp = velocityY < -500
 
         let shouldExpand: Bool = {
             if fastFlickUp { return true }
@@ -218,7 +234,7 @@ struct ListingDetailView: View {
         }()
 
         let previousSnap = sheetSnap
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
             if shouldExpand {
                 sheetOffset = maxSheetTravel
                 sheetSnap = .expanded
@@ -231,62 +247,47 @@ struct ListingDetailView: View {
         if sheetSnap != previousSnap { snapFeedback &+= 1 }
     }
 
-    private var contentDrag: some Gesture {
-        DragGesture(minimumDistance: 8)
-            .onChanged { value in
-                if contentDragMode == .none {
-                    if sheetSnap == .collapsed {
-                        contentDragMode = .driveSheet
-                    } else if sheetSnap == .expanded && scrolledToTop && value.translation.height > 0 {
-                        contentDragMode = .driveSheet
-                    } else {
-                        contentDragMode = .scroll
-                    }
-                }
-                guard contentDragMode == .driveSheet else { return }
-                let translation = -value.translation.height
-                let newOffset = dragStartOffset + translation
-                sheetOffset = max(0, min(maxSheetTravel, newOffset))
-            }
-            .onEnded { value in
-                if contentDragMode == .driveSheet {
-                    snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
-                }
-                contentDragMode = .none
-            }
+    private func collapseFromOverscroll() {
+        let previousSnap = sheetSnap
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
+            sheetOffset = 0
+            sheetSnap = .collapsed
+        }
+        dragStartOffset = 0
+        if sheetSnap != previousSnap { snapFeedback &+= 1 }
     }
 
     private var sheetContent: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    Color.clear.frame(height: 0).id("sheetTop")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                headerSection
+                    .padding(.horizontal, Theme.Spacing.lg)
 
-                    headerSection
-                        .padding(.horizontal, Theme.Spacing.lg)
-
-                    if sheetSnap == .expanded {
-                        expandedContent
-                    }
-
-                    Color.clear.frame(height: 100)
+                if sheetSnap == .expanded {
+                    expandedContent
                 }
-                .background(
-                    GeometryReader { inner in
-                        Color.clear.preference(
-                            key: ScrollOffsetKey.self,
-                            value: inner.frame(in: .named("sheetScroll")).minY
-                        )
-                    }
-                )
+
+                Color.clear.frame(height: 100)
             }
-            .coordinateSpace(name: "sheetScroll")
-            .onPreferenceChange(ScrollOffsetKey.self) { value in
-                scrolledToTop = value >= -1
+        }
+        .scrollDisabled(sheetSnap == .collapsed)
+        .scrollIndicators(.hidden)
+        .onScrollGeometryChange(for: CGFloat.self) { geo in
+            geo.contentOffset.y
+        } action: { _, y in
+            scrolledToTop = y <= 1
+            if y < minScrollOffsetDuringPhase {
+                minScrollOffsetDuringPhase = y
             }
-            .scrollDisabled(sheetSnap == .collapsed)
-            .scrollIndicators(.hidden)
-            .simultaneousGesture(contentDrag)
+        }
+        .onScrollPhaseChange { _, phase in
+            if phase == .idle {
+                // Pull-down past threshold at the top hands off to sheet collapse.
+                if sheetSnap == .expanded && minScrollOffsetDuringPhase < -70 {
+                    collapseFromOverscroll()
+                }
+                minScrollOffsetDuringPhase = 0
+            }
         }
     }
 
@@ -632,19 +633,6 @@ struct ListingDetailView: View {
 private enum SheetSnap {
     case collapsed
     case expanded
-}
-
-private enum ContentDragMode {
-    case none
-    case driveSheet
-    case scroll
-}
-
-private struct ScrollOffsetKey: PreferenceKey {
-    nonisolated static let defaultValue: CGFloat = 0
-    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
 }
 
 extension Int: @retroactive Identifiable {

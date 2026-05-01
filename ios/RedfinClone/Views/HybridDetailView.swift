@@ -17,7 +17,7 @@ struct HybridDetailView: View {
     @State private var sheetSnap: HybridSheetSnap = .collapsed
     @State private var dragStartOffset: CGFloat = 0
     @State private var scrolledToTop: Bool = true
-    @State private var contentDragMode: HybridContentDragMode = .none
+    @State private var minScrollOffsetDuringPhase: CGFloat = 0
     @State private var snapFeedback: Int = 0
     @State private var sheetScrollY: CGFloat = 0
     @Environment(\.askRedfinContext) private var askRedfinContext
@@ -225,20 +225,34 @@ struct HybridDetailView: View {
         .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
         .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
+        .simultaneousGesture(collapsedSheetDrag)
         .sensoryFeedback(.impact(weight: .light), trigger: snapFeedback)
     }
 
     private var sheetDragHandle: some View {
-        VStack(spacing: 0) {
+        ZStack {
+            Color.clear
+                .frame(height: 44)
+                .contentShape(Rectangle())
             Capsule()
                 .fill(Color(.systemGray3))
                 .frame(width: 36, height: 5)
-                .padding(.top, Theme.Spacing.xs + 2)
-                .padding(.bottom, Theme.Spacing.sm)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, Theme.Spacing.lg)
-        .contentShape(Rectangle())
+    }
+
+    private var collapsedSheetDrag: some Gesture {
+        DragGesture(minimumDistance: 6)
+            .onChanged { value in
+                guard sheetSnap == .collapsed else { return }
+                let translation = -value.translation.height
+                let newOffset = dragStartOffset + translation
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                guard sheetSnap == .collapsed else { return }
+                snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
+            }
     }
 
     private var sheetDrag: some Gesture {
@@ -257,8 +271,8 @@ struct HybridDetailView: View {
         let velocityY = predictedY - translationY
         let projectedOffset = sheetOffset - velocityY * 0.2
         let midPoint = maxSheetTravel * 0.5
-        let fastFlickDown = velocityY > 600
-        let fastFlickUp = velocityY < -600
+        let fastFlickDown = velocityY > 500
+        let fastFlickUp = velocityY < -500
 
         let shouldExpand: Bool = {
             if fastFlickUp { return true }
@@ -267,7 +281,7 @@ struct HybridDetailView: View {
         }()
 
         let previousSnap = sheetSnap
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
             if shouldExpand {
                 sheetOffset = maxSheetTravel
                 sheetSnap = .expanded
@@ -280,29 +294,14 @@ struct HybridDetailView: View {
         if sheetSnap != previousSnap { snapFeedback &+= 1 }
     }
 
-    private var contentDrag: some Gesture {
-        DragGesture(minimumDistance: 8)
-            .onChanged { value in
-                if contentDragMode == .none {
-                    if sheetSnap == .collapsed {
-                        contentDragMode = .driveSheet
-                    } else if sheetSnap == .expanded && scrolledToTop && value.translation.height > 0 {
-                        contentDragMode = .driveSheet
-                    } else {
-                        contentDragMode = .scroll
-                    }
-                }
-                guard contentDragMode == .driveSheet else { return }
-                let translation = -value.translation.height
-                let newOffset = dragStartOffset + translation
-                sheetOffset = max(0, min(maxSheetTravel, newOffset))
-            }
-            .onEnded { value in
-                if contentDragMode == .driveSheet {
-                    snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
-                }
-                contentDragMode = .none
-            }
+    private func collapseFromOverscroll() {
+        let previousSnap = sheetSnap
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
+            sheetOffset = 0
+            sheetSnap = .collapsed
+        }
+        dragStartOffset = 0
+        if sheetSnap != previousSnap { snapFeedback &+= 1 }
     }
 
     private func updateAskContext() {
@@ -327,8 +326,6 @@ struct HybridDetailView: View {
     private var sheetContent: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Color.clear.frame(height: 0).id("sheetTop")
-
                 priceAndAddressSection
                     .padding(.horizontal, Theme.Spacing.md)
                     .padding(.top, Theme.Spacing.xs)
@@ -339,23 +336,26 @@ struct HybridDetailView: View {
 
                 Color.clear.frame(height: 120)
             }
-            .background(
-                GeometryReader { inner in
-                    Color.clear.preference(
-                        key: HybridScrollOffsetKey.self,
-                        value: inner.frame(in: .named("hybridSheetScroll")).minY
-                    )
-                }
-            )
-        }
-        .coordinateSpace(name: "hybridSheetScroll")
-        .onPreferenceChange(HybridScrollOffsetKey.self) { value in
-            scrolledToTop = value >= -1
-            sheetScrollY = value
         }
         .scrollDisabled(sheetSnap == .collapsed)
         .scrollIndicators(.hidden)
-        .simultaneousGesture(contentDrag)
+        .onScrollGeometryChange(for: CGFloat.self) { geo in
+            geo.contentOffset.y
+        } action: { _, y in
+            scrolledToTop = y <= 1
+            sheetScrollY = -y
+            if y < minScrollOffsetDuringPhase {
+                minScrollOffsetDuringPhase = y
+            }
+        }
+        .onScrollPhaseChange { _, phase in
+            if phase == .idle {
+                if sheetSnap == .expanded && minScrollOffsetDuringPhase < -70 {
+                    collapseFromOverscroll()
+                }
+                minScrollOffsetDuringPhase = 0
+            }
+        }
     }
 
     @ViewBuilder
@@ -747,17 +747,4 @@ struct HybridDetailView: View {
 private enum HybridSheetSnap {
     case collapsed
     case expanded
-}
-
-private enum HybridContentDragMode {
-    case none
-    case driveSheet
-    case scroll
-}
-
-private struct HybridScrollOffsetKey: PreferenceKey {
-    nonisolated static let defaultValue: CGFloat = 0
-    nonisolated static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
 }
