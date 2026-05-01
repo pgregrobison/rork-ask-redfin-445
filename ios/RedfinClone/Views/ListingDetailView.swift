@@ -18,6 +18,7 @@ struct ListingDetailView: View {
     @State private var focusVisible: Bool = false
     @State private var contentDragMode: ContentDragMode = .none
     @State private var snapFeedback: Int = 0
+    @Environment(\.askRedfinContext) private var askRedfinContext
 
     private let collapsedPeekHeight: CGFloat = 220
 
@@ -58,6 +59,15 @@ struct ListingDetailView: View {
                 }
             }
         }
+        .onAppear { askRedfinContext.context = .detailHero }
+        .onChange(of: focusedPhotoIndex) { _, idx in
+            askRedfinContext.context = idx != nil ? .photoFocus : (sheetSnap == .expanded ? .detailFeatures : .detailHero)
+        }
+        .onChange(of: sheetSnap) { _, snap in
+            guard focusedPhotoIndex == nil else { return }
+            askRedfinContext.context = snap == .expanded ? .detailFeatures : .detailHero
+        }
+        .onDisappear { askRedfinContext.context = .default }
         .ignoresSafeArea()
         .background(Theme.Colors.background)
         .navigationBarTitleDisplayMode(.inline)
@@ -359,8 +369,19 @@ struct ListingDetailView: View {
 
             moreSections
                 .padding(.horizontal, Theme.Spacing.lg)
+
+            if hideAskRedfinFAB {
+                inlineRequestShowingButton
+                    .padding(.horizontal, Theme.Spacing.lg)
+                    .padding(.top, Theme.Spacing.lg)
+            }
         }
         .transition(.opacity)
+    }
+
+    private var inlineRequestShowingButton: some View {
+        Button(action: {}) { Text("Request showing") }
+            .buttonStyle(.primary)
     }
 
     // MARK: - Footer

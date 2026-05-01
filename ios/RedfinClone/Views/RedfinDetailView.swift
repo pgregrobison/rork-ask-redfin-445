@@ -15,6 +15,7 @@ struct RedfinDetailView: View {
     @State private var homePrice: String = ""
     @State private var downPaymentPercent: Double = 20
     @State private var selectedMediaTab: Int = 0
+    @Environment(\.askRedfinContext) private var askRedfinContext
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
@@ -89,6 +90,7 @@ struct RedfinDetailView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
+            // attach lifecycle hooks below via modifiers
             ScrollView {
                 VStack(spacing: 0) {
                     heroPhotoCarousel
@@ -106,6 +108,20 @@ struct RedfinDetailView: View {
             .coordinateSpace(name: "redfinScroll")
             .onPreferenceChange(RedfinScrollOffsetKey.self) { value in
                 scrollOffset = value
+                let scrolled = -value
+                let ctx: AskRedfinContextModel.Context
+                if scrolled < photoCarouselHeight - 80 {
+                    ctx = .detailHero
+                } else if scrolled < photoCarouselHeight + 400 {
+                    ctx = .detailPrice
+                } else if scrolled < photoCarouselHeight + 1100 {
+                    ctx = .detailFeatures
+                } else {
+                    ctx = .detailLifestyle
+                }
+                if askRedfinContext.context != ctx {
+                    askRedfinContext.context = ctx
+                }
             }
             .scrollIndicators(.hidden)
             .ignoresSafeArea(edges: .top)
@@ -116,6 +132,8 @@ struct RedfinDetailView: View {
             }
         }
         .background(Theme.Colors.background)
+        .onAppear { askRedfinContext.context = .detailHero }
+        .onDisappear { askRedfinContext.context = .default }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(useZoomTransition)
         .toolbarBackground(scrollOffset < -(photoCarouselHeight - 100) ? .visible : .hidden, for: .navigationBar)

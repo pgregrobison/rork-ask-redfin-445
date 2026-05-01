@@ -19,6 +19,8 @@ struct HybridDetailView: View {
     @State private var scrolledToTop: Bool = true
     @State private var contentDragMode: HybridContentDragMode = .none
     @State private var snapFeedback: Int = 0
+    @State private var sheetScrollY: CGFloat = 0
+    @Environment(\.askRedfinContext) private var askRedfinContext
 
     private let redfinRed = Theme.Colors.brandRed
     private let tourIllustrationURL = "https://r2-pub.rork.com/generated-images/d2e764d4-6e36-4e51-ab3d-a5c3d148f6b5.png"
@@ -108,10 +110,6 @@ struct HybridDetailView: View {
                 if focusedPhotoIndex != nil {
                     focusOverlay
                 }
-
-                if !hideAskRedfinFAB {
-                    stickyAskRedfinBar
-                }
             }
         }
         .ignoresSafeArea()
@@ -163,9 +161,14 @@ struct HybridDetailView: View {
             }
         }
         .toolbarColorScheme(focusedPhotoIndex != nil ? .dark : nil, for: .navigationBar)
+        .onAppear { updateAskContext() }
+        .onChange(of: focusedPhotoIndex) { _, _ in updateAskContext() }
+        .onChange(of: sheetSnap) { _, _ in updateAskContext() }
+        .onChange(of: sheetScrollY) { _, _ in updateAskContext() }
         .onDisappear {
             focusedPhotoIndex = nil
             focusVisible = false
+            askRedfinContext.context = .default
         }
     }
 
@@ -302,6 +305,25 @@ struct HybridDetailView: View {
             }
     }
 
+    private func updateAskContext() {
+        if focusedPhotoIndex != nil {
+            askRedfinContext.context = .photoFocus
+            return
+        }
+        guard sheetSnap == .expanded else {
+            askRedfinContext.context = .detailHero
+            return
+        }
+        let scrolled = -sheetScrollY
+        if scrolled < 280 {
+            askRedfinContext.context = .detailPrice
+        } else if scrolled < 780 {
+            askRedfinContext.context = .detailFeatures
+        } else {
+            askRedfinContext.context = .detailLifestyle
+        }
+    }
+
     private var sheetContent: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -329,6 +351,7 @@ struct HybridDetailView: View {
         .coordinateSpace(name: "hybridSheetScroll")
         .onPreferenceChange(HybridScrollOffsetKey.self) { value in
             scrolledToTop = value >= -1
+            sheetScrollY = value
         }
         .scrollDisabled(sheetSnap == .collapsed)
         .scrollIndicators(.hidden)
@@ -339,9 +362,7 @@ struct HybridDetailView: View {
     private var expandedSections: some View {
         VStack(spacing: Theme.Container.spacing) {
             rateSummarySection
-            if !hideAskRedfinFAB {
-                requestShowingSection
-            }
+            requestShowingSection
 
             sectionContainer { propertyDetailsContent }
             sectionContainer { featureAndDescriptionContent }
@@ -353,47 +374,6 @@ struct HybridDetailView: View {
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.top, Theme.Spacing.lg)
         .transition(.opacity)
-    }
-
-    // MARK: - Sticky Ask Redfin Bar
-
-    private var stickyAskRedfinBar: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            askRedfinInputCapsule
-                .padding(.horizontal, Theme.Spacing.md)
-                .padding(.bottom, max(safeAreaBottom, Theme.Spacing.sm))
-        }
-    }
-
-    private var askRedfinInputCapsule: some View {
-        Button(action: onAskRedfin) {
-            HStack(spacing: Theme.Spacing.sm) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: Theme.ButtonSize.iconSize, weight: .semibold))
-                    .foregroundStyle(.primary)
-                Text("Ask anything...")
-                    .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-            .padding(.horizontal, Theme.Spacing.md)
-            .padding(.vertical, Theme.Spacing.sm + 2)
-            .frame(maxWidth: .infinity)
-            .background {
-                if #available(iOS 26.0, *) {
-                    Capsule().fill(.ultraThinMaterial)
-                } else {
-                    Capsule().fill(.ultraThinMaterial)
-                }
-            }
-            .overlay(
-                Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
-            )
-            .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: 2)
-            .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Focus Photo Overlay

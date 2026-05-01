@@ -9,6 +9,7 @@ struct FindView: View {
     let onListingTap: (Listing) -> Void
     var showShimmer: Bool = false
     var accessoryMode: Bool = false
+    @Environment(\.askRedfinContext) private var askRedfinContext
 
     var body: some View {
         Group {
@@ -18,6 +19,9 @@ struct FindView: View {
                 FindMapView(viewModel: viewModel, zoomNamespace: zoomNamespace, onListingTap: onListingTap, showShimmer: showShimmer, accessoryMode: accessoryMode)
             }
         }
+        .onAppear { updateContext() }
+        .onChange(of: isActive) { _, _ in updateContext() }
+        .onChange(of: viewModel.showListView) { _, _ in updateContext() }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isActive {
@@ -43,6 +47,11 @@ struct FindView: View {
                 }
             }
         }
+    }
+
+    private func updateContext() {
+        guard isActive else { return }
+        askRedfinContext.context = viewModel.showListView ? .default : .map
     }
 
     private var sortMenu: some View {

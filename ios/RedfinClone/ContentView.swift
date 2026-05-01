@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var viewModel = ListingsViewModel()
     @State private var chatViewModel = ChatViewModel()
     @State private var debugSettings = DebugSettings()
+    @State private var askRedfinContext = AskRedfinContextModel()
     @State private var selectedTab: AppTab = .find
 
     @State private var navigationPath = NavigationPath()
@@ -21,6 +22,7 @@ struct ContentView: View {
 
     var body: some View {
         rootLayout
+            .environment(\.askRedfinContext, askRedfinContext)
             .overlay(alignment: .top) {
                 if selectedTab == .find && navigationPath.isEmpty {
                     FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
