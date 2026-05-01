@@ -5,6 +5,7 @@ final class AskRedfinContextModel {
     enum Context: Equatable {
         case `default`
         case map
+        case mapCard
         case detailHero
         case detailPrice
         case detailFeatures
@@ -19,40 +20,48 @@ final class AskRedfinContextModel {
         case .default:
             return [
                 "Ask anything...",
-                "What's a good neighborhood for families?",
-                "Help me compare two homes"
+                "Compare two homes",
+                "Best areas for families?"
             ]
         case .map:
             return [
-                "What's it like living here?",
-                "How are the schools in this area?",
-                "Walkable to coffee shops?"
+                "What's it like here?",
+                "Schools in this area?",
+                "Walkable to coffee?"
+            ]
+        case .mapCard:
+            return [
+                "Tell me about this home",
+                "Why this price?",
+                "What's the catch?",
+                "Compare to nearby homes"
             ]
         case .detailHero:
             return [
                 "Is this priced fairly?",
-                "How long has this been listed?"
+                "How long on market?"
             ]
         case .detailPrice:
             return [
-                "How does this price compare to nearby homes?",
-                "What would my monthly payment look like?"
+                "Price vs. nearby homes?",
+                "Estimate my payment",
+                "Is this a good deal?"
             ]
         case .detailFeatures:
             return [
-                "What stands out about this home?",
-                "Any red flags in the details?"
+                "What stands out here?",
+                "Any red flags?"
             ]
         case .detailLifestyle:
             return [
-                "How are the schools nearby?",
-                "What's the commute like?"
+                "Schools nearby?",
+                "What's the commute?"
             ]
         case .photoFocus:
             return [
-                "What are these countertops made of?",
-                "What style is this kitchen?",
-                "Estimate the cost to redo this room"
+                "What are these counters?",
+                "What style is this?",
+                "Cost to redo this room?"
             ]
         }
     }

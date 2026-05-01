@@ -22,6 +22,7 @@ struct FindView: View {
         .onAppear { updateContext() }
         .onChange(of: isActive) { _, _ in updateContext() }
         .onChange(of: viewModel.showListView) { _, _ in updateContext() }
+        .onChange(of: viewModel.selectedListing?.id) { _, _ in updateContext() }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isActive {
@@ -51,7 +52,11 @@ struct FindView: View {
 
     private func updateContext() {
         guard isActive else { return }
-        askRedfinContext.context = viewModel.showListView ? .default : .map
+        if viewModel.showListView {
+            askRedfinContext.context = .default
+        } else {
+            askRedfinContext.context = viewModel.selectedListing != nil ? .mapCard : .map
+        }
     }
 
     private var sortMenu: some View {
