@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var myHomePath = NavigationPath()
     @State private var myRedfinPath = NavigationPath()
     @State private var showTabBar: Bool = true
+    @State private var stickyMinimized: Bool = false
     @State private var pendingMapListings: [Listing]?
     @State private var pendingNeighborhoodFocus: [String]?
     @State private var showLocationMenu: Bool = false
@@ -197,7 +198,7 @@ struct ContentView: View {
 
     @available(iOS 26.0, *)
     private var accessoryLayout: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: tabSelectionBinding) {
             Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
                 NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
@@ -252,6 +253,18 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(.keyboard)
+        .onChange(of: viewModel.isMapInteracting) { _, interacting in
+            if interacting { stickyMinimized = true }
+        }
+        .onChange(of: viewModel.isCardVisible) { _, visible in
+            if visible { stickyMinimized = true }
+        }
+        .onChange(of: viewModel.showListView) { _, showing in
+            if showing { stickyMinimized = false }
+        }
+        .onChange(of: navigationPath.count) { _, count in
+            if count == 0 { stickyMinimized = false }
+        }
     }
 
     @ViewBuilder
@@ -351,7 +364,18 @@ struct ContentView: View {
         guard selectedTab == .find,
               !viewModel.showListView,
               navigationPath.isEmpty else { return false }
-        return viewModel.isCardVisible || viewModel.isMapInteracting
+        return stickyMinimized
+    }
+
+    @available(iOS 26.0, *)
+    private var tabSelectionBinding: Binding<AppTab> {
+        Binding(
+            get: { selectedTab },
+            set: { newValue in
+                stickyMinimized = false
+                selectedTab = newValue
+            }
+        )
     }
 
     private func navigateToListing(_ listing: Listing) {
