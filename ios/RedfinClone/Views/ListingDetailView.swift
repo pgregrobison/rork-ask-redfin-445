@@ -18,6 +18,7 @@ struct ListingDetailView: View {
     @State private var focusVisible: Bool = false
     @State private var minScrollOffsetDuringPhase: CGFloat = 0
     @State private var snapFeedback: Int = 0
+    @State private var sheetDragActive: Bool = false
     @Environment(\.askRedfinContext) private var askRedfinContext
 
     private let collapsedPeekHeight: CGFloat = 220
@@ -183,7 +184,7 @@ struct ListingDetailView: View {
     private var sheetDragHandle: some View {
         ZStack {
             Color.clear
-                .frame(height: 44)
+                .frame(height: 28)
                 .contentShape(Rectangle())
             Capsule()
                 .fill(Color(.systemGray3))
@@ -247,14 +248,26 @@ struct ListingDetailView: View {
         if sheetSnap != previousSnap { snapFeedback &+= 1 }
     }
 
-    private func collapseFromOverscroll() {
-        let previousSnap = sheetSnap
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
-            sheetOffset = 0
-            sheetSnap = .collapsed
-        }
-        dragStartOffset = 0
-        if sheetSnap != previousSnap { snapFeedback &+= 1 }
+    // Real-time collapse drag: only activates when expanded and the inner
+    // ScrollView is at scroll top, and only on downward drags. Mirrors the
+    // collapsed→expanded pull behavior 1:1.
+    private var expandedContentDrag: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                guard sheetSnap == .expanded, scrolledToTop else { return }
+                if !sheetDragActive {
+                    guard value.translation.height > 4 else { return }
+                    sheetDragActive = true
+                    dragStartOffset = sheetOffset
+                }
+                let newOffset = dragStartOffset - value.translation.height
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                guard sheetDragActive else { return }
+                sheetDragActive = false
+                snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
+            }
     }
 
     private var sheetContent: some View {
@@ -270,25 +283,14 @@ struct ListingDetailView: View {
                 Color.clear.frame(height: 100)
             }
         }
-        .scrollDisabled(sheetSnap == .collapsed)
+        .scrollDisabled(sheetSnap == .collapsed || sheetDragActive)
         .scrollIndicators(.hidden)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.y
         } action: { _, y in
             scrolledToTop = y <= 1
-            if y < minScrollOffsetDuringPhase {
-                minScrollOffsetDuringPhase = y
-            }
         }
-        .onScrollPhaseChange { _, phase in
-            if phase == .idle {
-                // Pull-down past threshold at the top hands off to sheet collapse.
-                if sheetSnap == .expanded && minScrollOffsetDuringPhase < -70 {
-                    collapseFromOverscroll()
-                }
-                minScrollOffsetDuringPhase = 0
-            }
-        }
+        .simultaneousGesture(expandedContentDrag)
     }
 
     // MARK: - Header Section

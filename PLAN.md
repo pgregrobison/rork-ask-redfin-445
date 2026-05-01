@@ -1,29 +1,19 @@
-# Rebuild detail page sheet so drag and scroll feel natural
+# Tighten drag handle and make sheet collapse the true inverse of expand
 
-## Why it feels broken today
+## What's wrong today
+- The grab bar at the top of the detail sheet has a tall 44pt tap area, making it visually heavy.
+- When the sheet is expanded and scrolled to the top, dragging down first tries to scroll the page, then "realizes" you wanted to collapse and snaps — that's the awkward delay you're feeling. It's because the collapse is triggered after you let go, based on overscroll, instead of dragging the sheet in real time.
 
-The sheet currently runs two gestures at once: the scroll view is trying to scroll the content, and a custom drag is trying to move the sheet. iOS almost always lets the scroll view win, which is why pulling the sheet up, pulling it down, and the scrolled-down handoff all feel unreliable. The drag handle is also a tiny 5pt-tall capsule, which makes it hard to grab on purpose.
+## The fix
 
-We'll keep the inline sheet (so it never covers the Ask Redfin input bar), but make it behave like the sheets in Apple Maps and Find My.
+**Slimmer grab bar**
+- Reduce the handle's tap area so the bar itself feels tighter and more refined, while still being easy to grab.
 
-## What will change for you
+**Collapse becomes the exact inverse of expand**
+- From the expanded state, if the content is scrolled to the very top, a downward swipe anywhere on the sheet immediately drags the sheet down in real time (1:1 with your finger), just like a pull-up from collapsed expands it 1:1.
+- Release past the midpoint (or with a fast flick down) snaps to collapsed; otherwise it springs back to expanded.
+- Once any downward drag has passed the handoff threshold, the inner page scroll stays locked for the rest of that gesture so there's no fight between scrolling and dragging.
+- If the page is scrolled even slightly down, a downward swipe only scrolls the content — never drags the sheet. The sheet can only be collapsed by content drag when at scroll top, or by grabbing the handle directly (which always works).
 
-- **Pulling the sheet up from collapsed**: anywhere on the sheet works — the handle, the address, the price, the whole top area. One smooth motion lifts it to expanded.
-- **Pulling the sheet down from expanded**: when the content is scrolled to the top, swiping down anywhere on the sheet smoothly drags it toward collapsed. Past the midpoint (or with a flick), it snaps closed.
-- **Scrolled down inside the expanded sheet**: swipe down only scrolls the content back up, exactly like a normal page. Once the content reaches the top, continuing to pull down seamlessly hands off and starts dragging the sheet — no lift-and-retry needed.
-- **The drag handle is always grabbable**: even if the content is scrolled down, dragging directly on the handle pulls the sheet down. The handle itself becomes a much larger, easier-to-hit target (about three times taller hit area) while looking the same.
-- **Snappier feel**: lighter haptic when the sheet locks into collapsed or expanded, and the spring is tuned so flicks resolve quickly instead of drifting.
-- **Ask Redfin input stays put**: the floating Ask Redfin bar at the bottom remains visible and untouched in every state — collapsed, dragging, expanded, scrolled, and photo view.
-
-## Where it applies
-
-- The Current detail page
-- The Hybrid detail page
-
-Both will share the same interaction model so they feel identical.
-
-## How it works under the hood (in plain terms)
-
-Instead of two gestures fighting, the scroll view itself becomes the source of truth. When you pull the content past its top edge, that overscroll is converted into sheet movement. When you flick or release, the sheet snaps to collapsed or expanded based on distance and velocity. The drag handle keeps its own dedicated gesture so it always works, even mid-scroll.
-
-No changes to layout, colors, content, or the Ask Redfin bar.
+**Result**
+- Pull up → expand. Pull down from the top → collapse. Same feel, same responsiveness, no delay, no double-take.
