@@ -1,19 +1,27 @@
-# Tighten drag handle and make sheet collapse the true inverse of expand
+# Make map pan/zoom minimize the tab bar like list scroll-down
 
-## What's wrong today
-- The grab bar at the top of the detail sheet has a tall 44pt tap area, making it visually heavy.
-- When the sheet is expanded and scrolled to the top, dragging down first tries to scroll the page, then "realizes" you wanted to collapse and snaps — that's the awkward delay you're feeling. It's because the collapse is triggered after you let go, based on overscroll, instead of dragging the sheet in real time.
+## Problem
 
-## The fix
+In the accessory variant, scrolling down on a list view smoothly minimizes the tab bar + Ask Redfin accessory. But panning or zooming the map currently does nothing — the bar stays full-size. The hidden scroll driver we use today isn't being recognized by iOS 26's tab bar minimize behavior because it's marked non-interactive.
 
-**Slimmer grab bar**
-- Reduce the handle's tap area so the bar itself feels tighter and more refined, while still being easy to grab.
+## What will change
 
-**Collapse becomes the exact inverse of expand**
-- From the expanded state, if the content is scrolled to the very top, a downward swipe anywhere on the sheet immediately drags the sheet down in real time (1:1 with your finger), just like a pull-up from collapsed expands it 1:1.
-- Release past the midpoint (or with a fast flick down) snaps to collapsed; otherwise it springs back to expanded.
-- Once any downward drag has passed the handoff threshold, the inner page scroll stays locked for the rest of that gesture so there's no fight between scrolling and dragging.
-- If the page is scrolled even slightly down, a downward swipe only scrolls the content — never drags the sheet. The sheet can only be collapsed by content drag when at scroll top, or by grabbing the handle directly (which always works).
+**Map gestures minimize immediately**
+- Any pan or zoom on the map (the moment the gesture starts) will minimize the tab bar and Ask Redfin pill, exactly matching the scroll-down animation used on list views.
+- The minimize will be driven through a real scroll-geometry signal so iOS animates it natively (smooth, system-matched feel) instead of snapping.
 
-**Result**
-- Pull up → expand. Pull down from the top → collapse. Same feel, same responsiveness, no delay, no double-take.
+**Stays minimized until you tap to restore**
+- Once minimized, the bar stays compact even after the map stops moving — no auto-restore on idle.
+- Tapping the minimized tab bar area or the Ask Redfin accessory pill restores the full-size bar.
+- Switching tabs, opening the list view, opening a listing card, or navigating into a detail page also restores it (existing behavior preserved).
+
+**No change to list view behavior**
+- List views keep their current native scroll-down-to-minimize / scroll-up-to-restore behavior untouched.
+
+## Why it didn't work before
+
+The invisible driver behind the map was both hit-test-disabled and scroll-disabled, so the system never treated it as an active scroll surface and never fired the minimize animation. The fix is to replace it with a properly registered (but visually invisible and touch-passthrough) scroll surface that the system recognizes, and to drive its offset whenever the map reports a camera change.
+
+## Restore tap target
+
+A thin, transparent tap zone will sit over the minimized tab bar / accessory area only while minimized. Tapping it (or the accessory pill itself) brings the bar back to full size with the same native animation.

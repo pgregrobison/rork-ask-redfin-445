@@ -42,6 +42,7 @@ struct ContentView: View {
                 .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $viewModel.showChat, onDismiss: {
+            stickyMinimized = false
             let nbhds = pendingNeighborhoodFocus
             pendingNeighborhoodFocus = nil
             if let listings = pendingMapListings {
@@ -204,8 +205,9 @@ struct ContentView: View {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive, accessoryMode: true)
-                    .background {
+                    .overlay {
                         AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
+                            .allowsHitTesting(false)
                     }
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
@@ -248,6 +250,7 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
             AskRedfinAccessoryBar {
+                stickyMinimized = false
                 chatViewModel.focusInputOnAppear = true
                 viewModel.showChat = true
             }
