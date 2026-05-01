@@ -16,6 +16,8 @@ struct ListingDetailView: View {
     @State private var dragStartOffset: CGFloat = 0
     @State private var scrolledToTop: Bool = true
     @State private var focusVisible: Bool = false
+    @State private var contentDragMode: ContentDragMode = .none
+    @State private var snapFeedback: Int = 0
 
     private let collapsedPeekHeight: CGFloat = 220
 
@@ -164,6 +166,7 @@ struct ListingDetailView: View {
         .clipShape(.rect(topLeadingRadius: Theme.Radius.large, topTrailingRadius: Theme.Radius.large))
         .shadow(color: Theme.Shadow.mediumColor, radius: Theme.Shadow.mediumRadius, y: -5)
         .offset(y: screenH - collapsedPeekHeight - sheetOffset)
+        .sensoryFeedback(.impact(weight: .light), trigger: snapFeedback)
     }
 
     private var sheetDragHandle: some View {
@@ -187,20 +190,59 @@ struct ListingDetailView: View {
                 sheetOffset = max(0, min(maxSheetTravel, newOffset))
             }
             .onEnded { value in
-                let velocity = -value.predictedEndTranslation.height / max(1, abs(value.translation.height)) * abs(value.translation.height)
-                let projected = sheetOffset + velocity * 0.2
-                let midPoint = maxSheetTravel * 0.4
+                snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
+            }
+    }
 
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                    if projected > midPoint {
-                        sheetOffset = maxSheetTravel
-                        sheetSnap = .expanded
+    private func snapSheet(translationY: CGFloat, predictedY: CGFloat) {
+        let velocityY = predictedY - translationY
+        let projectedOffset = sheetOffset - velocityY * 0.2
+        let midPoint = maxSheetTravel * 0.5
+        let fastFlickDown = velocityY > 600
+        let fastFlickUp = velocityY < -600
+
+        let shouldExpand: Bool = {
+            if fastFlickUp { return true }
+            if fastFlickDown { return false }
+            return projectedOffset > midPoint
+        }()
+
+        let previousSnap = sheetSnap
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            if shouldExpand {
+                sheetOffset = maxSheetTravel
+                sheetSnap = .expanded
+            } else {
+                sheetOffset = 0
+                sheetSnap = .collapsed
+            }
+        }
+        dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
+        if sheetSnap != previousSnap { snapFeedback &+= 1 }
+    }
+
+    private var contentDrag: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .onChanged { value in
+                if contentDragMode == .none {
+                    if sheetSnap == .collapsed {
+                        contentDragMode = .driveSheet
+                    } else if sheetSnap == .expanded && scrolledToTop && value.translation.height > 0 {
+                        contentDragMode = .driveSheet
                     } else {
-                        sheetOffset = 0
-                        sheetSnap = .collapsed
+                        contentDragMode = .scroll
                     }
                 }
-                dragStartOffset = sheetSnap == .expanded ? maxSheetTravel : 0
+                guard contentDragMode == .driveSheet else { return }
+                let translation = -value.translation.height
+                let newOffset = dragStartOffset + translation
+                sheetOffset = max(0, min(maxSheetTravel, newOffset))
+            }
+            .onEnded { value in
+                if contentDragMode == .driveSheet {
+                    snapSheet(translationY: value.translation.height, predictedY: value.predictedEndTranslation.height)
+                }
+                contentDragMode = .none
             }
     }
 
@@ -234,31 +276,7 @@ struct ListingDetailView: View {
             }
             .scrollDisabled(sheetSnap == .collapsed)
             .scrollIndicators(.hidden)
-            .simultaneousGesture(
-                sheetSnap == .expanded && scrolledToTop ?
-                DragGesture(minimumDistance: 20)
-                    .onChanged { value in
-                        guard value.translation.height > 0 else { return }
-                        let progress = min(value.translation.height / maxSheetTravel, 1.0)
-                        sheetOffset = maxSheetTravel * (1.0 - progress)
-                    }
-                    .onEnded { value in
-                        let threshold: CGFloat = 60
-                        if value.translation.height > threshold || value.predictedEndTranslation.height > 150 {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                sheetOffset = 0
-                                sheetSnap = .collapsed
-                            }
-                            dragStartOffset = 0
-                        } else {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                sheetOffset = maxSheetTravel
-                            }
-                            dragStartOffset = maxSheetTravel
-                        }
-                    }
-                : nil
-            )
+            .simultaneousGesture(contentDrag)
         }
     }
 
@@ -593,6 +611,12 @@ struct ListingDetailView: View {
 private enum SheetSnap {
     case collapsed
     case expanded
+}
+
+private enum ContentDragMode {
+    case none
+    case driveSheet
+    case scroll
 }
 
 private struct ScrollOffsetKey: PreferenceKey {
