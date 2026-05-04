@@ -54,7 +54,7 @@ struct FindMapView: View {
 
             Color.clear
                 .overlay(alignment: .topTrailing) {
-                    MapActionButtons(viewModel: viewModel)
+                    MapActionButtons(viewModel: viewModel, alignWithToolbar: accessoryMode)
                 }
                 .allowsHitTesting(!showShimmer)
 
@@ -87,6 +87,7 @@ struct FindMapView: View {
 
 private struct MapActionButtons: View {
     let viewModel: ListingsViewModel
+    var alignWithToolbar: Bool = false
 
     var body: some View {
         GlassActionButtonStack(items: [
@@ -97,7 +98,7 @@ private struct MapActionButtons: View {
             })
         ])
         .padding(.trailing, Theme.Spacing.md)
-        .padding(.top, Theme.Spacing.xs)
+        .padding(.top, alignWithToolbar ? -Theme.IconSize.mediumTap : Theme.Spacing.xs)
         .animation(nil, value: viewModel.selectedListing != nil)
     }
 }
