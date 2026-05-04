@@ -1,9 +1,8 @@
-# Make Filters and Save Search buttons fully rounded
+# Use native iOS segmented control for listing status
 
 **Change**
 
-- Update the **Filters** and **Save search** buttons in the expanded search panel so their corners are fully rounded (capsule shape) instead of the current rounded-rectangle.
+- Replace the custom capsule-style For Sale / For Rent / Sold control at the top of the expanded search panel with the standard built-in iOS segmented control.
+- It will look and behave exactly like Apple's native segmented control (system styling, system selection color, native press animation).
+- All other controls (location, price, beds, baths, action buttons) remain unchanged.
 
-**Where**
-
-- Only the two action buttons inside the expanded "Find" search panel are affected. The segmented controls, inputs, and other components remain unchanged.

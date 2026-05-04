@@ -62,31 +62,13 @@ struct LocationMenuView: View {
     // MARK: - Status segmented control
 
     private var statusSegmentedControl: some View {
-        HStack(spacing: 0) {
+        Picker("Listing status", selection: $viewModel.listingStatus) {
             ForEach(ListingStatus.allCases) { status in
-                let isSelected = viewModel.listingStatus == status
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        viewModel.listingStatus = status
-                    }
-                } label: {
-                    Text(status.rawValue)
-                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: controlHeight - 6)
-                        .background {
-                            if isSelected {
-                                Capsule().fill(Color(.label))
-                                    .padding(2)
-                                    .transition(.opacity)
-                            }
-                        }
-                }
-                .buttonStyle(.plain)
+                Text(status.rawValue).tag(status)
             }
         }
-        .background(Theme.Colors.fill, in: Capsule())
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 
     // MARK: - Location
