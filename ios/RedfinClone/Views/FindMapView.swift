@@ -8,6 +8,9 @@ struct FindMapView: View {
     var showShimmer: Bool = false
     var accessoryMode: Bool = false
 
+    @State private var scrollPulse: Int = 0
+    @State private var scrollReset: Bool = false
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Map(position: $viewModel.mapPosition) {
@@ -37,6 +40,10 @@ struct FindMapView: View {
             .mapControls { }
             .onMapCameraChange(frequency: .continuous) { _ in
                 viewModel.noteMapCameraChanging()
+                if accessoryMode {
+                    scrollReset = false
+                    scrollPulse &+= 1
+                }
             }
             .onMapCameraChange(frequency: .onEnd) { context in
                 viewModel.persistMapRegion(context.region)
@@ -75,7 +82,16 @@ struct FindMapView: View {
             }
 
         }
-
+        .background {
+            if accessoryMode, #available(iOS 26.0, *) {
+                MapAccessoryScrollDriver(pulse: scrollPulse, reset: scrollReset)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+        }
+        .onChange(of: viewModel.showListView) { _, showing in
+            if showing { scrollReset = true }
+        }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {
                 viewModel.panToUserLocation()

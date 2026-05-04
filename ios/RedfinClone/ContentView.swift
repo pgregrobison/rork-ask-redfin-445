@@ -163,9 +163,6 @@ struct ContentView: View {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: {}, onListingTap: { listing in
                         navigateToListing(listing)
                     }, showShimmer: mapShimmerActive, accessoryMode: true, hideProfileButton: true)
-                    .background {
-                        AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
-                    }
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
