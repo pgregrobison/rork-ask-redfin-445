@@ -98,7 +98,7 @@ private struct MapActionButtons: View {
             })
         ])
         .padding(.trailing, Theme.Spacing.md)
-        .padding(.top, alignWithToolbar ? -Theme.IconSize.mediumTap : Theme.Spacing.xs)
+        .padding(.top, alignWithToolbar ? -(Theme.IconSize.mediumTap + Theme.Spacing.xs) : Theme.Spacing.xs)
         .animation(nil, value: viewModel.selectedListing != nil)
     }
 }
