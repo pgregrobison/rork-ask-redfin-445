@@ -34,10 +34,15 @@ struct FilterSheetView: View {
         ("$10M", 10_000_000),
     ]
 
+    private let controlHeight: CGFloat = 44
+    private let tileHeight: CGFloat = 48
+    private let controlRadius: CGFloat = 12
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Theme.Spacing.xl) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+                    statusSegmentedControl
                     priceSection
                     bedsSection
                     bathsSection
@@ -45,6 +50,7 @@ struct FilterSheetView: View {
                 }
                 .padding(.horizontal, Theme.Spacing.md)
                 .padding(.top, Theme.Spacing.md)
+                .padding(.bottom, Theme.Spacing.xl)
             }
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
@@ -68,15 +74,28 @@ struct FilterSheetView: View {
         }
     }
 
+    // MARK: - Status
+
+    private var statusSegmentedControl: some View {
+        Picker("Listing status", selection: $viewModel.listingStatus) {
+            ForEach(ListingStatus.allCases) { status in
+                Text(status.rawValue).tag(status)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+    }
+
+    // MARK: - Price
+
     private var priceSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            Text("Price")
-                .font(Theme.Typography.secondaryBold)
-                .foregroundStyle(.secondary)
+            sectionLabel("Price")
 
             HStack(spacing: Theme.Spacing.xs) {
                 priceDropdown(
-                    label: priceLabel(for: viewModel.filterMinPrice, fallback: "No Min"),
+                    label: priceLabel(for: viewModel.filterMinPrice, fallback: "Enter min"),
+                    isPlaceholder: viewModel.filterMinPrice == nil,
                     options: priceOptions,
                     selection: $viewModel.filterMinPrice
                 )
@@ -86,7 +105,8 @@ struct FilterSheetView: View {
                     .foregroundStyle(.tertiary)
 
                 priceDropdown(
-                    label: priceLabel(for: viewModel.filterMaxPrice, fallback: "No Max"),
+                    label: priceLabel(for: viewModel.filterMaxPrice, fallback: "Enter max"),
+                    isPlaceholder: viewModel.filterMaxPrice == nil,
                     options: maxPriceOptions,
                     selection: $viewModel.filterMaxPrice
                 )
@@ -94,7 +114,7 @@ struct FilterSheetView: View {
         }
     }
 
-    private func priceDropdown(label: String, options: [(String, Int?)], selection: Binding<Int?>) -> some View {
+    private func priceDropdown(label: String, isPlaceholder: Bool, options: [(String, Int?)], selection: Binding<Int?>) -> some View {
         Menu {
             ForEach(Array(options.enumerated()), id: \.offset) { _, option in
                 Button {
@@ -109,17 +129,19 @@ struct FilterSheetView: View {
                 }
             }
         } label: {
-            HStack(spacing: 4) {
+            HStack {
                 Text(label)
-                    .font(.subheadline.weight(.medium))
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: Theme.Spacing.xs + 1, weight: .bold))
+                    .font(Theme.Typography.body)
+                    .foregroundStyle(isPlaceholder ? Color.secondary : Color.primary)
+                Spacer(minLength: Theme.Spacing.xs)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
             }
-            .foregroundStyle(.primary)
             .padding(.horizontal, Theme.Spacing.sm)
             .frame(maxWidth: .infinity)
-            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
-            .background(Theme.Colors.fill, in: Capsule())
+            .frame(height: controlHeight)
+            .background(Theme.Colors.fill, in: .rect(cornerRadius: controlRadius))
         }
     }
 
@@ -135,13 +157,12 @@ struct FilterSheetView: View {
         return "$\(value / 1000)K"
     }
 
+    // MARK: - Beds & Baths
+
     private var bedsSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            Text("Beds")
-                .font(Theme.Typography.secondaryBold)
-                .foregroundStyle(.secondary)
-
-            segmentedPills(
+            sectionLabel("Beds")
+            optionTiles(
                 options: [0, 1, 2, 3, 4, 5],
                 selection: $viewModel.filterMinBeds,
                 labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
@@ -151,11 +172,8 @@ struct FilterSheetView: View {
 
     private var bathsSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            Text("Baths")
-                .font(Theme.Typography.secondaryBold)
-                .foregroundStyle(.secondary)
-
-            segmentedPills(
+            sectionLabel("Baths")
+            optionTiles(
                 options: [0, 1, 2, 3, 4],
                 selection: $viewModel.filterMinBaths,
                 labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
@@ -163,21 +181,23 @@ struct FilterSheetView: View {
         }
     }
 
-    private func segmentedPills(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
-        HStack(spacing: Theme.Spacing.xxs) {
+    private func optionTiles(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
+        HStack(spacing: Theme.Spacing.xs) {
             ForEach(options, id: \.self) { value in
                 let isSelected = selection.wrappedValue == value
                 Button {
-                    selection.wrappedValue = value
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                        selection.wrappedValue = value
+                    }
                 } label: {
                     Text(labelForValue(value))
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
+                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
                         .frame(maxWidth: .infinity)
-                        .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+                        .frame(height: tileHeight)
                         .background(
                             isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
-                            in: Capsule()
+                            in: .rect(cornerRadius: controlRadius)
                         )
                 }
                 .buttonStyle(.plain)
@@ -185,32 +205,45 @@ struct FilterSheetView: View {
         }
     }
 
+    // MARK: - Property type
+
     private var propertyTypeSection: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            Text("Property Type")
-                .font(Theme.Typography.secondaryBold)
-                .foregroundStyle(.secondary)
+            sectionLabel("Home type")
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: Theme.Spacing.xs)], spacing: Theme.Spacing.xs) {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 100), spacing: Theme.Spacing.xs)],
+                spacing: Theme.Spacing.xs
+            ) {
                 ForEach(propertyTypes, id: \.self) { type in
                     let isSelected = propertyType == type
                     Button {
-                        propertyType = type
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                            propertyType = type
+                        }
                     } label: {
                         Text(type)
                             .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                            .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
-                            .padding(.horizontal, Theme.Spacing.sm + 2)
-                            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
+                            .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                            .padding(.horizontal, Theme.Spacing.sm)
                             .frame(maxWidth: .infinity)
+                            .frame(height: tileHeight)
                             .background(
-                                isSelected ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Theme.Colors.fill),
-                                in: .rect(cornerRadius: Theme.Radius.pill)
+                                isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
+                                in: .rect(cornerRadius: controlRadius)
                             )
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
+    }
+
+    // MARK: - Helpers
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.subheadline)
+            .foregroundStyle(.primary)
     }
 }
