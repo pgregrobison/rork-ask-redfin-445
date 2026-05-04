@@ -1,11 +1,18 @@
-# Eliminate the system-color flash before splash
+# Fix the system-color flash before the red splash
 
-**The fix**
+## What's wrong
 
-- Lock the launch background color to Redfin red in **both** light and dark appearances explicitly, so iOS never falls back to a system color while resolving the asset.
-- Tint the underlying app window itself Redfin red, so even the briefest pre-render frame (during the icon-zoom-to-app transition) shows red instead of the system background.
-- Make the very first frame of the app's root view also Redfin red, ensuring a seamless red-on-red handoff from launch screen → splash → content.
+The OS-level launch screen is currently empty, so iOS shows the default system background (white in light mode, black in dark mode) for a split second before our app's red splash takes over. Other apps like OpenTable and the real Redfin avoid this because their OS-level launch screen is itself painted with the brand color.
 
-**Result**
+The settings we tried to use to set the launch background color and logo were silently ignored by iOS — they were written in a way the system doesn't actually read.
 
-Tapping the app icon will show solid Redfin red instantly and continuously — no white/black flicker in either light or dark mode — until the splash logo fades into the app.
+## The fix
+
+- Provide a proper launch screen configuration so iOS itself paints the screen Redfin red with the centered Redfin logo from the very first frame — before any code runs.
+- This makes the transition from app icon → splash seamless: red the entire time, exactly like OpenTable and the live Redfin app.
+
+## What you'll see
+
+- Tap the app icon → instantly Redfin red with the centered Redfin logo.
+- No white flash in light mode, no black flash in dark mode, on any device.
+- The existing splash animation and timing stays the same.

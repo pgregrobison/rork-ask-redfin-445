@@ -29,9 +29,22 @@
 		105FC5932E9EAD3200EA8BCF /* RedfinCloneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RedfinCloneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		105FC5A62E9EAD3300EA8BCF /* Exceptions for "RedfinClone" folder in "AskRedfin" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 105FC5792E9EAD3100EA8BCF /* AskRedfin */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		105FC57C2E9EAD3100EA8BCF /* RedfinClone */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				105FC5A62E9EAD3300EA8BCF /* Exceptions for "RedfinClone" folder in "AskRedfin" target */,
+			);
 			path = RedfinClone;
 			sourceTree = "<group>";
 		};
@@ -407,21 +420,8 @@
 				EXPO_PUBLIC_PROJECT_ID = "";
 				EXPO_PUBLIC_TEAM_ID = "";
 				EXPO_PUBLIC_RORK_APP_KEY = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_EXPO_PUBLIC_TOOLKIT_URL = "$(EXPO_PUBLIC_TOOLKIT_URL)";
-				INFOPLIST_KEY_EXPO_PUBLIC_PROJECT_ID = "$(EXPO_PUBLIC_PROJECT_ID)";
-				INFOPLIST_KEY_EXPO_PUBLIC_TEAM_ID = "$(EXPO_PUBLIC_TEAM_ID)";
-				INFOPLIST_KEY_EXPO_PUBLIC_RORK_APP_KEY = "$(EXPO_PUBLIC_RORK_APP_KEY)";
-				INFOPLIST_KEY_CFBundleDisplayName = "Ask Redfin";
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "See homes near your current location";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Image = LaunchLogo;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RedfinClone/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -452,21 +452,8 @@
 				EXPO_PUBLIC_PROJECT_ID = "";
 				EXPO_PUBLIC_TEAM_ID = "";
 				EXPO_PUBLIC_RORK_APP_KEY = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_EXPO_PUBLIC_TOOLKIT_URL = "$(EXPO_PUBLIC_TOOLKIT_URL)";
-				INFOPLIST_KEY_EXPO_PUBLIC_PROJECT_ID = "$(EXPO_PUBLIC_PROJECT_ID)";
-				INFOPLIST_KEY_EXPO_PUBLIC_TEAM_ID = "$(EXPO_PUBLIC_TEAM_ID)";
-				INFOPLIST_KEY_EXPO_PUBLIC_RORK_APP_KEY = "$(EXPO_PUBLIC_RORK_APP_KEY)";
-				INFOPLIST_KEY_CFBundleDisplayName = "Ask Redfin";
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "See homes near your current location";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_BackgroundColor = LaunchBackground;
-				INFOPLIST_KEY_UILaunchScreen_Image = LaunchLogo;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RedfinClone/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
