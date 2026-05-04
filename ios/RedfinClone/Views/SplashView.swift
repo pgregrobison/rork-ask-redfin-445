@@ -12,10 +12,12 @@ struct SplashView: View {
             iconRed
                 .ignoresSafeArea()
 
-            Text("Redfin")
-                .font(.system(size: 56, weight: .bold, design: .rounded))
+            Image("RedfinLogo")
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
                 .foregroundStyle(.white)
-                .tracking(-1)
+                .frame(width: 200)
                 .scaleEffect(logoScale)
                 .opacity(logoOpacity)
         }
