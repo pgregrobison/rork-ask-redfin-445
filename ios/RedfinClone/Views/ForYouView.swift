@@ -6,6 +6,7 @@ struct ForYouView: View {
     let isActive: Bool
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
+    var hideProfileButton: Bool = false
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -54,7 +55,7 @@ struct ForYouView: View {
         .navigationTitle(isActive ? "For You" : "")
         .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            if isActive {
+            if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")

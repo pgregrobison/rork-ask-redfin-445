@@ -201,9 +201,9 @@ struct ContentView: View {
         TabView(selection: tabSelectionBinding) {
             Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
                 NavigationStack(path: $navigationPath) {
-                    FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: { showDebugPanel = true }, onListingTap: { listing in
+                    FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: {}, onListingTap: { listing in
                         navigateToListing(listing)
-                    }, showShimmer: mapShimmerActive, accessoryMode: true)
+                    }, showShimmer: mapShimmerActive, accessoryMode: true, hideProfileButton: true)
                     .background {
                         AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
                     }
@@ -214,10 +214,10 @@ struct ContentView: View {
             }
             Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
                 NavigationStack(path: $forYouPath) {
-                    ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: { showDebugPanel = true }) { listing in
+                    ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
                         forYouPath.append(listing)
-                    }
+                    }, hideProfileButton: true)
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -225,10 +225,10 @@ struct ContentView: View {
             }
             Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
                 NavigationStack(path: $savedPath) {
-                    SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: { showDebugPanel = true }) { listing in
+                    SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
                         savedPath.append(listing)
-                    }
+                    }, hideProfileButton: true)
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -236,7 +236,7 @@ struct ContentView: View {
             }
             Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
-                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
+                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true)
                 }
             }
             Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {

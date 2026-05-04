@@ -4,6 +4,7 @@ struct MyHomeView: View {
     @Environment(\.colorScheme) private var colorScheme
     let isActive: Bool
     let onProfileTap: () -> Void
+    var hideProfileButton: Bool = false
 
     var body: some View {
         ScrollView {
@@ -20,7 +21,7 @@ struct MyHomeView: View {
         .navigationTitle(isActive ? "My Home" : "")
         .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            if isActive {
+            if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")

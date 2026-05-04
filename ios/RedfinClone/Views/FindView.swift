@@ -9,6 +9,7 @@ struct FindView: View {
     let onListingTap: (Listing) -> Void
     var showShimmer: Bool = false
     var accessoryMode: Bool = false
+    var hideProfileButton: Bool = false
     @Environment(\.askRedfinContext) private var askRedfinContext
 
     var body: some View {
@@ -40,10 +41,12 @@ struct FindView: View {
                         sortMenu
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { onProfileTap() } label: {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                if !hideProfileButton {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { onProfileTap() } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                        }
                     }
                 }
             }

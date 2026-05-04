@@ -6,6 +6,7 @@ struct SavedView: View {
     let isActive: Bool
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
+    var hideProfileButton: Bool = false
 
     var body: some View {
         Group {
@@ -38,7 +39,7 @@ struct SavedView: View {
         .navigationTitle(isActive ? "Saved" : "")
         .navigationBarTitleDisplayMode(isActive ? .large : .inline)
         .toolbar {
-            if isActive {
+            if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { onProfileTap() } label: {
                         Image(systemName: "person.crop.circle")
