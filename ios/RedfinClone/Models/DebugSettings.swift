@@ -36,8 +36,8 @@ class DebugSettings {
 
     init() {
         let storedBehavior = UserDefaults.standard.string(forKey: "debug_searchBehavior") ?? ""
-        self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .default
+        self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .mapFocus
         let storedEntry = UserDefaults.standard.string(forKey: "debug_globalEntrypoint") ?? ""
-        self.globalEntrypoint = GlobalEntrypoint(rawValue: storedEntry) ?? .appNav
+        self.globalEntrypoint = GlobalEntrypoint(rawValue: storedEntry) ?? .accessory
     }
 }
