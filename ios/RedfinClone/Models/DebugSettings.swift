@@ -1,10 +1,5 @@
 import SwiftUI
 
-nonisolated enum CardTransitionStyle: String, CaseIterable, Codable, Sendable {
-    case nativePush = "Native Push"
-    case zoom = "Zoom"
-}
-
 nonisolated enum DetailPageStyle: String, CaseIterable, Codable, Sendable {
     case current = "Current"
     case james = "James"
@@ -16,11 +11,6 @@ nonisolated enum SearchBehavior: String, CaseIterable, Codable, Sendable {
     case mapFocus = "Map Focus"
 }
 
-nonisolated enum RealisticSyncMode: String, CaseIterable, Codable, Sendable {
-    case bidirectional = "Bi-directional sync"
-    case oneWay = "One-way sync"
-}
-
 nonisolated enum GlobalEntrypoint: String, CaseIterable, Codable, Sendable {
     case appNav = "App nav"
     case accessory = "Accessory"
@@ -28,24 +18,12 @@ nonisolated enum GlobalEntrypoint: String, CaseIterable, Codable, Sendable {
 
 @Observable
 class DebugSettings {
-    var cardTransition: CardTransitionStyle {
-        didSet { UserDefaults.standard.set(cardTransition.rawValue, forKey: "debug_cardTransition") }
-    }
-
     var detailPageStyle: DetailPageStyle {
         didSet { UserDefaults.standard.set(detailPageStyle.rawValue, forKey: "debug_detailPageStyle") }
     }
 
     var searchBehavior: SearchBehavior {
         didSet { UserDefaults.standard.set(searchBehavior.rawValue, forKey: "debug_searchBehavior") }
-    }
-
-    var realisticModeEnabled: Bool {
-        didSet { UserDefaults.standard.set(realisticModeEnabled, forKey: "debug_realisticModeEnabled") }
-    }
-
-    var realisticSyncMode: RealisticSyncMode {
-        didSet { UserDefaults.standard.set(realisticSyncMode.rawValue, forKey: "debug_realisticSyncMode") }
     }
 
     var globalEntrypoint: GlobalEntrypoint {
@@ -105,15 +83,10 @@ class DebugSettings {
     }
 
     init() {
-        let stored = UserDefaults.standard.string(forKey: "debug_cardTransition") ?? ""
-        self.cardTransition = CardTransitionStyle(rawValue: stored) ?? .nativePush
         let storedStyle = UserDefaults.standard.string(forKey: "debug_detailPageStyle") ?? ""
-        self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .current
+        self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .hybrid
         let storedBehavior = UserDefaults.standard.string(forKey: "debug_searchBehavior") ?? ""
         self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .default
-        self.realisticModeEnabled = UserDefaults.standard.object(forKey: "debug_realisticModeEnabled") as? Bool ?? false
-        let storedSync = UserDefaults.standard.string(forKey: "debug_realisticSyncMode") ?? ""
-        self.realisticSyncMode = RealisticSyncMode(rawValue: storedSync) ?? .bidirectional
         let storedEntry = UserDefaults.standard.string(forKey: "debug_globalEntrypoint") ?? ""
         self.globalEntrypoint = GlobalEntrypoint(rawValue: storedEntry) ?? .appNav
 

@@ -62,15 +62,8 @@ struct ContentView: View {
                 onDismiss: {
                     viewModel.showChat = false
                 },
-                onShowOnMap: { listings, filters in
-                    let addNbhd = chatViewModel.searchAddNeighborhoodsJustArrived
-                    if let filters, debugSettings.realisticModeEnabled {
-                        viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
-                        pendingMapListings = viewModel.filteredListings
-                        pendingNeighborhoodFocus = filters.neighborhoods
-                    } else {
-                        pendingMapListings = listings
-                    }
+                onShowOnMap: { listings, _ in
+                    pendingMapListings = listings
                     selectedTab = .find
                     viewModel.showListView = false
                     viewModel.dismissOverlay()
@@ -86,54 +79,20 @@ struct ContentView: View {
                 zoomNamespace: zoomNamespace
             )
         }
-        .onChange(of: chatViewModel.thinkingState) { _, state in
-            guard state == .searching,
-                  debugSettings.realisticModeEnabled,
-                  isMapFocusEligible else { return }
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-                chatDetent = .fraction(0.7)
-            }
-        }
         .onChange(of: chatViewModel.searchResultsJustArrived) { _, results in
             guard let results, !results.isEmpty else { return }
-            let filters = chatViewModel.searchFiltersJustArrived
-            let addNbhd = chatViewModel.searchAddNeighborhoodsJustArrived
-            let isBidirectional = debugSettings.realisticModeEnabled && debugSettings.realisticSyncMode == .bidirectional
 
             if isMapFocusEligible {
                 chatViewModel.searchResultsJustArrived = nil
                 chatViewModel.searchFiltersJustArrived = nil
-                if isBidirectional, let filters {
-                    viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
-                }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                     chatDetent = .fraction(0.7)
                 }
                 Task {
                     try? await Task.sleep(for: .milliseconds(350))
-                    if isBidirectional, let nbhds = filters?.neighborhoods, !nbhds.isEmpty {
-                        viewModel.fitNeighborhoods(nbhds, sheetFraction: 0.7)
-                    } else {
-                        let targetListings = isBidirectional ? viewModel.filteredListings : results
-                        viewModel.fitListings(targetListings, sheetFraction: 0.7)
-                    }
+                    viewModel.fitListings(results, sheetFraction: 0.7)
                 }
                 return
-            }
-
-            if isBidirectional {
-                chatViewModel.searchResultsJustArrived = nil
-                chatViewModel.searchFiltersJustArrived = nil
-                if let filters {
-                    viewModel.applyChatFilters(filters, addNeighborhoods: addNbhd)
-                    pendingMapListings = viewModel.filteredListings
-                    pendingNeighborhoodFocus = filters.neighborhoods
-                } else {
-                    pendingMapListings = results
-                }
-                selectedTab = .find
-                viewModel.showListView = false
-                viewModel.dismissOverlay()
             }
         }
         .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in
@@ -302,11 +261,7 @@ struct ContentView: View {
             .onAppear { withAnimation(.easeOut(duration: 0.2)) { showTabBar = false } }
             .onDisappear { if !viewModel.isCardVisible { withAnimation(.easeOut(duration: 0.2)) { showTabBar = true } } }
 
-        if debugSettings.cardTransition == .zoom {
-            detail.navigationTransition(.zoom(sourceID: listing.id, in: zoomNamespace))
-        } else {
-            detail
-        }
+        detail.navigationTransition(.zoom(sourceID: listing.id, in: zoomNamespace))
     }
 
     @ViewBuilder
@@ -317,7 +272,7 @@ struct ContentView: View {
             ListingDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
-                useZoomTransition: debugSettings.cardTransition == .zoom,
+                useZoomTransition: true,
                 hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
@@ -326,7 +281,7 @@ struct ContentView: View {
             RedfinDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
-                useZoomTransition: debugSettings.cardTransition == .zoom,
+                useZoomTransition: true,
                 hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
@@ -335,7 +290,7 @@ struct ContentView: View {
             HybridDetailView(
                 listing: listing,
                 isSaved: viewModel.isSaved(listing),
-                useZoomTransition: debugSettings.cardTransition == .zoom,
+                useZoomTransition: true,
                 hideAskRedfinFAB: hideFAB,
                 onToggleSave: { viewModel.toggleSaved(listing) },
                 onAskRedfin: { viewModel.showChat = true }
@@ -344,7 +299,7 @@ struct ContentView: View {
     }
 
     private var mapShimmerActive: Bool {
-        debugSettings.realisticModeEnabled && chatViewModel.thinkingState != .none
+        false
     }
 
     private var isMapFocusEligible: Bool {

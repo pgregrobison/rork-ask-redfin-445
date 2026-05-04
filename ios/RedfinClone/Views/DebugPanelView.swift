@@ -39,37 +39,6 @@ struct DebugPanelView: View {
                 }
 
                 Section {
-                    ForEach(CardTransitionStyle.allCases, id: \.self) { style in
-                        Button {
-                            settings.cardTransition = style
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(style.rawValue)
-                                        .font(.body)
-                                        .foregroundStyle(.primary)
-                                    Text(style.subtitle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if settings.cardTransition == style {
-                                    Image(systemName: "checkmark")
-                                        .font(.body.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                } header: {
-                    Text("Card Transition")
-                } footer: {
-                    Text("Controls how tapping a listing card navigates to the detail page.")
-                }
-
-                Section {
                     ForEach(DetailPageStyle.allCases, id: \.self) { style in
                         Button {
                             settings.detailPageStyle = style
@@ -132,41 +101,6 @@ struct DebugPanelView: View {
                 }
 
                 Section {
-                    Toggle("Realistic Mode", isOn: $settings.realisticModeEnabled)
-
-                    if settings.realisticModeEnabled {
-                        ForEach(RealisticSyncMode.allCases, id: \.self) { mode in
-                            Button {
-                                settings.realisticSyncMode = mode
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(mode.rawValue)
-                                            .font(.body)
-                                            .foregroundStyle(.primary)
-                                        Text(mode.subtitle)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if settings.realisticSyncMode == mode {
-                                        Image(systemName: "checkmark")
-                                            .font(.body.weight(.semibold))
-                                            .foregroundStyle(.primary)
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                } header: {
-                    Text("Realistic Mode")
-                } footer: {
-                    Text("Stretches home-search thinking to 8 seconds and lets you test how chat syncs with the Find surface.")
-                }
-
-                Section {
                     Toggle("Use Spring", isOn: $settings.panUseSpring)
 
                     if settings.panUseSpring {
@@ -218,15 +152,6 @@ struct DebugPanelView: View {
     }
 }
 
-extension CardTransitionStyle {
-    var subtitle: String {
-        switch self {
-        case .nativePush: "Standard navigation push"
-        case .zoom: "Card zooms into detail view"
-        }
-    }
-}
-
 extension DetailPageStyle {
     var subtitle: String {
         switch self {
@@ -272,15 +197,6 @@ extension GlobalEntrypoint {
         switch self {
         case .appNav: "Custom tab bar with Ask Redfin FAB"
         case .accessory: "Native tab bar with Ask Redfin input accessory (iOS 26)"
-        }
-    }
-}
-
-extension RealisticSyncMode {
-    var subtitle: String {
-        switch self {
-        case .bidirectional: "Chat updates the map and list live as results arrive"
-        case .oneWay: "Chat only updates Find when you tap Show on map"
         }
     }
 }
