@@ -420,6 +420,8 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor~iphone" = LaunchBackground;
 				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor~ipad" = LaunchBackground;
+				"INFOPLIST_KEY_UILaunchScreen_Image~iphone" = LaunchLogo;
+				"INFOPLIST_KEY_UILaunchScreen_Image~ipad" = LaunchLogo;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -465,6 +467,8 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor~iphone" = LaunchBackground;
 				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor~ipad" = LaunchBackground;
+				"INFOPLIST_KEY_UILaunchScreen_Image~iphone" = LaunchLogo;
+				"INFOPLIST_KEY_UILaunchScreen_Image~ipad" = LaunchLogo;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
