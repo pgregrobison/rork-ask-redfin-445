@@ -7,6 +7,7 @@ struct ForYouView: View {
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
     var hideProfileButton: Bool = false
+    var ownsNavStack: Bool = false
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -52,8 +53,8 @@ struct ForYouView: View {
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
-        .navigationTitle(isActive ? "For You" : "")
-        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
+        .navigationTitle(ownsNavStack || isActive ? "For You" : "")
+        .navigationBarTitleDisplayMode(ownsNavStack || isActive ? .large : .inline)
         .toolbar {
             if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {

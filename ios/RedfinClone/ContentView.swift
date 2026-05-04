@@ -24,6 +24,11 @@ struct ContentView: View {
     var body: some View {
         rootLayout
             .environment(\.askRedfinContext, askRedfinContext)
+            .overlay(alignment: .top) {
+                if selectedTab == .find && navigationPath.isEmpty {
+                    FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
+                }
+            }
         .tint(.primary)
         .onAppear {
             viewModel.debugSettings = debugSettings
@@ -202,11 +207,6 @@ struct ContentView: View {
                     .background {
                         AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
                     }
-                    .overlay(alignment: .top) {
-                        if navigationPath.isEmpty {
-                            FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
-                        }
-                    }
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -217,7 +217,7 @@ struct ContentView: View {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
                         forYouPath.append(listing)
-                    }, hideProfileButton: true)
+                    }, hideProfileButton: true, ownsNavStack: true)
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -228,7 +228,7 @@ struct ContentView: View {
                     SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
                         savedPath.append(listing)
-                    }, hideProfileButton: true)
+                    }, hideProfileButton: true, ownsNavStack: true)
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -236,12 +236,12 @@ struct ContentView: View {
             }
             Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
-                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true)
+                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true)
                 }
             }
             Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
                 NavigationStack(path: $myRedfinPath) {
-                    MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true })
+                    MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true }, ownsNavStack: true)
                 }
             }
         }
@@ -274,11 +274,6 @@ struct ContentView: View {
                 navigateToListing(listing)
             }, showShimmer: mapShimmerActive)
             .animation(.easeInOut(duration: 0.25), value: mapShimmerActive)
-            .overlay(alignment: .top) {
-                if selectedTab == .find && navigationPath.isEmpty {
-                    FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
-                }
-            }
             .opacity(selectedTab == .find ? 1 : 0)
             .allowsHitTesting(selectedTab == .find)
 

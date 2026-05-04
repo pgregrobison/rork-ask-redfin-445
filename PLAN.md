@@ -1,16 +1,12 @@
-# Stop the Find header from sliding in when switching tabs
+# Fix headers sliding in across all tabs
 
-**The problem**
+**The real issue**
 
-The location/search pill at the top of the Find tab is currently attached to the whole app shell, with a rule that says "only show on the Find tab." Every time you tap into Find from another tab, the pill is freshly added and animates in from the top — that's the janky slide you're seeing.
+Each tab's screen (For You, Saved, My Home, My Redfin, and Find) currently hides its own title until that tab becomes "active," then sets it back to the real title. Because each tab now has its own navigation stack, that toggle plays the standard large-title slide-down animation every time you switch tabs — which is what looks janky.
 
-**The fix**
+**Plan**
 
-- Anchor the Find header pill inside the Find tab itself, instead of at the app root.
-- Result: switching between tabs swaps the whole screen at once (as expected), and the pill is simply already there when you land on Find — no slide-in animation.
-- Behavior on Find stays identical: same pill, same expand/collapse for the location menu, same hide-when-viewing-a-listing rule.
-
-**What stays the same**
-
-- All other tabs are untouched.
-- The expanded location menu, filters sheet, and save search continue to work exactly as today.
+- Undo the previous Find-specific tweak so we're back to the original behavior there.
+- Stop toggling the title and large/inline mode based on whether the tab is active. Each tab will simply declare its title once, so switching tabs no longer animates the header in from the top.
+- Keep the toolbar buttons (profile, list/map toggle, sort) gated on active state where needed so they don't double up — only the title text/mode change is what was causing the slide.
+- Result: tapping between For You, Saved, My Home, My Redfin, and Find will feel instant, with no header animation on switch.

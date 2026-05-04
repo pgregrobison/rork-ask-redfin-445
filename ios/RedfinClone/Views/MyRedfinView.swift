@@ -3,6 +3,7 @@ import SwiftUI
 struct MyRedfinView: View {
     let isActive: Bool
     let onProfileTap: () -> Void
+    var ownsNavStack: Bool = false
 
     var body: some View {
         ScrollView {
@@ -16,8 +17,8 @@ struct MyRedfinView: View {
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
-        .navigationTitle(isActive ? "My Redfin" : "")
-        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
+        .navigationTitle(ownsNavStack || isActive ? "My Redfin" : "")
+        .navigationBarTitleDisplayMode(ownsNavStack || isActive ? .large : .inline)
         .toolbar {
             if isActive {
                 ToolbarItem(placement: .topBarTrailing) {

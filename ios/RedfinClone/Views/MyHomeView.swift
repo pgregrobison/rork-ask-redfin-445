@@ -5,6 +5,7 @@ struct MyHomeView: View {
     let isActive: Bool
     let onProfileTap: () -> Void
     var hideProfileButton: Bool = false
+    var ownsNavStack: Bool = false
 
     var body: some View {
         ScrollView {
@@ -18,8 +19,8 @@ struct MyHomeView: View {
             .padding(.bottom, Theme.Spacing.tabBarClearance)
         }
         .background(Theme.Colors.background)
-        .navigationTitle(isActive ? "My Home" : "")
-        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
+        .navigationTitle(ownsNavStack || isActive ? "My Home" : "")
+        .navigationBarTitleDisplayMode(ownsNavStack || isActive ? .large : .inline)
         .toolbar {
             if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {

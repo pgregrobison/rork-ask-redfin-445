@@ -7,6 +7,7 @@ struct SavedView: View {
     let onProfileTap: () -> Void
     let onListingTap: (Listing) -> Void
     var hideProfileButton: Bool = false
+    var ownsNavStack: Bool = false
 
     var body: some View {
         Group {
@@ -36,8 +37,8 @@ struct SavedView: View {
             }
         }
         .background(Theme.Colors.background)
-        .navigationTitle(isActive ? "Saved" : "")
-        .navigationBarTitleDisplayMode(isActive ? .large : .inline)
+        .navigationTitle(ownsNavStack || isActive ? "Saved" : "")
+        .navigationBarTitleDisplayMode(ownsNavStack || isActive ? .large : .inline)
         .toolbar {
             if isActive && !hideProfileButton {
                 ToolbarItem(placement: .topBarTrailing) {
