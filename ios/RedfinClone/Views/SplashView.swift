@@ -1,9 +1,6 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State private var logoScale: CGFloat = 0.85
-    @State private var logoOpacity: Double = 0
-
     // Matches the app icon background fill (display-p3 0.87059, 0.20000, 0.25490)
     private let iconRed = Color(.displayP3, red: 0.87059, green: 0.20000, blue: 0.25490, opacity: 1)
 
@@ -12,22 +9,16 @@ struct SplashView: View {
             iconRed
                 .ignoresSafeArea()
 
-            Image("RedfinLogo")
+            // Use the same asset and size as the native launch screen (Info.plist
+            // UILaunchScreen.UIImageName = "LaunchLogo", which iOS centers at its
+            // natural 200pt width). No entrance animation — the logo must appear
+            // pixel-identical to where the system left it, so the handoff is invisible.
+            Image("LaunchLogo")
                 .resizable()
-                .renderingMode(.template)
                 .scaledToFit()
-                .foregroundStyle(.white)
                 .frame(width: 200)
-                .scaleEffect(logoScale)
-                .opacity(logoOpacity)
         }
         .preferredColorScheme(.dark)
-        .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.75)) {
-                logoScale = 1.0
-                logoOpacity = 1.0
-            }
-        }
     }
 }
 
