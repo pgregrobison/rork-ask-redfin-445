@@ -24,11 +24,6 @@ struct ContentView: View {
     var body: some View {
         rootLayout
             .environment(\.askRedfinContext, askRedfinContext)
-            .overlay(alignment: .top) {
-                if selectedTab == .find && navigationPath.isEmpty {
-                    FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
-                }
-            }
         .tint(.primary)
         .onAppear {
             viewModel.debugSettings = debugSettings
@@ -207,6 +202,11 @@ struct ContentView: View {
                     .background {
                         AccessoryScrollDriver(minimized: shouldMinimizeAccessory)
                     }
+                    .overlay(alignment: .top) {
+                        if navigationPath.isEmpty {
+                            FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
+                        }
+                    }
                     .navigationDestination(for: Listing.self) { listing in
                         listingDetail(for: listing)
                     }
@@ -274,6 +274,11 @@ struct ContentView: View {
                 navigateToListing(listing)
             }, showShimmer: mapShimmerActive)
             .animation(.easeInOut(duration: 0.25), value: mapShimmerActive)
+            .overlay(alignment: .top) {
+                if selectedTab == .find && navigationPath.isEmpty {
+                    FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
+                }
+            }
             .opacity(selectedTab == .find ? 1 : 0)
             .allowsHitTesting(selectedTab == .find)
 
