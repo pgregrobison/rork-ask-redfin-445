@@ -1,12 +1,28 @@
-# Restyle Filters menu to match expanded panel + add status segmented control
+# Add location and more filters to the Filters menu
 
-**Updates to the Filters menu (full filter sheet):**
+## What changes in the Filters menu
 
-- Add a native iOS segmented control at the top with **For Sale / For Rent / Sold**, no label, bound to the same listing status as the expanded panel.
-- Replace the price dropdowns with the new rounded-rectangle style (44pt tall, 12pt corner radius, theme fill background, chevron-down indicator) — matching the expanded panel.
-- Replace the bed/bath pill segments with the rounded-tile style used in the expanded panel: equal-width tiles, 48pt tall, rounded corners, selected tile uses system label color background with system background text.
-- Update the Property Type grid to use the same rounded-tile styling (rounded corners instead of pills, same selected/unselected colors).
-- Switch section labels (Price, Beds, Baths, Property Type) to the lighter primary subheadline style used in the expanded panel.
-- Keep Reset / Done toolbar buttons and existing behavior unchanged.
+**Add Location at the top** (just under the For sale / For rent / Sold segmented control)
+- Same look as the expanded Find panel: a rounded fill text field with a clear (×) button
+- Live location suggestions appear in a dropdown list as you type, matching the expanded panel exactly
+- Tapping a suggestion sets the location and dismisses the suggestions
 
-**Out of scope:** the expanded Find panel itself, the active filter chips row, and any other screens.
+**Add new filter sections below Home type** (in this order, all using the same theme colors, spacing, corner radius, and control styling as the rest of the sheet):
+
+1. **Square feet** — two dropdowns side-by-side (Min sq ft – Max sq ft)
+2. **Lot size** — two dropdowns side-by-side (Min – Max, in acres / sq ft)
+3. **Year built** — two dropdowns side-by-side (Min year – Max year)
+4. **HOA fee** — single dropdown (No HOA fee / up to $50 / $100 / $200 / $500 / Any)
+5. **Parking spots** — tile selector row (Any, 1+, 2+, 3+, 4+) matching the Beds/Baths style
+6. **More** — wrapping chips that toggle on/off: Pool, Garage, A/C, Fireplace, Waterfront. Selected chips use the dark inverse fill, unselected use the light fill — same as Home type tiles.
+
+These are visual-only; tapping them updates local state so they feel real but they don't filter the listings.
+
+**Reset button** also clears the new fake filter values so the sheet always returns to a clean state.
+
+## Visual consistency
+
+- All new controls reuse the existing 44pt control height, 48pt tile height, 12pt corner radius, and Theme spacing
+- Dropdowns use the same Menu-with-chevron pattern already used for Price
+- Chips and tiles use the same selected/unselected treatment (label color inverse, fill background)
+- Section labels use the same subheadline style
