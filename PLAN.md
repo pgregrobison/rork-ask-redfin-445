@@ -1,18 +1,26 @@
-# Fix the system-color flash before the red splash
+# Restyle the expanded Find sheet and add a sale-status segmented control
 
-## What's wrong
+## What changes
 
-The OS-level launch screen is currently empty, so iOS shows the default system background (white in light mode, black in dark mode) for a split second before our app's red splash takes over. Other apps like OpenTable and the real Redfin avoid this because their OS-level launch screen is itself painted with the brand color.
+**Expanded "Find" sheet (the panel that drops down with location, price, beds, baths)**
 
-The settings we tried to use to set the launch background color and logo were silently ignored by iOS — they were written in a way the system doesn't actually read.
+- **New status segmented control at the very top** (above the location search field):
+  - Three options: **For Sale**, **For Rent**, **Sold**
+  - No label above it — the control speaks for itself
+  - Defaults to **For Sale**
+  - Selected segment uses an inverse fill: dark in light mode, white in dark mode (matches the mock); unselected segments sit on a subtle neutral track
+  - Tapping a segment updates the listings shown
+  - This control is independent — it does **not** alter the existing Home Type control inside the Filter menu
 
-## The fix
+- **Restyled controls** to match the mock and use shared design tokens (system colors, theme spacing, theme corner radii):
+  - Price min/max dropdowns: cleaner pill buttons with consistent height, spacing, and a refined chevron
+  - Beds and Baths pill rows: tighter, more uniform pills; selected pill uses the same inverse fill treatment as the new status control for visual consistency
+  - Location search field, dividers, and action buttons (Filter, Save Search) tuned to the same spacing and radius scale
 
-- Provide a proper launch screen configuration so iOS itself paints the screen Redfin red with the centered Redfin logo from the very first frame — before any code runs.
-- This makes the transition from app icon → splash seamless: red the entire time, exactly like OpenTable and the live Redfin app.
+- **No change** to the collapsed pill, the Filter sheet, or the Home Type control inside Filter.
 
-## What you'll see
+## Visual feel
 
-- Tap the app icon → instantly Redfin red with the centered Redfin logo.
-- No white flash in light mode, no black flash in dark mode, on any device.
-- The existing splash animation and timing stays the same.
+- Calm, tightly aligned rows with breathing room that matches the mock
+- A single accent treatment (inverse fill) used consistently for any "selected" state across status, beds, and baths
+- All paddings, radii, and colors flow from the existing theme so light and dark modes both look intentional

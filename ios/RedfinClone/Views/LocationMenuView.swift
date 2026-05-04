@@ -35,54 +35,254 @@ struct LocationMenuView: View {
         ("$10M", 10_000_000),
     ]
 
+    private let controlHeight: CGFloat = 44
+    private let controlRadius: CGFloat = 12
+
     var body: some View {
-        VStack(spacing: 0) {
-            searchField
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            statusSegmentedControl
+            locationSection
+            priceSection
+            bedsSection
+            bathsSection
+            actionButtons
 
             if !searchService.suggestions.isEmpty {
-                Divider().padding(.leading, Theme.Spacing.sm + 2)
+                Divider().padding(.horizontal, Theme.Spacing.md)
                 suggestionslist
             }
-
-            Divider().padding(.leading, Theme.Spacing.sm + 2)
-            priceFilterRow
-            bedsFilterRow
-            bathsFilterRow
-            Divider().padding(.leading, Theme.Spacing.sm + 2)
-            actionButtons
         }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.vertical, Theme.Spacing.md)
         .onAppear {
             searchService.searchText = viewModel.locationName
         }
     }
 
-    private var searchField: some View {
-        HStack(spacing: Theme.Spacing.xs + 2) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: Theme.IconSize.small, weight: .medium))
-                .foregroundStyle(.secondary)
+    // MARK: - Status segmented control
 
-            TextField("Search location...", text: Binding(
-                get: { searchService.searchText },
-                set: { searchService.updateQuery($0) }
-            ))
-            .font(Theme.Typography.body)
-            .focused($isSearchFocused)
-            .submitLabel(.search)
-
-            if !searchService.searchText.isEmpty {
+    private var statusSegmentedControl: some View {
+        HStack(spacing: 0) {
+            ForEach(ListingStatus.allCases) { status in
+                let isSelected = viewModel.listingStatus == status
                 Button {
-                    searchService.clear()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        viewModel.listingStatus = status
+                    }
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: Theme.ButtonSize.iconSize))
-                        .foregroundStyle(.tertiary)
+                    Text(status.rawValue)
+                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: controlHeight - 6)
+                        .background {
+                            if isSelected {
+                                Capsule().fill(Color(.label))
+                                    .padding(2)
+                                    .transition(.opacity)
+                            }
+                        }
                 }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, Theme.Spacing.sm + 2)
-        .padding(.vertical, Theme.Spacing.sm)
+        .background(Theme.Colors.fill, in: Capsule())
     }
+
+    // MARK: - Location
+
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+            Text("Location")
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+
+            HStack(spacing: Theme.Spacing.xs) {
+                TextField("Search location", text: Binding(
+                    get: { searchService.searchText },
+                    set: { searchService.updateQuery($0) }
+                ))
+                .font(Theme.Typography.body)
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+
+                if !searchService.searchText.isEmpty {
+                    Button {
+                        searchService.clear()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: Theme.ButtonSize.iconSize))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, Theme.Spacing.sm)
+            .frame(height: controlHeight)
+            .background(Theme.Colors.fill, in: .rect(cornerRadius: controlRadius))
+        }
+    }
+
+    // MARK: - Price
+
+    private var priceSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+            Text("Price")
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+
+            HStack(spacing: Theme.Spacing.xs) {
+                priceDropdown(
+                    label: priceLabel(for: viewModel.filterMinPrice, fallback: "Enter min"),
+                    isPlaceholder: viewModel.filterMinPrice == nil,
+                    options: priceOptions,
+                    selection: $viewModel.filterMinPrice
+                )
+
+                Text("–")
+                    .font(.subheadline)
+                    .foregroundStyle(.tertiary)
+
+                priceDropdown(
+                    label: priceLabel(for: viewModel.filterMaxPrice, fallback: "Enter max"),
+                    isPlaceholder: viewModel.filterMaxPrice == nil,
+                    options: maxPriceOptions,
+                    selection: $viewModel.filterMaxPrice
+                )
+            }
+        }
+    }
+
+    private func priceDropdown(label: String, isPlaceholder: Bool, options: [(String, Int?)], selection: Binding<Int?>) -> some View {
+        Menu {
+            ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+                Button {
+                    selection.wrappedValue = option.1
+                } label: {
+                    HStack {
+                        Text(option.0)
+                        if selection.wrappedValue == option.1 {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack {
+                Text(label)
+                    .font(Theme.Typography.body)
+                    .foregroundStyle(isPlaceholder ? Color.secondary : Color.primary)
+                Spacer(minLength: Theme.Spacing.xs)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, Theme.Spacing.sm)
+            .frame(maxWidth: .infinity)
+            .frame(height: controlHeight)
+            .background(Theme.Colors.fill, in: .rect(cornerRadius: controlRadius))
+        }
+    }
+
+    private func priceLabel(for value: Int?, fallback: String) -> String {
+        guard let value else { return fallback }
+        if value >= 1_000_000 {
+            let m = Double(value) / 1_000_000.0
+            if m == m.rounded() {
+                return "$\(Int(m))M"
+            }
+            return "$\(String(format: "%.1f", m))M"
+        }
+        return "$\(value / 1000)K"
+    }
+
+    // MARK: - Beds & Baths
+
+    private var bedsSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+            Text("Beds")
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+
+            optionTiles(
+                options: [0, 1, 2, 3, 4, 5],
+                selection: $viewModel.filterMinBeds,
+                labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
+            )
+        }
+    }
+
+    private var bathsSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+            Text("Baths")
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+
+            optionTiles(
+                options: [0, 1, 2, 3, 4],
+                selection: $viewModel.filterMinBaths,
+                labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
+            )
+        }
+    }
+
+    private func optionTiles(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
+        HStack(spacing: Theme.Spacing.xs) {
+            ForEach(options, id: \.self) { value in
+                let isSelected = selection.wrappedValue == value
+                Button {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                        selection.wrappedValue = value
+                    }
+                } label: {
+                    Text(labelForValue(value))
+                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                        .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: controlHeight + 4)
+                        .background(
+                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
+                            in: .rect(cornerRadius: controlRadius)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Action buttons
+
+    private var actionButtons: some View {
+        HStack(spacing: Theme.Spacing.xs) {
+            Button {
+                onOpenFilter()
+            } label: {
+                actionLabel(systemImage: "slider.horizontal.3", title: "Filters")
+            }
+            .buttonStyle(.plain)
+
+            Button {} label: {
+                actionLabel(systemImage: "bookmark", title: "Save search")
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, Theme.Spacing.xxs)
+    }
+
+    private func actionLabel(systemImage: String, title: String) -> some View {
+        HStack(spacing: Theme.Spacing.xs) {
+            Image(systemName: systemImage)
+                .font(.system(size: Theme.IconSize.small, weight: .semibold))
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+        }
+        .foregroundStyle(.primary)
+        .frame(maxWidth: .infinity)
+        .frame(height: controlHeight + 4)
+        .background(Theme.Colors.fill, in: .rect(cornerRadius: controlRadius))
+    }
+
+    // MARK: - Search suggestions
 
     private var suggestionslist: some View {
         ScrollView {
@@ -91,10 +291,10 @@ struct LocationMenuView: View {
                     Button {
                         selectSuggestion(suggestion)
                     } label: {
-                        HStack(spacing: 12) {
+                        HStack(spacing: Theme.Spacing.sm) {
                             Image(systemName: "mappin.circle.fill")
                                 .font(.system(size: Theme.Spacing.lg))
-                                .foregroundStyle(.red.opacity(0.8))
+                                .foregroundStyle(Theme.Colors.brandRed.opacity(0.85))
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(suggestion.title)
@@ -111,7 +311,7 @@ struct LocationMenuView: View {
 
                             Spacer()
                         }
-                        .padding(.horizontal, Theme.Spacing.sm + 2)
+                        .padding(.horizontal, Theme.Spacing.sm)
                         .padding(.vertical, Theme.Spacing.xs + 2)
                         .contentShape(Rectangle())
                     }
@@ -120,163 +320,6 @@ struct LocationMenuView: View {
             }
         }
         .frame(maxHeight: 240)
-    }
-
-    private var priceFilterRow: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
-            Text("Price")
-                .font(Theme.Typography.captionBold)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: Theme.Spacing.xs) {
-                priceDropdown(
-                    label: priceLabel(for: viewModel.filterMinPrice, fallback: "No Min"),
-                    options: priceOptions,
-                    selection: $viewModel.filterMinPrice
-                )
-
-                Text("–")
-                    .font(.subheadline)
-                    .foregroundStyle(.tertiary)
-
-                priceDropdown(
-                    label: priceLabel(for: viewModel.filterMaxPrice, fallback: "No Max"),
-                    options: maxPriceOptions,
-                    selection: $viewModel.filterMaxPrice
-                )
-            }
-        }
-        .padding(.horizontal, Theme.Spacing.sm + 2)
-        .padding(.vertical, Theme.Spacing.xs + 2)
-    }
-
-    private func priceDropdown(label: String, options: [(String, Int?)], selection: Binding<Int?>) -> some View {
-        Menu {
-            ForEach(Array(options.enumerated()), id: \.offset) { _, option in
-                Button {
-                    selection.wrappedValue = option.1
-                } label: {
-                    HStack {
-                        Text(option.0)
-                        if selection.wrappedValue == option.1 {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(label)
-                    .font(.subheadline.weight(.medium))
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: Theme.Spacing.xs + 1, weight: .bold))
-            }
-            .foregroundStyle(.primary)
-            .padding(.horizontal, Theme.Spacing.sm)
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: Theme.ButtonSize.minHeight - 4)
-            .background(Theme.Colors.fill, in: Capsule())
-        }
-    }
-
-    private func priceLabel(for value: Int?, fallback: String) -> String {
-        guard let value else { return fallback }
-        if value >= 1_000_000 {
-            let m = Double(value) / 1_000_000.0
-            if m == m.rounded() {
-                return "$\(Int(m))M"
-            }
-            return "$\(String(format: "%.1f", m))M"
-        }
-        return "$\(value / 1000)K"
-    }
-
-    private var bedsFilterRow: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
-            Text("Beds")
-                .font(Theme.Typography.captionBold)
-                .foregroundStyle(.secondary)
-
-            segmentedPills(
-                options: [0, 1, 2, 3, 4, 5],
-                selection: $viewModel.filterMinBeds,
-                labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
-            )
-        }
-        .padding(.horizontal, Theme.Spacing.sm + 2)
-        .padding(.vertical, Theme.Spacing.xs + 2)
-    }
-
-    private var bathsFilterRow: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.xxs + 2) {
-            Text("Baths")
-                .font(Theme.Typography.captionBold)
-                .foregroundStyle(.secondary)
-
-            segmentedPills(
-                options: [0, 1, 2, 3, 4],
-                selection: $viewModel.filterMinBaths,
-                labelForValue: { $0 == 0 ? "Any" : "\($0)+" }
-            )
-        }
-        .padding(.horizontal, Theme.Spacing.sm + 2)
-        .padding(.vertical, Theme.Spacing.xs + 2)
-    }
-
-    private func segmentedPills(options: [Int], selection: Binding<Int>, labelForValue: @escaping (Int) -> String) -> some View {
-        HStack(spacing: Theme.Spacing.xxs) {
-            ForEach(options, id: \.self) { value in
-                let isSelected = selection.wrappedValue == value
-                Button {
-                    selection.wrappedValue = value
-                } label: {
-                    Text(labelForValue(value))
-                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Theme.Colors.invertedPrimary : .primary)
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: Theme.ButtonSize.minHeight - 4)
-                        .background(
-                            isSelected ? AnyShapeStyle(Color(.label)) : AnyShapeStyle(Theme.Colors.fill),
-                            in: Capsule()
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private var actionButtons: some View {
-        HStack(spacing: Theme.Spacing.xs) {
-            Button {
-                onOpenFilter()
-            } label: {
-                HStack(spacing: Theme.Spacing.xxs + 2) {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: Theme.IconSize.mapPin, weight: .semibold))
-                    Text("Filter")
-                        .font(.subheadline.weight(.medium))
-                }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: Theme.ButtonSize.minHeight - 4)
-                .background(Theme.Colors.fill, in: .rect(cornerRadius: Theme.Radius.pill))
-            }
-            .buttonStyle(.plain)
-
-            Button {} label: {
-                HStack(spacing: Theme.Spacing.xxs + 2) {
-                    Image(systemName: "bookmark")
-                        .font(.system(size: Theme.IconSize.mapPin, weight: .semibold))
-                    Text("Save Search")
-                        .font(.subheadline.weight(.medium))
-                }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: Theme.ButtonSize.minHeight - 4)
-                .background(Theme.Colors.fill, in: .rect(cornerRadius: Theme.Radius.pill))
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, Theme.Spacing.xs + 2)
-        .padding(.vertical, Theme.Spacing.xs + 2)
     }
 
     private func selectSuggestion(_ suggestion: MKLocalSearchCompletion) {

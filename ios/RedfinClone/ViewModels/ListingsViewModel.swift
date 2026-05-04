@@ -3,6 +3,13 @@ import SwiftUI
 import MapKit
 import CoreLocation
 
+nonisolated enum ListingStatus: String, CaseIterable, Sendable, Identifiable {
+    case forSale = "For sale"
+    case forRent = "For rent"
+    case sold = "Sold"
+    var id: String { rawValue }
+}
+
 nonisolated enum SortOption: String, CaseIterable, Sendable {
     case recommended = "Recommended"
     case priceLowToHigh = "Price Low→High"
@@ -25,6 +32,7 @@ class ListingsViewModel {
     private var mapInteractionIdleTask: Task<Void, Never>?
     private var dismissTask: Task<Void, Never>?
     var sortOption: SortOption = .recommended
+    var listingStatus: ListingStatus = .forSale
     var showListView: Bool = false
     var showChat: Bool = false
     var locationName: String = "New York City"
