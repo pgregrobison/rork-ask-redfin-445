@@ -279,7 +279,7 @@ struct LocationMenuView: View {
         .foregroundStyle(.primary)
         .frame(maxWidth: .infinity)
         .frame(height: controlHeight + 4)
-        .background(Theme.Colors.fill, in: .rect(cornerRadius: controlRadius))
+        .background(Theme.Colors.fill, in: .capsule)
     }
 
     // MARK: - Search suggestions
