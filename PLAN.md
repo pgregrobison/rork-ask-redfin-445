@@ -1,14 +1,15 @@
-# Fix the black flash on app launch
+# Make pulling the detail sheet down feel instant
 
-**What's happening**
+**The problem**
 
-When you tap the app icon, iOS shows its own built-in launch screen *before* the app's code ever runs. Right now that built-in launch screen is misconfigured, so it renders as solid black for a moment until our custom splash takes over.
+When the property details panel is fully open and scrolled to the top, pulling down feels sticky. The list inside the panel keeps trying to bounce before the panel finally agrees to collapse, so there's a noticeable lag and resistance.
 
 **The fix**
 
-- Place the actual Redfin logo image files into the launch screen image slot so iOS has something to draw. Right now the slot is empty, which is why iOS shows nothing.
-- Correct the launch screen configuration so the Redfin red background and the centered logo are baked into the system-level launch screen — the same screen iOS shows the instant you tap the icon.
+- Disable the inner list's rubber-band bounce while it's at the top, so a downward drag immediately moves the panel instead of stretching the list.
+- Hand off the drag to the panel the moment the finger moves down at the top of the list — no activation delay — so closing mirrors the same instant feel as pulling up to expand.
+- Keep upward drags fully scrolling the list as they do today.
 
 **Result**
 
-The moment you tap the app icon, you'll see the Redfin red background with the white logo centered — instantly, with no black flash. Our animated splash screen then smoothly takes over with its scale/fade-in animation, so the handoff is invisible.
+Pulling the panel down from the top will feel exactly like the inverse of pulling it up: one smooth, immediate motion that snaps closed with the same spring.

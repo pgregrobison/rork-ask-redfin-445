@@ -299,11 +299,13 @@ struct HybridDetailView: View {
     // ScrollView is at scroll top, and only on downward drags. Mirrors the
     // collapsed→expanded pull behavior 1:1.
     private var expandedContentDrag: some Gesture {
-        DragGesture(minimumDistance: 0)
+        DragGesture(minimumDistance: 1)
             .onChanged { value in
                 guard sheetSnap == .expanded, scrolledToTop else { return }
                 if !sheetDragActive {
-                    guard value.translation.height > 4 else { return }
+                    // Activate on the very first downward movement so the
+                    // ScrollView never has a chance to rubber-band.
+                    guard value.translation.height > 0 else { return }
                     sheetDragActive = true
                     dragStartOffset = sheetOffset
                 }
@@ -351,6 +353,7 @@ struct HybridDetailView: View {
             }
         }
         .scrollDisabled(sheetSnap == .collapsed || sheetDragActive)
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
         .scrollIndicators(.hidden)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.y
