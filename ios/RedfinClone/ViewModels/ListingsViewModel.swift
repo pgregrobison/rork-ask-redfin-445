@@ -254,9 +254,17 @@ class ListingsViewModel {
             dismissOverlay()
             return
         }
+        let wasCardVisible = isCardVisible && selectedListing != nil
         dismissTask?.cancel()
         dismissTask = nil
         dismissingListing = nil
+        if wasCardVisible {
+            // Swap content in place — no slide animation between pins.
+            selectedListing = listing
+            markSeen(listing)
+            panToListing(listing)
+            return
+        }
         isCardVisible = false
         selectedListing = listing
         markSeen(listing)
