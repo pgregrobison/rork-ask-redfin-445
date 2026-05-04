@@ -1,17 +1,14 @@
-# Clean up debug panel: lock in zoom + hybrid, remove realistic mode and transition options
+# Simplify debug panel — remove DP style and animation tuning
 
-**What changes**
+## Cleanup
 
-- Remove the "Card Transition" section from the debug panel — every variant now uses the zoom card transition by default.
-- Remove the "Realistic Mode" section (and its bi-directional / one-way sync sub-options) entirely from the debug panel.
-- Set the default detail page style to "Hybrid" so all variants use the hybrid layout out of the box.
-- Wire the rest of the app so zoom transitions are always on, and any realistic-mode-only behavior (8-second thinking stretch, live chat→map sync gating) is simply turned off.
-- Clean up the underlying settings model so the removed options no longer linger as stored preferences.
+- Remove the **DP Style** picker entirely. The detail page will always use the Hybrid layout.
+- Remove the **Camera Pan**, **Card Overlay Entrance**, and **Card Overlay Dismiss** sections from the debug panel.
+- Remove the **Reset Animation Defaults** button.
+- The detail-page-style setting (and its enum) is deleted; references to "Current" and "James" layouts are no longer reachable from the debug panel.
+- Pin pan and card slide-up/down animations now use sensible fixed defaults instead of being user-tunable.
 
-**What stays**
+## What remains in the debug panel
 
-- Global Entrypoint (App nav / Accessory)
-- DP Style (Current / James / Hybrid — defaulting to Hybrid)
-- Search Behavior (Default / Map Focus)
-- Camera Pan, Card Overlay Entrance, Card Overlay Dismiss animation tuners
-- Reset Animation Defaults button
+- Global Entrypoint (App nav vs Accessory)
+- Search Behavior (Default vs Map Focus)

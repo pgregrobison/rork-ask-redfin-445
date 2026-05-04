@@ -1,11 +1,5 @@
 import SwiftUI
 
-nonisolated enum DetailPageStyle: String, CaseIterable, Codable, Sendable {
-    case current = "Current"
-    case james = "James"
-    case hybrid = "Hybrid"
-}
-
 nonisolated enum SearchBehavior: String, CaseIterable, Codable, Sendable {
     case `default` = "Default"
     case mapFocus = "Map Focus"
@@ -18,10 +12,6 @@ nonisolated enum GlobalEntrypoint: String, CaseIterable, Codable, Sendable {
 
 @Observable
 class DebugSettings {
-    var detailPageStyle: DetailPageStyle {
-        didSet { UserDefaults.standard.set(detailPageStyle.rawValue, forKey: "debug_detailPageStyle") }
-    }
-
     var searchBehavior: SearchBehavior {
         didSet { UserDefaults.standard.set(searchBehavior.rawValue, forKey: "debug_searchBehavior") }
     }
@@ -30,74 +20,24 @@ class DebugSettings {
         didSet { UserDefaults.standard.set(globalEntrypoint.rawValue, forKey: "debug_globalEntrypoint") }
     }
 
-    var panDuration: Double {
-        didSet { UserDefaults.standard.set(panDuration, forKey: "debug_panDuration") }
-    }
-    var panUseSpring: Bool {
-        didSet { UserDefaults.standard.set(panUseSpring, forKey: "debug_panUseSpring") }
-    }
-    var panSpringResponse: Double {
-        didSet { UserDefaults.standard.set(panSpringResponse, forKey: "debug_panSpringResponse") }
-    }
-    var panSpringDamping: Double {
-        didSet { UserDefaults.standard.set(panSpringDamping, forKey: "debug_panSpringDamping") }
-    }
-    var overlaySpringResponse: Double {
-        didSet { UserDefaults.standard.set(overlaySpringResponse, forKey: "debug_overlaySpringResponse") }
-    }
-    var overlaySpringDamping: Double {
-        didSet { UserDefaults.standard.set(overlaySpringDamping, forKey: "debug_overlaySpringDamping") }
-    }
-    var dismissSpringResponse: Double {
-        didSet { UserDefaults.standard.set(dismissSpringResponse, forKey: "debug_dismissSpringResponse") }
-    }
-    var dismissSpringDamping: Double {
-        didSet { UserDefaults.standard.set(dismissSpringDamping, forKey: "debug_dismissSpringDamping") }
-    }
-
-    var panAnimation: Animation {
-        if panUseSpring {
-            return .spring(response: panSpringResponse, dampingFraction: panSpringDamping)
-        } else {
-            return .easeInOut(duration: panDuration)
-        }
-    }
+    static let panDuration: Double = 0.35
+    static let overlaySpringResponse: Double = 0.35
+    static let overlaySpringDamping: Double = 0.8
+    static let dismissSpringResponse: Double = 0.35
+    static let dismissSpringDamping: Double = 0.8
 
     var overlayAnimation: Animation {
-        .spring(response: overlaySpringResponse, dampingFraction: overlaySpringDamping)
+        .spring(response: Self.overlaySpringResponse, dampingFraction: Self.overlaySpringDamping)
     }
 
     var dismissAnimation: Animation {
-        .spring(response: dismissSpringResponse, dampingFraction: dismissSpringDamping)
-    }
-
-    func resetAnimationDefaults() {
-        panDuration = 0.35
-        panUseSpring = false
-        panSpringResponse = 0.35
-        panSpringDamping = 0.8
-        overlaySpringResponse = 0.35
-        overlaySpringDamping = 0.8
-        dismissSpringResponse = 0.35
-        dismissSpringDamping = 0.8
+        .spring(response: Self.dismissSpringResponse, dampingFraction: Self.dismissSpringDamping)
     }
 
     init() {
-        let storedStyle = UserDefaults.standard.string(forKey: "debug_detailPageStyle") ?? ""
-        self.detailPageStyle = DetailPageStyle(rawValue: storedStyle) ?? .hybrid
         let storedBehavior = UserDefaults.standard.string(forKey: "debug_searchBehavior") ?? ""
         self.searchBehavior = SearchBehavior(rawValue: storedBehavior) ?? .default
         let storedEntry = UserDefaults.standard.string(forKey: "debug_globalEntrypoint") ?? ""
         self.globalEntrypoint = GlobalEntrypoint(rawValue: storedEntry) ?? .appNav
-
-        let ud = UserDefaults.standard
-        self.panDuration = ud.object(forKey: "debug_panDuration") as? Double ?? 0.35
-        self.panUseSpring = ud.object(forKey: "debug_panUseSpring") as? Bool ?? false
-        self.panSpringResponse = ud.object(forKey: "debug_panSpringResponse") as? Double ?? 0.35
-        self.panSpringDamping = ud.object(forKey: "debug_panSpringDamping") as? Double ?? 0.8
-        self.overlaySpringResponse = ud.object(forKey: "debug_overlaySpringResponse") as? Double ?? 0.35
-        self.overlaySpringDamping = ud.object(forKey: "debug_overlaySpringDamping") as? Double ?? 0.8
-        self.dismissSpringResponse = ud.object(forKey: "debug_dismissSpringResponse") as? Double ?? 0.35
-        self.dismissSpringDamping = ud.object(forKey: "debug_dismissSpringDamping") as? Double ?? 0.8
     }
 }

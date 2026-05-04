@@ -341,20 +341,10 @@ class ListingsViewModel {
             span: currentSpan
         )
         let startRegion = MKCoordinateRegion(center: currentCenter, span: currentSpan)
-        let settings = debugSettings
-        let useSpring = settings?.panUseSpring ?? false
-        if useSpring {
-            animateCameraSpring(
-                from: startRegion, to: targetRegion,
-                response: settings?.panSpringResponse ?? 0.35,
-                damping: settings?.panSpringDamping ?? 0.8
-            )
-        } else {
-            animateCameraEaseInOut(
-                from: startRegion, to: targetRegion,
-                duration: settings?.panDuration ?? 0.35
-            )
-        }
+        animateCameraEaseInOut(
+            from: startRegion, to: targetRegion,
+            duration: DebugSettings.panDuration
+        )
     }
 
     var cardListing: Listing? {
@@ -369,8 +359,7 @@ class ListingsViewModel {
             isCardVisible = false
         }
         dismissTask = Task {
-            let response = debugSettings?.dismissSpringResponse ?? 0.35
-            try? await Task.sleep(for: .seconds(response))
+            try? await Task.sleep(for: .seconds(DebugSettings.dismissSpringResponse))
             guard !Task.isCancelled else { return }
             dismissingListing = nil
         }
@@ -417,53 +406,6 @@ class ListingsViewModel {
                 mapPosition = .region(interpolateRegion(from: startRegion, to: endRegion, t: eased))
                 try? await Task.sleep(nanoseconds: sleepNano)
             }
-            mapPosition = .region(endRegion)
-            currentCenter = endRegion.center
-            currentSpan = endRegion.span
-            isAnimatingCamera = false
-        }
-    }
-
-    private func animateCameraSpring(from startRegion: MKCoordinateRegion, to endRegion: MKCoordinateRegion, response: Double, damping: Double) {
-        cameraAnimationTask?.cancel()
-        isAnimatingCamera = true
-
-        var positions = [startRegion.center.latitude, startRegion.center.longitude,
-                         startRegion.span.latitudeDelta, startRegion.span.longitudeDelta]
-        let targets = [endRegion.center.latitude, endRegion.center.longitude,
-                       endRegion.span.latitudeDelta, endRegion.span.longitudeDelta]
-        var velocities = [0.0, 0.0, 0.0, 0.0]
-        let omega = 2.0 * .pi / response
-
-        cameraAnimationTask = Task {
-            let dt = 1.0 / 60.0
-            var totalTime = 0.0
-            let maxTime = max(response * 6.0, 1.5)
-
-            while !Task.isCancelled && totalTime < maxTime {
-                var settled = true
-                for i in 0..<4 {
-                    let accel = omega * omega * (targets[i] - positions[i]) - 2.0 * damping * omega * velocities[i]
-                    velocities[i] += accel * dt
-                    positions[i] += velocities[i] * dt
-                    let range = abs(targets[i] - [startRegion.center.latitude, startRegion.center.longitude,
-                                                   startRegion.span.latitudeDelta, startRegion.span.longitudeDelta][i])
-                    let threshold = max(range * 0.002, 0.00001)
-                    if abs(positions[i] - targets[i]) > threshold || abs(velocities[i]) > threshold * 5 {
-                        settled = false
-                    }
-                }
-
-                mapPosition = .region(MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: positions[0], longitude: positions[1]),
-                    span: MKCoordinateSpan(latitudeDelta: max(positions[2], 0.001), longitudeDelta: max(positions[3], 0.001))
-                ))
-
-                totalTime += dt
-                if settled { break }
-                try? await Task.sleep(nanoseconds: 16_000_000)
-            }
-
             mapPosition = .region(endRegion)
             currentCenter = endRegion.center
             currentSpan = endRegion.span

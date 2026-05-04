@@ -267,35 +267,14 @@ struct ContentView: View {
     @ViewBuilder
     private func detailView(for listing: Listing) -> some View {
         let hideFAB = debugSettings.globalEntrypoint == .accessory
-        switch debugSettings.detailPageStyle {
-        case .current:
-            ListingDetailView(
-                listing: listing,
-                isSaved: viewModel.isSaved(listing),
-                useZoomTransition: true,
-                hideAskRedfinFAB: hideFAB,
-                onToggleSave: { viewModel.toggleSaved(listing) },
-                onAskRedfin: { viewModel.showChat = true }
-            )
-        case .james:
-            RedfinDetailView(
-                listing: listing,
-                isSaved: viewModel.isSaved(listing),
-                useZoomTransition: true,
-                hideAskRedfinFAB: hideFAB,
-                onToggleSave: { viewModel.toggleSaved(listing) },
-                onAskRedfin: { viewModel.showChat = true }
-            )
-        case .hybrid:
-            HybridDetailView(
-                listing: listing,
-                isSaved: viewModel.isSaved(listing),
-                useZoomTransition: true,
-                hideAskRedfinFAB: hideFAB,
-                onToggleSave: { viewModel.toggleSaved(listing) },
-                onAskRedfin: { viewModel.showChat = true }
-            )
-        }
+        HybridDetailView(
+            listing: listing,
+            isSaved: viewModel.isSaved(listing),
+            useZoomTransition: true,
+            hideAskRedfinFAB: hideFAB,
+            onToggleSave: { viewModel.toggleSaved(listing) },
+            onAskRedfin: { viewModel.showChat = true }
+        )
     }
 
     private var mapShimmerActive: Bool {
