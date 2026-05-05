@@ -367,6 +367,10 @@ class ListingsViewModel {
         if !isAnimatingCamera {
             currentSpan = region.span
             currentCenter = region.center
+            // Capture user pans/zooms into the source-of-truth so the map
+            // restores to the same view when FindMapView is recreated
+            // (e.g. after switching to list view and back).
+            mapPosition = .region(region)
         }
         locationService.isTrackingUser = false
     }

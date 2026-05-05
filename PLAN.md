@@ -1,12 +1,20 @@
-# Fix immediate crash: remove broken map-pan minimize hack
+# Persist map position across view switches
 
-**Why the app crashes**
-The last attempt to trigger the minimized accessory bar on map pan reassigned and re-parented an internal scroll view gesture recognizer. iOS treats that as an unsupported operation and crashes on launch.
+**The problem**
 
-**What I'll do**
-- Remove the broken hidden-scroll-view driver and its hooks from the map view and view model so the app launches cleanly again.
-- Restore the previous behavior where the accessory minimizes on tab-bar's native scroll-down behavior plus card visibility.
-- Leave list view, other tabs, and all unrelated screens untouched.
+Right now, switching between the map and list views in Find sometimes shifts the map to a different position, even when nothing should have moved it. The map should feel "sticky" — wherever you left it, that's where you come back to.
 
-**After this fix**
-The app will launch normally. The "minimize accessory when panning the map" behavior will be **not yet implemented** — I'll need a fresh, safer approach (e.g. a transparent scroll layer on top of the map that passes taps through). Happy to try that next once the crash is resolved.
+**What will change**
+
+The map will only move in these specific situations:
+- You drag, pinch, or zoom the map yourself
+- You tap a pin (still auto-centers on the selected home, as today)
+- You tap "Show on Map" from Ask Redfin
+- An Ask Redfin search runs while you're on the map-focus variant
+- You tap the "locate me" button to jump to your current location
+
+In every other case — including switching to list and back, opening/closing details, dismissing the chat without a search, or running an Ask Redfin search on the accessory/list-focus variants — the map will stay exactly where you left it.
+
+**How it'll feel**
+
+Switching from map → list → map will be seamless: same center, same zoom, same area. No surprise jumps. Searches and filters that don't explicitly target the map won't disturb your view.
