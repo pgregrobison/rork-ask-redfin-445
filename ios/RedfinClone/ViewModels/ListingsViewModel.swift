@@ -28,8 +28,6 @@ class ListingsViewModel {
     var selectedListing: Listing?
     private(set) var dismissingListing: Listing?
     var isCardVisible: Bool = false
-    var isMapInteracting: Bool = false
-    private var mapInteractionIdleTask: Task<Void, Never>?
     private var dismissTask: Task<Void, Never>?
     var sortOption: SortOption = .recommended
     var listingStatus: ListingStatus = .forSale
@@ -371,25 +369,6 @@ class ListingsViewModel {
             currentCenter = region.center
         }
         locationService.isTrackingUser = false
-    }
-
-    func noteMapCameraChanging() {
-        guard !isAnimatingCamera else { return }
-        if !isMapInteracting {
-            withAnimation(.easeInOut(duration: 0.22)) {
-                isMapInteracting = true
-            }
-        }
-        mapInteractionIdleTask?.cancel()
-        mapInteractionIdleTask = Task {
-            try? await Task.sleep(for: .milliseconds(450))
-            guard !Task.isCancelled else { return }
-            await MainActor.run {
-                withAnimation(.easeInOut(duration: 0.28)) {
-                    self.isMapInteracting = false
-                }
-            }
-        }
     }
 
     private func animateCameraEaseInOut(from startRegion: MKCoordinateRegion, to endRegion: MKCoordinateRegion, duration: Double) {

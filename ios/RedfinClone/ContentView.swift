@@ -209,9 +209,6 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(.keyboard)
-        .onChange(of: viewModel.isMapInteracting) { _, interacting in
-            if interacting { stickyMinimized = true }
-        }
         .onChange(of: viewModel.isCardVisible) { _, visible in
             if visible { stickyMinimized = true }
         }
@@ -282,13 +279,6 @@ struct ContentView: View {
         debugSettings.searchBehavior == .mapFocus
             && selectedTab == .find
             && !viewModel.showListView
-    }
-
-    private var shouldHideTabBarForMapPan: Bool {
-        selectedTab == .find
-            && !viewModel.showListView
-            && navigationPath.isEmpty
-            && viewModel.isMapInteracting
     }
 
     private var shouldMinimizeAccessory: Bool {

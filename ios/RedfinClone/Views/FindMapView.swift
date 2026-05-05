@@ -35,9 +35,6 @@ struct FindMapView: View {
             }
             .mapStyle(.standard(pointsOfInterest: .excludingAll))
             .mapControls { }
-            .onMapCameraChange(frequency: .continuous) { _ in
-                viewModel.noteMapCameraChanging()
-            }
             .onMapCameraChange(frequency: .onEnd) { context in
                 viewModel.persistMapRegion(context.region)
                 viewModel.updateLocationName(for: context.region)
@@ -74,13 +71,6 @@ struct FindMapView: View {
                 .opacity(viewModel.isCardVisible ? 1 : 0)
             }
 
-        }
-        .background {
-            if accessoryMode, #available(iOS 26.0, *) {
-                MapAccessoryScrollDriver()
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
         }
         .onChange(of: viewModel.locationService.userLocation?.coordinate.latitude) { _, _ in
             if viewModel.locationService.isTrackingUser {

@@ -1,20 +1,12 @@
-# Forward map pans through a real scroll view to trigger native tab-bar minimize
+# Fix immediate crash: remove broken map-pan minimize hack
 
-## What's changing
+**Why the app crashes**
+The last attempt to trigger the minimized accessory bar on map pan reassigned and re-parented an internal scroll view gesture recognizer. iOS treats that as an unsupported operation and crashes on launch.
 
-Right now, panning the map on the Find tab is supposed to minimize the bottom Ask Redfin accessory bar — but the trick we tried (an invisible scroll view nudged programmatically) doesn't actually trigger the system's minimize behavior, because iOS only reacts to real finger-driven scrolling.
+**What I'll do**
+- Remove the broken hidden-scroll-view driver and its hooks from the map view and view model so the app launches cleanly again.
+- Restore the previous behavior where the accessory minimizes on tab-bar's native scroll-down behavior plus card visibility.
+- Leave list view, other tabs, and all unrelated screens untouched.
 
-## New approach
-
-I'll put a transparent scroll layer **on top of** the map. As you drag your finger, that scroll layer scrolls (which is what the system needs to see in order to minimize the accessory bar), and the same drag is simultaneously passed through to the map so it pans/zooms exactly as before.
-
-## Behavior
-
-- **Map view of Find only.** No other tab, page, or the list view is affected.
-- **Panning, zooming, or rotating the map** all minimize the accessory bar, just like scrolling a feed does elsewhere in the app.
-- **Re-expanding** works exactly like the rest of the OS: the accessory stays minimized until you tap the minimized tab bar, matching the native behavior on every other screen.
-- Tapping pins, the map action buttons (layers / draw / locate), and the listing card overlay all keep working — the transparent layer doesn't swallow taps, only drags.
-
-## Cleanup
-
-- The old invisible-scroll-view driver and its camera-change "pulse" plumbing get removed since they're no longer needed.
+**After this fix**
+The app will launch normally. The "minimize accessory when panning the map" behavior will be **not yet implemented** — I'll need a fresh, safer approach (e.g. a transparent scroll layer on top of the map that passes taps through). Happy to try that next once the crash is resolved.
