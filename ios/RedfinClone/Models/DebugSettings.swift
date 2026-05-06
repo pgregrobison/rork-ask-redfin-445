@@ -10,6 +10,11 @@ nonisolated enum GlobalEntrypoint: String, CaseIterable, Codable, Sendable {
     case accessory = "Accessory"
 }
 
+nonisolated enum OpenToOffersVariant: String, CaseIterable, Codable, Sendable {
+    case aggressive = "Aggressive"
+    case conservative = "Conservative"
+}
+
 @Observable
 class DebugSettings {
     var searchBehavior: SearchBehavior {
@@ -19,6 +24,10 @@ class DebugSettings {
     var globalEntrypoint: GlobalEntrypoint {
         didSet { UserDefaults.standard.set(globalEntrypoint.rawValue, forKey: "debug_globalEntrypoint") }
     }
+
+    var openToOffersVariant: OpenToOffersVariant = .aggressive
+    var otoIsActive: Bool = false
+    var resetDraftTrigger: Int = 0
 
     static let panDuration: Double = 0.35
     static let overlaySpringResponse: Double = 0.35

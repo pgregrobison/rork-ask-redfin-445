@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var viewModel = ListingsViewModel()
     @State private var chatViewModel = ChatViewModel()
     @State private var debugSettings = DebugSettings()
+    @State private var myHomeDraft = OTOSetupDraft()
     @State private var askRedfinContext = AskRedfinContextModel()
     @State private var selectedTab: AppTab = .find
 
@@ -192,7 +193,7 @@ struct ContentView: View {
             }
             Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
-                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true)
+                    MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 }
             }
             Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
@@ -242,7 +243,7 @@ struct ContentView: View {
             .opacity(selectedTab == .saved ? 1 : 0)
             .allowsHitTesting(selectedTab == .saved)
 
-            MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true })
+            MyHomeView(isActive: selectedTab == .myHome, onProfileTap: { showDebugPanel = true }, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 .opacity(selectedTab == .myHome ? 1 : 0)
                 .allowsHitTesting(selectedTab == .myHome)
         }
