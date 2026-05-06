@@ -18,7 +18,16 @@ struct MyHomeView: View {
     @State private var isOTOButtonLoading = false
     @State private var showOffersSheet = false
 
-    private let pageBg = Color(red: 250/255, green: 249/255, blue: 248/255)
+    // Warm off-white in light, system background in dark.
+    private let pageBg = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor.systemBackground
+            : UIColor(red: 250/255, green: 249/255, blue: 248/255, alpha: 1)
+    })
+
+    // Adaptive card surface: white in light, near-black raised surface in dark.
+    private let cardBg = Color(.secondarySystemGroupedBackground)
+    private let cardBorder = Color(.separator)
 
     var body: some View {
         ScrollView {
@@ -105,7 +114,7 @@ struct MyHomeView: View {
 
             Text("1223 Smith St")
                 .font(.system(size: 16))
-                .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                .foregroundStyle(.primary)
         }
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -168,8 +177,8 @@ struct MyHomeView: View {
                 ForEach(0..<3, id: \.self) { i in
                     RoundedRectangle(cornerRadius: 30)
                         .fill(i == heroIndex
-                              ? Color(red: 17/255, green: 17/255, blue: 17/255)
-                              : Color(red: 84/255, green: 84/255, blue: 84/255).opacity(0.6))
+                              ? Color.primary
+                              : Color.secondary.opacity(0.6))
                         .frame(width: i == heroIndex ? 26 : 12, height: 12)
                         .animation(.easeInOut(duration: 0.2), value: heroIndex)
                 }
@@ -183,18 +192,18 @@ struct MyHomeView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Neighborhood market")
                 .font(.system(size: 23, weight: .bold))
-                .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Seattle is a balanced market")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color(red: 34/255, green: 34/255, blue: 34/255))
+                        .foregroundStyle(.primary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text("Supply and demand are about equal. Homes are selling for a fair market value.")
                         .font(.system(size: 14))
-                        .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                        .foregroundStyle(.primary)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 4)
                 }
@@ -212,9 +221,9 @@ struct MyHomeView: View {
                 }
             }
             .padding(20)
-            .background(Color.white)
+            .background(cardBg)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 221/255, green: 221/255, blue: 221/255), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
 
             HStack(spacing: 12) {
                 MarketPhotoCard(
@@ -246,10 +255,10 @@ struct MyHomeView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Open to Offers")
                         .font(.system(size: 23, weight: .bold))
-                        .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                        .foregroundStyle(.primary)
                     Text("34 buyers have reacted to your price.")
                         .font(.system(size: 16))
-                        .foregroundStyle(Color(red: 34/255, green: 34/255, blue: 34/255))
+                        .foregroundStyle(.primary)
                 }
                 otoDashboardCard
             } else if debugSettings.openToOffersVariant == .conservative {
@@ -257,7 +266,7 @@ struct MyHomeView: View {
             } else {
                 Text("See what your home is worth to real buyers")
                     .font(.system(size: 23, weight: .bold))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                 openToOffersAggressive
             }
@@ -268,10 +277,7 @@ struct MyHomeView: View {
     private var otoDashboardCard: some View {
         let teal   = Color(red: 21/255,  green: 114/255, blue: 122/255)
         let green  = Color(red: 1/255,   green: 120/255, blue: 62/255)
-        let dark   = Color(red: 17/255,  green: 17/255,  blue: 17/255)
-        let mid    = Color(red: 104/255, green: 104/255, blue: 104/255)
-        let inset  = Color(red: 56/255,  green: 52/255,  blue: 48/255).opacity(0.06)
-        let border = Color(red: 221/255, green: 221/255, blue: 221/255)
+        let inset  = Theme.Colors.inset
 
         return VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 8) {
@@ -279,9 +285,9 @@ struct MyHomeView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(teal)
                 (Text("Listed Apr 16  ·  Expires Jun 16")
-                    .foregroundColor(dark) +
+                    .foregroundColor(.primary) +
                  Text("  (24 days left)")
-                    .foregroundColor(mid))
+                    .foregroundColor(.secondary))
                     .font(.system(size: 14))
                 Spacer()
             }
@@ -290,30 +296,30 @@ struct MyHomeView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sentimentRow(label: "5 Great deal", percent: "15%", fg: green, bgOpacity: 0.1, borderColor: green, bold: false)
                 sentimentRow(label: "16 Fair price", percent: "47%", fg: teal, bgOpacity: 0.1, borderColor: teal, bold: true)
-                sentimentRow(label: "13 Too high", percent: "38%", fg: dark, bgOpacity: 0.0, borderColor: border, bold: false, insetColor: inset, percentColor: mid)
+                sentimentRow(label: "13 Too high", percent: "38%", fg: .primary, bgOpacity: 0.0, borderColor: cardBorder, bold: false, insetColor: inset, percentColor: .secondary)
                 Text("Based on reactions from 34 interested buyers")
                     .font(.system(size: 12))
-                    .foregroundStyle(mid)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 16)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text("What buyers are saying")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(mid)
+                    .foregroundStyle(.secondary)
                 Text("Above comp prices (8), Needs updating (5), Great location (4), Move-in ready (3)")
                     .font(.system(size: 14))
-                    .foregroundStyle(dark)
+                    .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 16)
 
             HStack(spacing: 12) {
                 Button(action: { showOffersSheet = true }) {
-                    statTile(value: "3", label: "Offers submitted", inset: inset, dark: dark)
+                    statTile(value: "3", label: "Offers submitted", inset: inset)
                 }
                 .buttonStyle(.plain)
-                statTile(value: "12", label: "Views", inset: inset, dark: dark)
+                statTile(value: "12", label: "Views", inset: inset)
             }
             .padding(.horizontal, 16)
 
@@ -321,10 +327,10 @@ struct MyHomeView: View {
                 Button(action: { showOTONextSteps = true }) {
                     Text("Take the next step")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color(.systemBackground))
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
-                        .background(Color(red: 34/255, green: 34/255, blue: 34/255))
+                        .background(Color.primary)
                         .clipShape(Capsule())
                 }
                 Button(action: { showOTOSetupFlow = true }) {
@@ -338,9 +344,9 @@ struct MyHomeView: View {
             .padding(.horizontal, 16)
         }
         .padding(.vertical, 24)
-        .background(Color.white)
+        .background(cardBg)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(border, lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
     }
 
     private func sentimentRow(label: String, percent: String, fg: Color, bgOpacity: Double, borderColor: Color, bold: Bool, insetColor: Color? = nil, percentColor: Color? = nil) -> some View {
@@ -366,14 +372,14 @@ struct MyHomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    private func statTile(value: String, label: String, inset: Color, dark: Color) -> some View {
+    private func statTile(value: String, label: String, inset: Color) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(dark)
+                .foregroundStyle(.primary)
             Text(label)
                 .font(.system(size: 14))
-                .foregroundStyle(dark)
+                .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -383,10 +389,7 @@ struct MyHomeView: View {
     }
 
     private var openToOffersConservative: some View {
-        let red    = Color(red: 222/255, green: 51/255,  blue: 65/255)
-        let dark   = Color(red: 34/255,  green: 34/255,  blue: 34/255)
-        let mid    = Color(red: 102/255, green: 102/255, blue: 102/255)
-        let border = Color(red: 221/255, green: 221/255, blue: 221/255)
+        let red = Color(red: 222/255, green: 51/255, blue: 65/255)
 
         return VStack(alignment: .leading, spacing: 16) {
             Text("OPEN TO OFFERS")
@@ -399,12 +402,12 @@ struct MyHomeView: View {
 
             Text("Not ready to list?\nYou don't have to be.")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(dark)
+                .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text("Hear from buyers before you decide anything.\nNo commitment, no listing, no clock running.")
                 .font(.system(size: 15))
-                .foregroundStyle(mid)
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: 14) {
@@ -427,9 +430,9 @@ struct MyHomeView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemBackground))
+        .background(cardBg)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(border, lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
     }
 
     private var openToOffersAggressive: some View {
@@ -465,7 +468,7 @@ struct MyHomeView: View {
                         .disabled(isOTOButtonLoading)
                         Text("No listing. No commitment. No sense of urgency.")
                             .font(.system(size: 13))
-                            .foregroundStyle(Color(red: 102/255, green: 102/255, blue: 102/255))
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
                     }
@@ -488,7 +491,7 @@ struct MyHomeView: View {
                 )
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 221/255, green: 221/255, blue: 221/255), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
     }
 
     // MARK: - Guide for your home
@@ -498,10 +501,10 @@ struct MyHomeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("A guide for your home")
                     .font(.system(size: 23, weight: .bold))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
                 Text("What to do, what's worth it, and who can help.")
                     .font(.system(size: 16))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -516,19 +519,19 @@ struct MyHomeView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Reimagine your space")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
 
                 ReimagineSpacePlaceholder()
 
                 Button(action: {}) {
                     Text("Get started")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
                 }
-                .background(Color.white)
-                .overlay(Capsule().stroke(Color(red: 34/255, green: 34/255, blue: 34/255), lineWidth: 1))
+                .background(cardBg)
+                .overlay(Capsule().stroke(Color.primary, lineWidth: 1))
                 .clipShape(Capsule())
                 .padding(.top, 8)
             }
@@ -537,7 +540,7 @@ struct MyHomeView: View {
                 Text("Work with a local pro")
                     .font(.system(size: 18, weight: .bold))
                     .padding(.top, 12)
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
 
                 VStack(spacing: 12) {
                     HomeGuideProRow(title: "Lawn care",       imageURL: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=120&h=120&fit=crop&auto=format")
@@ -553,12 +556,12 @@ struct MyHomeView: View {
                     Text("Search projects")
                         .font(.system(size: 14, weight: .bold))
                 }
-                .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
             }
-            .background(Color.white)
-            .overlay(Capsule().stroke(Color(red: 34/255, green: 34/255, blue: 34/255), lineWidth: 1))
+            .background(cardBg)
+            .overlay(Capsule().stroke(Color.primary, lineWidth: 1))
             .clipShape(Capsule())
             .padding(.top, 8)
         }
@@ -690,10 +693,10 @@ private struct StatChip: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.system(size: 12))
-                .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                .foregroundStyle(.primary)
             Text(value)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                .foregroundStyle(.primary)
                 .monospacedDigit()
             if let change {
                 HStack(spacing: 2) {
@@ -706,15 +709,15 @@ private struct StatChip: View {
                         .monospacedDigit()
                     + Text(" \(mom)")
                         .font(.system(size: 12))
-                        .foregroundStyle(Color(red: 104/255, green: 104/255, blue: 104/255))
+                        .foregroundStyle(.secondary)
                 }
             }
         }
         .padding(16)
         .frame(width: 163, alignment: .leading)
-        .background(Color(red: 249/255, green: 249/255, blue: 249/255))
+        .background(Theme.Colors.inset)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 221/255, green: 221/255, blue: 221/255), lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.separator), lineWidth: 0.5))
     }
 }
 
@@ -793,19 +796,19 @@ private struct HomeGuideTipCard: View {
             HStack(alignment: .top, spacing: 8) {
                 Text(title)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(Color(red: 19/255, green: 19/255, blue: 19/255))
+                    .foregroundStyle(.primary)
                     .lineLimit(2)
                 Spacer()
                 Image(systemName: "xmark")
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(Color(red: 104/255, green: 104/255, blue: 104/255))
+                    .foregroundStyle(.secondary)
                     .padding(.top, 3)
             }
 
             HStack(spacing: 0) {
                 Text(cost)
                     .font(.system(size: 14))
-                    .foregroundStyle(Color(red: 104/255, green: 104/255, blue: 104/255))
+                    .foregroundStyle(.secondary)
                     .monospacedDigit()
                 Spacer()
                 Button(action: {}) {
@@ -817,9 +820,9 @@ private struct HomeGuideTipCard: View {
         }
         .padding(20)
         .frame(width: 220, height: 108, alignment: .topLeading)
-        .background(Color.white)
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 209/255, green: 209/255, blue: 209/255), lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.separator), lineWidth: 0.5))
     }
 }
 
@@ -842,23 +845,23 @@ private struct HomeGuideProRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("TRENDING")
                     .font(.system(size: 12))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
                 Text(title)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                    .foregroundStyle(.primary)
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Color(red: 17/255, green: 17/255, blue: 17/255))
+                .foregroundStyle(.primary)
         }
         .padding(20)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 209/255, green: 209/255, blue: 209/255), lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.separator), lineWidth: 0.5))
     }
 }
 

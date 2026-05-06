@@ -204,89 +204,60 @@ struct OTOOffersSheetView: View {
 // MARK: - Asset placeholders (until art is provided)
 
 struct MarketGaugePlaceholder: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static let lightURL = URL(string: "https://r2-pub.rork.com/generated-images/d1dde4b8-fe41-48e9-a7fc-d5068ac827b3.png")
+    private static let darkURL  = URL(string: "https://r2-pub.rork.com/generated-images/66152ea8-5f5d-416c-aa08-d2989d398279.png")
+
     var body: some View {
-        ZStack {
-            // Semi-circle gauge arc
-            Canvas { ctx, size in
-                let rect = CGRect(x: 12, y: 0, width: size.width - 24, height: (size.width - 24))
-                let center = CGPoint(x: rect.midX, y: rect.maxY)
-                let radius = rect.width / 2
-
-                let segments: [(start: Double, end: Double, color: Color)] = [
-                    (180, 220, Color(red: 222/255, green: 51/255, blue: 65/255)),
-                    (220, 260, Color(red: 232/255, green: 150/255, blue: 60/255)),
-                    (260, 280, Color(red: 21/255, green: 114/255, blue: 122/255)),
-                    (280, 320, Color(red: 232/255, green: 150/255, blue: 60/255)),
-                    (320, 360, Color(red: 1/255, green: 120/255, blue: 62/255)),
-                ]
-                for seg in segments {
-                    var path = Path()
-                    path.addArc(
-                        center: center,
-                        radius: radius,
-                        startAngle: .degrees(seg.start),
-                        endAngle: .degrees(seg.end),
-                        clockwise: false
-                    )
-                    ctx.stroke(path, with: .color(seg.color), style: StrokeStyle(lineWidth: 18, lineCap: .butt))
-                }
-
-                // Needle pointing roughly to "balanced" middle
-                var needle = Path()
-                needle.move(to: center)
-                let needleAngle: Double = 270 * .pi / 180
-                let nx = center.x + cos(needleAngle) * (radius - 4)
-                let ny = center.y + sin(needleAngle) * (radius - 4)
-                needle.addLine(to: CGPoint(x: nx, y: ny))
-                ctx.stroke(needle, with: .color(Color(red: 17/255, green: 17/255, blue: 17/255)), style: StrokeStyle(lineWidth: 3, lineCap: .round))
-
-                ctx.fill(Path(ellipseIn: CGRect(x: center.x - 7, y: center.y - 7, width: 14, height: 14)),
-                         with: .color(Color(red: 17/255, green: 17/255, blue: 17/255)))
+        VStack(spacing: 8) {
+            AsyncImage(url: colorScheme == .dark ? Self.darkURL : Self.lightURL) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                Color.clear
             }
-            .frame(height: 130)
+            .frame(height: 160)
+            .frame(maxWidth: .infinity)
 
-            VStack {
+            HStack {
+                Text("Buyer's").font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                HStack {
-                    Text("Buyer's").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text("Balanced").font(.caption.weight(.semibold))
-                    Spacer()
-                    Text("Seller's").font(.caption).foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 4)
-                .padding(.top, 4)
+                Text("Balanced").font(.caption.weight(.semibold)).foregroundStyle(.primary)
+                Spacer()
+                Text("Seller's").font(.caption).foregroundStyle(.secondary)
             }
+            .padding(.horizontal, 4)
         }
         .frame(maxWidth: .infinity)
     }
 }
 
 struct ReimagineSpacePlaceholder: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static let lightURL = URL(string: "https://r2-pub.rork.com/generated-images/63b7a663-d01f-4f46-8b3b-174b160622e8.png")
+    private static let darkURL  = URL(string: "https://r2-pub.rork.com/generated-images/a9b1a488-d353-44a3-87bf-5d17da0dde37.png")
+
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 235/255, green: 220/255, blue: 200/255),
-                    Color(red: 200/255, green: 215/255, blue: 200/255)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            VStack(spacing: 8) {
-                Image(systemName: "wand.and.stars")
-                    .font(.system(size: 36, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.9))
-                Text("Reimagine your space")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                Text("Visualize updates with AI")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.85))
+        Color(.tertiarySystemFill)
+            .frame(height: 180)
+            .overlay {
+                AsyncImage(url: colorScheme == .dark ? Self.darkURL : Self.lightURL) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "wand.and.stars")
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .allowsHitTesting(false)
             }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 180)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
