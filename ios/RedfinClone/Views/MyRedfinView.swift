@@ -58,7 +58,7 @@ struct MyRedfinView: View {
     }
 
     private var avatar: some View {
-        let url = URL(string: "https://randomuser.me/api/portraits/women/68.jpg")
+        let url = URL(string: "https://i.pravatar.cc/300?img=49")
         return AsyncImage(url: url) { phase in
             switch phase {
             case .success(let image):
