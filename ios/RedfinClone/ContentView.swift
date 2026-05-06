@@ -159,7 +159,7 @@ struct ContentView: View {
     @available(iOS 26.0, *)
     private var accessoryLayout: some View {
         TabView(selection: tabSelectionBinding) {
-            Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+            Tab(value: AppTab.find) {
                 NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: {}, onListingTap: { listing in
                         navigateToListing(listing)
@@ -168,8 +168,10 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+            } label: {
+                tabLabel(for: .find)
             }
-            Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+            Tab(value: AppTab.forYou) {
                 NavigationStack(path: $forYouPath) {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
@@ -179,8 +181,10 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+            } label: {
+                tabLabel(for: .forYou)
             }
-            Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+            Tab(value: AppTab.saved) {
                 NavigationStack(path: $savedPath) {
                     SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
@@ -190,16 +194,22 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+            } label: {
+                tabLabel(for: .saved)
             }
-            Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+            Tab(value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 }
+            } label: {
+                tabLabel(for: .myHome)
             }
-            Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+            Tab(value: AppTab.myRedfin) {
                 NavigationStack(path: $myRedfinPath) {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true }, ownsNavStack: true)
                 }
+            } label: {
+                tabLabel(for: .myRedfin)
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
@@ -287,6 +297,16 @@ struct ContentView: View {
               !viewModel.showListView,
               navigationPath.isEmpty else { return false }
         return stickyMinimized
+    }
+
+    @ViewBuilder
+    private func tabLabel(for tab: AppTab) -> some View {
+        Label {
+            Text(tab.title)
+        } icon: {
+            Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
+                .environment(\.symbolVariants, .none)
+        }
     }
 
     @available(iOS 26.0, *)
