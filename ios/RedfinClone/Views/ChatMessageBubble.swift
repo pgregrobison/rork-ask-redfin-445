@@ -66,8 +66,20 @@ struct ChatMessageBubble: View {
                     .environment(\.chatWidgetMessageID, message.id)
             }
 
-            if message.isTourRoute {
-                TourRouteMapWidget()
+            if let route = message.tourDayRoute {
+                TourRouteMapWidget(route: route, allListings: allListings)
+            }
+
+            if let stopListingId = message.tourDayCurrentStopId,
+               let listing = allListings.first(where: { $0.id == stopListingId }),
+               let stop = TourDayData.demoRoute.stops.first(where: { $0.listingId == stopListingId }) {
+                TourDayStopCard(
+                    listing: listing,
+                    stopNumber: stop.id,
+                    totalStops: TourDayData.demoRoute.stops.count,
+                    time: stop.time,
+                    onTap: { onListingTap(listing) }
+                )
             }
 
             if message.role == .assistant && !message.content.isEmpty && !message.isStreaming {

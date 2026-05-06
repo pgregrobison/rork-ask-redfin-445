@@ -31,6 +31,9 @@ class ChatViewModel {
     var isVoiceMuted: Bool = false
     var voiceTranscriptMessageId: String?
     var voiceScrollToTopId: String?
+    var tourDayBannerVisible: Bool = false
+    var tourDayHint: String?
+    var tourDayCurrentStopIndex: Int = 0
     var searchResultsJustArrived: [Listing]?
     var searchFiltersJustArrived: SearchFilters?
     var searchAddNeighborhoodsJustArrived: Bool = false
@@ -42,6 +45,7 @@ class ChatViewModel {
     private let storageKey = "chatThreads_v2"
     private var streamTask: Task<Void, Never>?
     private var voiceSimTask: Task<Void, Never>?
+    private var tourDayTask: Task<Void, Never>?
 
     private let voiceSimPhrases = [
         "I'm looking for a 3 bedroom home near downtown Raleigh with a big backyard"
@@ -104,8 +108,138 @@ class ChatViewModel {
         inputText = ""
         updateThreadTitle(from: text)
 
+        if text.lowercased().contains("tour day") {
+            startTourDay()
+            return
+        }
+
         streamTask?.cancel()
         streamTask = Task { await generateResponse(for: text) }
+    }
+
+    func startTourDay() {
+        tourDayTask?.cancel()
+        streamTask?.cancel()
+        thinkingState = .none
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        let title = "Tour Day · \(formatter.string(from: Date()))"
+        let thread = ChatThread(title: title, messages: [], isTourDay: true)
+        threads.insert(thread, at: 0)
+        activeThreadId = thread.id
+        tourDayCurrentStopIndex = 0
+        saveThreads()
+
+        tourDayBannerVisible = true
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+
+        tourDayTask = Task { await runTourDayScript() }
+    }
+
+    private func runTourDayScript() async {
+        try? await Task.sleep(for: .milliseconds(400))
+        if Task.isCancelled { return }
+
+        await streamAssistantMessage("Welcome to tour day! I've created a new thread for all things tours. Here's your day at a glance.")
+        if Task.isCancelled { return }
+
+        try? await Task.sleep(for: .milliseconds(700))
+        if Task.isCancelled { return }
+
+        let routeMsg = ChatMessage(
+            role: .assistant,
+            content: "I mapped out the most efficient route for your 4 tours today.",
+            isStreaming: false,
+            tourDayRoute: TourDayData.demoRoute
+        )
+        appendMessage(routeMsg)
+        saveThreads()
+
+        try? await Task.sleep(for: .seconds(2))
+        if Task.isCancelled { return }
+
+        withAnimation(.easeOut(duration: 0.4)) {
+            tourDayBannerVisible = false
+        }
+
+        for stop in TourDayData.demoRoute.stops {
+            if Task.isCancelled { return }
+            tourDayCurrentStopIndex = stop.id
+            try? await Task.sleep(for: .seconds(2))
+            if Task.isCancelled { return }
+
+            let intro: String
+            if stop.id == 1 {
+                intro = "First stop coming up at \(stop.time). Heading to the Tribeca home now."
+            } else {
+                intro = stopTransitionPrompt(for: stop.id)
+            }
+            await streamAssistantMessage(intro, currentStopId: nil)
+            if Task.isCancelled { return }
+
+            let card = ChatMessage(
+                role: .assistant,
+                content: "",
+                tourDayCurrentStopId: stop.listingId
+            )
+            appendMessage(card)
+            saveThreads()
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+            if stop.id > 1 {
+                tourDayHint = "Tap the waveform to reply by voice"
+                try? await Task.sleep(for: .seconds(5))
+                tourDayHint = nil
+                if Task.isCancelled { return }
+            } else {
+                try? await Task.sleep(for: .seconds(4))
+                if Task.isCancelled { return }
+            }
+        }
+
+        if Task.isCancelled { return }
+        tourDayCurrentStopIndex = 0
+        try? await Task.sleep(for: .seconds(1))
+
+        let summary = """
+        That's a wrap on tour day! Here's a recap of what you loved and didn't — I've passed this along to your agent.
+
+        • 100 Barclay St — Loved the natural light; kitchen felt cramped.
+        • 88 Greenwich St — Beautiful finishes, but the second bedroom was tight.
+        • 55 Hudson Yards — Top pick. The view sold you.
+        • 142 W 82nd St — Great space, unsure about the location.
+        """
+        let summaryMsg = ChatMessage(
+            role: .assistant,
+            content: summary,
+            isTourDaySummary: true
+        )
+        appendMessage(summaryMsg)
+        saveThreads()
+    }
+
+    private func stopTransitionPrompt(for stopId: Int) -> String {
+        switch stopId {
+        case 2: return "On your way to the 2nd tour — let me know what you thought of the first home."
+        case 3: return "Heading to tour #3. How did the second one feel?"
+        case 4: return "Last stop ahead. What did you think of #3?"
+        default: return "Next stop coming up."
+        }
+    }
+
+    private func streamAssistantMessage(_ text: String, currentStopId: String? = nil) async {
+        let msg = ChatMessage(role: .assistant, content: "", isStreaming: true, tourDayCurrentStopId: currentStopId)
+        appendMessage(msg)
+        await streamText(text, toMessageId: msg.id)
+        finalizeMessage(msg.id)
+        saveThreads()
+    }
+
+    func dismissTourDayBanner() {
+        withAnimation(.easeOut(duration: 0.3)) {
+            tourDayBannerVisible = false
+        }
     }
 
     func setFeedback(_ feedback: MessageFeedback, for messageId: String) {
@@ -143,6 +277,16 @@ class ChatViewModel {
         isVoiceMuted.toggle()
     }
 
+    private func tourDayVoicePhrase() -> String? {
+        guard isTourDayThread, tourDayCurrentStopIndex > 0 else { return nil }
+        return TourDayData.voicePhrasesByStop[tourDayCurrentStopIndex]
+    }
+
+    private func tourDayAssistantAck() -> String? {
+        guard isTourDayThread, tourDayCurrentStopIndex > 0 else { return nil }
+        return TourDayData.assistantAcksByStop[tourDayCurrentStopIndex]
+    }
+
     private func simulateVoiceInput() async {
         while isVoiceMuted {
             if Task.isCancelled { return }
@@ -157,7 +301,7 @@ class ChatViewModel {
             try? await Task.sleep(for: .milliseconds(100))
         }
 
-        let phrase = voiceSimPhrases[0]
+        let phrase = tourDayVoicePhrase() ?? voiceSimPhrases[0]
         let words = phrase.split(separator: " ").map(String.init)
 
         let userMsg = ChatMessage(role: .user, content: "", isStreaming: true)
@@ -188,6 +332,14 @@ class ChatViewModel {
 
         try? await Task.sleep(for: .milliseconds(600))
         if Task.isCancelled { return }
+
+        if let ack = tourDayAssistantAck() {
+            isVoiceModeActive = false
+            isVoiceMuted = false
+            tourDayHint = nil
+            await streamAssistantMessage(ack)
+            return
+        }
 
         streamTask?.cancel()
         streamTask = Task { await generateResponse(for: phrase) }

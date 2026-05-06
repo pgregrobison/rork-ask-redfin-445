@@ -17,6 +17,16 @@ nonisolated struct TourRequest: Codable, Sendable {
     let address: String?
 }
 
+nonisolated struct TourDayStop: Codable, Sendable, Identifiable, Hashable {
+    let id: Int
+    let listingId: String
+    let time: String
+}
+
+nonisolated struct TourDayRoute: Codable, Sendable, Hashable {
+    let stops: [TourDayStop]
+}
+
 nonisolated struct MortgageRequest: Codable, Sendable {
     let listingId: String?
 }
@@ -47,6 +57,9 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
     var mortgageRequest: MortgageRequest?
     var isStreaming: Bool
     var isTourRoute: Bool
+    var tourDayRoute: TourDayRoute?
+    var tourDayCurrentStopId: String?
+    var isTourDaySummary: Bool
     var toolCalls: [ToolCallRecord]?
 
     init(
@@ -61,6 +74,9 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         mortgageRequest: MortgageRequest? = nil,
         isStreaming: Bool = false,
         isTourRoute: Bool = false,
+        tourDayRoute: TourDayRoute? = nil,
+        tourDayCurrentStopId: String? = nil,
+        isTourDaySummary: Bool = false,
         toolCalls: [ToolCallRecord]? = nil
     ) {
         self.id = id
@@ -74,6 +90,9 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         self.mortgageRequest = mortgageRequest
         self.isStreaming = isStreaming
         self.isTourRoute = isTourRoute
+        self.tourDayRoute = tourDayRoute
+        self.tourDayCurrentStopId = tourDayCurrentStopId
+        self.isTourDaySummary = isTourDaySummary
         self.toolCalls = toolCalls
     }
 
