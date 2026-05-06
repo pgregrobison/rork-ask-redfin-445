@@ -1,29 +1,33 @@
-# Dark mode pass on My Home + new Neighborhood Market & Reimagine assets
+# Redesign the Neighborhood market section to match the new mockup
 
-**Scope:** My Home tab only. Hero carousel cards (the three colored value/equity/seasonal cards) are left untouched — their hardcoded colors stay.
+## What changes
 
-## Dark mode color pass
+Replace the current "Neighborhood market" block on the **My Home** tab with a cleaner, card‑based layout that matches the mockup. No other tab or section is touched.
 
-- **Page background**: warm off-white (#FAF9F8) in light mode, automatically swaps to standard system dark in dark mode.
-- **Address row, section headlines, body copy**: switch hardcoded near-blacks and greys to the system primary/secondary text colors so they stay readable in dark mode.
-- **Cards** (Neighborhood Market container, Open to Offers dashboard, Conservative variant, Guide tip cards, Pro rows, stat chips, stat tiles): white card backgrounds become an adaptive card surface; hardcoded grey borders become the system separator color.
-- **Sentiment rows, "Take the next step" button, outline buttons, "Reset" toolbar item, the orange/red/teal/green accents**: kept as-is per your selection (text + backgrounds only, accents preserved).
-- **Stat chip inner background, stat tile insets**: switch to the existing adaptive inset color so they read correctly in both modes.
-- **Map preview gradient overlay**: already uses systemBackground — verified, no change.
+## New layout (top to bottom)
 
-## Neighborhood Market asset
+- **Section title** renamed to **"Neighborhood"**.
+- **2 × 2 grid of stat cards**, each with a small label, a chevron, a large value, and a secondary line:
+  - Sale activity — 10 — Recently sold homes
+  - Ave. home value — $260K — −9.6% since last month
+  - Avg sale‑to‑list — 100% — +0.5% since last month
+  - Redfin estimate — $336K — −9.6% since last month
+- **Neighborhood developments** card containing:
+  - Header row "Neighborhood developments" with a chevron.
+  - Two development rows (Costco Wholesale — Under construction, Opening Spring 2026, "+3‑5% property value"; Highway 75 upgrade — Planned, "Lane additions to reduce congestion") each with a small isometric thumbnail and a chevron.
+  - A subtle sparkle row at the bottom: **"How does this affect my home value?"**
+- **Bottom row** (side by side): the existing **Similar homes** photo card ($411,000, 103 Bird's Cove Dr.) next to a new **Est. time to sell** stat card showing "27 days" with a green up‑arrow and "Faster than last month".
 
-- Replace the hand-drawn Canvas gauge with a polished generated illustration: a clean, flat, balanced-market dial with the needle centered between "Buyer's market" and "Seller's market", using Redfin teal/green accents on a neutral background.
-- Two versions generated — one for light mode, one for dark mode — and the right one is shown automatically.
-- Sits in the same spot inside the Neighborhood Market card with the existing "Buyer's / Balanced / Seller's" caption row underneath.
+## Design details
 
-## Reimagine Your Space asset
-
-- Replace the gradient-and-icon placeholder with a generated editorial illustration showing a soft before/after room interior (subtle split / wand-and-stars motif) consistent with the flat, minimal Redfin look.
-- Light + dark variants generated and swapped automatically.
-- Same rounded card frame and "Get started" button below.
+- Uses the same theme/system colors as the rest of the page (adaptive light/dark) — the new cards inherit the same surface, border, and inset tokens already used elsewhere on this page.
+- Stat cards reuse the typography scale already established (large bold value, small label, secondary trend line) so they feel native to the page.
+- Development rows use a generated isometric construction illustration (one asset reused for both rows) on a tinted thumbnail.
+- Sparkle CTA uses the existing red sparkle accent already used elsewhere in the app.
+- Top hero cards, Open to Offers, and the Guide section are **not** changed.
 
 ## Out of scope
 
-- Hero carousel (3 colored cards) — untouched.
-- Other tabs, debug panel, Find/list views — untouched.
+- No backend, no real data — values are hardcoded to match the mock.
+- No interaction wiring beyond visual chevrons (taps remain inert, matching the rest of this page).
+

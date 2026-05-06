@@ -186,62 +186,69 @@ struct MyHomeView: View {
         }
     }
 
-    // MARK: - Market insights
+    // MARK: - Neighborhood
 
     private var marketInsightsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Neighborhood market")
-                .font(.system(size: 23, weight: .bold))
+            Text("Neighborhood")
+                .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Seattle is a balanced market")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("Supply and demand are about equal. Homes are selling for a fair market value.")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, 4)
+            // 2x2 grid of stat cards
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    NeighborhoodStatCard(
+                        label: "Sale activity",
+                        value: "10",
+                        secondary: "Recently sold homes",
+                        secondaryColor: .secondary,
+                        cardBg: cardBg,
+                        cardBorder: cardBorder
+                    )
+                    NeighborhoodStatCard(
+                        label: "Ave. home value",
+                        value: "$260K",
+                        secondary: "-9.6% since last month",
+                        secondaryColor: .secondary,
+                        cardBg: cardBg,
+                        cardBorder: cardBorder
+                    )
                 }
-
-                MarketGaugePlaceholder()
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        StatChip(label: "Median list price",   value: "$639K", change: nil,        mom: "MoM")
-                        StatChip(label: "Median sale price",   value: "$645K", change: nil,        mom: "MoM")
-                        StatChip(label: "Avg. days on market", value: "12d",   change: "+5 days",  mom: "MoM")
-                        StatChip(label: "Recently sold homes", value: "48",    change: "+5",       mom: "MoM")
-                    }
-                    .padding(.horizontal, 2)
+                HStack(spacing: 12) {
+                    NeighborhoodStatCard(
+                        label: "Avg sale-to-list",
+                        value: "100%",
+                        secondary: "+0.5% since last month",
+                        secondaryColor: .secondary,
+                        cardBg: cardBg,
+                        cardBorder: cardBorder
+                    )
+                    NeighborhoodStatCard(
+                        label: "Redfin estimate",
+                        value: "$336K",
+                        secondary: "-9.6% since last month",
+                        secondaryColor: .secondary,
+                        cardBg: cardBg,
+                        cardBorder: cardBorder
+                    )
                 }
             }
-            .padding(20)
-            .background(cardBg)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
 
+            // Neighborhood developments card
+            NeighborhoodDevelopmentsCard(cardBg: cardBg, cardBorder: cardBorder)
+
+            // Bottom row: Similar homes photo card + Est. time to sell
             HStack(spacing: 12) {
                 MarketPhotoCard(
-                    title: "Sold homes",
+                    title: "Similar homes",
                     bg: Color(red: 40/255, green: 32/255, blue: 26/255),
                     imageURL: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=400&fit=crop&auto=format",
-                    badgeLabel: "SOLD",
+                    badgeLabel: "Sold",
                     primaryText: "$411,000",
                     secondaryText: "103 Bird's Cove Dr."
                 )
-                MarketPhotoCard(
-                    title: "Listed homes",
-                    bg: Color(red: 26/255, green: 36/255, blue: 28/255),
-                    imageURL: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=400&fit=crop&auto=format",
-                    badgeLabel: nil,
-                    primaryText: "11 nearby",
-                    secondaryText: "This month"
-                )
+                EstTimeToSellCard(cardBg: cardBg, cardBorder: cardBorder)
             }
         }
         .padding(.horizontal, 12)
@@ -862,6 +869,217 @@ private struct HomeGuideProRow: View {
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.separator), lineWidth: 0.5))
+    }
+}
+
+// MARK: - NeighborhoodStatCard
+
+private struct NeighborhoodStatCard: View {
+    let label: String
+    let value: String
+    let secondary: String
+    let secondaryColor: Color
+    let cardBg: Color
+    let cardBorder: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(label)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            Text(value)
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(.primary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.top, 18)
+            Text(secondary)
+                .font(.system(size: 13))
+                .foregroundStyle(secondaryColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .padding(.top, 14)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
+    }
+}
+
+// MARK: - NeighborhoodDevelopmentsCard
+
+private struct NeighborhoodDevelopmentsCard: View {
+    let cardBg: Color
+    let cardBorder: Color
+
+    private let thumbURL = "https://r2-pub.rork.com/generated-images/8b4a2572-367a-43a8-bbc9-4efb15c261f0.png"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Neighborhood developments")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 10) {
+                DevelopmentRow(
+                    thumbURL: thumbURL,
+                    title: "Costco Wholesale",
+                    statusLabel: "Under construction",
+                    description: "Opening Spring 2026",
+                    valueImpact: "+3-5% property value"
+                )
+                DevelopmentRow(
+                    thumbURL: thumbURL,
+                    title: "Highway 75 upgrade",
+                    statusLabel: "Planned",
+                    description: "Lane additions to reduce congestion",
+                    valueImpact: nil
+                )
+            }
+
+            Button(action: {}) {
+                HStack(spacing: 10) {
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.Colors.brandRed)
+                    Text("How does this affect my home value?")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 0)
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
+    }
+}
+
+private struct DevelopmentRow: View {
+    let thumbURL: String
+    let title: String
+    let statusLabel: String
+    let description: String
+    let valueImpact: String?
+
+    var body: some View {
+        HStack(spacing: 12) {
+            AsyncImage(url: URL(string: thumbURL)) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Color(.tertiarySystemFill)
+            }
+            .frame(width: 76, height: 76)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Text(statusLabel)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Theme.Colors.inset)
+                    .clipShape(Capsule())
+
+                Text(description)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+
+                if let valueImpact {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(valueImpact)
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundStyle(Theme.Colors.brandGreen)
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            ZStack {
+                Circle()
+                    .fill(Color(.systemBackground))
+                    .frame(width: 28, height: 28)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.Colors.inset)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - EstTimeToSellCard
+
+private struct EstTimeToSellCard: View {
+    let cardBg: Color
+    let cardBorder: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Est. time to sell")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 0)
+
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("27 days")
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .monospacedDigit()
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.Colors.brandGreen)
+            }
+
+            Text("Faster than last month")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .padding(.top, 8)
+                .lineLimit(2)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 185, alignment: .topLeading)
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(cardBorder, lineWidth: 0.5))
     }
 }
 
