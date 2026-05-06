@@ -67,7 +67,7 @@ struct ChatMessageBubble: View {
             }
 
             if let route = message.tourDayRoute {
-                TourRouteMapWidget(route: route, allListings: allListings)
+                TourRouteMapWidget(route: route, allListings: allListings, onStopTap: onListingTap)
             }
 
             if let stopListingId = message.tourDayCurrentStopId,

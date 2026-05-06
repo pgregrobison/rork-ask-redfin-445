@@ -37,6 +37,15 @@ struct ContentView: View {
             chatViewModel.currentFindFiltersProvider = { [weak viewModel] in
                 viewModel?.currentSearchFilters ?? SearchFilters()
             }
+            chatViewModel.requestTourDayNotificationHandler = { [weak viewModel] in
+                viewModel?.notificationService.scheduleTourDayNotification()
+            }
+        }
+        .onChange(of: viewModel.notificationService.pendingTourDayTrigger) { _, newCount in
+            guard newCount > 0 else { return }
+            viewModel.notificationService.pendingTourDayTrigger = 0
+            viewModel.showChat = true
+            chatViewModel.startTourDay()
         }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)

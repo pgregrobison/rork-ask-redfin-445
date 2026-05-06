@@ -5,14 +5,15 @@ import UIKit
 struct TourRouteMapWidget: View {
     let route: TourDayRoute
     let allListings: [Listing]
+    let onStopTap: (Listing) -> Void
 
     @State private var mapPosition: MapCameraPosition
-    @State private var showDirectionsMenu: Bool = false
     @State private var showFullMap: Bool = false
 
-    init(route: TourDayRoute, allListings: [Listing]) {
+    init(route: TourDayRoute, allListings: [Listing], onStopTap: @escaping (Listing) -> Void) {
         self.route = route
         self.allListings = allListings
+        self.onStopTap = onStopTap
         let coords = route.stops.compactMap { stop in
             allListings.first(where: { $0.id == stop.listingId })?.coordinate
         }
@@ -64,11 +65,6 @@ struct TourRouteMapWidget: View {
         .background(Theme.Colors.secondaryBackground)
         .clipShape(.rect(cornerRadius: Theme.Radius.widget))
         .padding(.horizontal, Theme.Spacing.md)
-        .confirmationDialog("Open directions in", isPresented: $showDirectionsMenu, titleVisibility: .visible) {
-            Button("Apple Maps") { openInAppleMaps() }
-            Button("Google Maps") { openInGoogleMaps() }
-            Button("Cancel", role: .cancel) {}
-        }
         .fullScreenCover(isPresented: $showFullMap) {
             FullScreenRouteMap(stopsWithListings: stopsWithListings, isPresented: $showFullMap)
         }
@@ -78,7 +74,7 @@ struct TourRouteMapWidget: View {
         HStack(spacing: 10) {
             Image(systemName: "map.fill")
                 .font(.system(size: Theme.IconSize.medium, weight: .semibold))
-                .foregroundStyle(Theme.Colors.brandRed)
+                .foregroundStyle(.primary)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Today's tour route")
                     .font(.headline)
@@ -116,55 +112,68 @@ struct TourRouteMapWidget: View {
     private var stopList: some View {
         VStack(spacing: Theme.Spacing.sm) {
             ForEach(stopsWithListings, id: \.stop.id) { item in
-                HStack(spacing: Theme.Spacing.sm) {
-                    ZStack {
-                        Circle()
-                            .fill(Theme.Colors.brandRed)
-                            .frame(width: 22, height: 22)
-                        Text("\(item.stop.id)")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onStopTap(item.listing)
+                } label: {
+                    HStack(spacing: Theme.Spacing.sm) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.primary)
+                                .frame(width: 22, height: 22)
+                            Text("\(item.stop.id)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(Theme.Colors.invertedPrimary)
+                        }
 
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(item.listing.address)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                        Text(item.listing.neighborhood ?? item.listing.city)
-                            .font(.caption)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(item.listing.address)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text(item.listing.neighborhood ?? item.listing.city)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Text(item.stop.time)
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
+                            .monospacedDigit()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.tertiary)
                     }
-
-                    Spacer()
-
-                    Text(item.stop.time)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             }
         }
         .padding(Theme.Spacing.md)
     }
 
     private var directionsButton: some View {
-        Button {
-            showDirectionsMenu = true
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
-                    .font(.system(size: 14, weight: .bold))
-                Text("Open directions")
-                    .font(.subheadline.weight(.semibold))
+        Menu {
+            Button {
+                openInAppleMaps()
+            } label: {
+                Label("Apple Maps", systemImage: "map")
             }
-            .foregroundStyle(Theme.Colors.invertedPrimary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
-            .background(Color.primary)
-            .clipShape(.rect(cornerRadius: Theme.Radius.medium))
+            Button {
+                openInGoogleMaps()
+            } label: {
+                Label("Google Maps", systemImage: "globe")
+            }
+        } label: {
+            HStack(spacing: Theme.Spacing.xs) {
+                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                    .font(.system(size: Theme.IconSize.medium, weight: .semibold))
+                Text("Open directions")
+            }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.primary)
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.bottom, Theme.Spacing.md)
     }

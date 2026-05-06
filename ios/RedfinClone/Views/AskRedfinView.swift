@@ -23,17 +23,6 @@ struct AskRedfinView: View {
             messageList
             inputFooter
         }
-        .overlay(alignment: .top) {
-            if chatViewModel.tourDayBannerVisible {
-                TourDayBannerView(onTap: {
-                    chatViewModel.dismissTourDayBanner()
-                })
-                .padding(.top, Theme.Spacing.xs)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(50)
-            }
-        }
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: chatViewModel.tourDayBannerVisible)
         .background(Theme.Colors.background)
         .environment(\.horizontalSizeClass, .regular)
         .presentationDragIndicator(.visible)

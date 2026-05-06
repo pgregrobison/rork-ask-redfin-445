@@ -31,7 +31,6 @@ class ChatViewModel {
     var isVoiceMuted: Bool = false
     var voiceTranscriptMessageId: String?
     var voiceScrollToTopId: String?
-    var tourDayBannerVisible: Bool = false
     var tourDayHint: String?
     var tourDayCurrentStopIndex: Int = 0
     var searchResultsJustArrived: [Listing]?
@@ -109,12 +108,18 @@ class ChatViewModel {
         updateThreadTitle(from: text)
 
         if text.lowercased().contains("tour day") {
-            startTourDay()
+            requestTourDayNotification()
             return
         }
 
         streamTask?.cancel()
         streamTask = Task { await generateResponse(for: text) }
+    }
+
+    var requestTourDayNotificationHandler: (() -> Void)?
+
+    func requestTourDayNotification() {
+        requestTourDayNotificationHandler?()
     }
 
     func startTourDay() {
@@ -131,7 +136,6 @@ class ChatViewModel {
         tourDayCurrentStopIndex = 0
         saveThreads()
 
-        tourDayBannerVisible = true
         UINotificationFeedbackGenerator().notificationOccurred(.success)
 
         tourDayTask = Task { await runTourDayScript() }
@@ -158,10 +162,6 @@ class ChatViewModel {
 
         try? await Task.sleep(for: .seconds(2))
         if Task.isCancelled { return }
-
-        withAnimation(.easeOut(duration: 0.4)) {
-            tourDayBannerVisible = false
-        }
 
         for stop in TourDayData.demoRoute.stops {
             if Task.isCancelled { return }
@@ -234,12 +234,6 @@ class ChatViewModel {
         await streamText(text, toMessageId: msg.id)
         finalizeMessage(msg.id)
         saveThreads()
-    }
-
-    func dismissTourDayBanner() {
-        withAnimation(.easeOut(duration: 0.3)) {
-            tourDayBannerVisible = false
-        }
     }
 
     func setFeedback(_ feedback: MessageFeedback, for messageId: String) {

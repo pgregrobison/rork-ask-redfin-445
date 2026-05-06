@@ -15,7 +15,7 @@ struct TourDayStopCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: "mappin.circle.fill")
                             .font(.caption2.bold())
-                            .foregroundStyle(Theme.Colors.brandRed)
+                            .foregroundStyle(.primary)
                         Text("Stop \(stopNumber) of \(totalStops) • \(time)")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
@@ -67,11 +67,11 @@ struct TourDayStopCard: View {
             .overlay(alignment: .topLeading) {
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.brandRed)
+                        .fill(Color.primary)
                         .frame(width: 22, height: 22)
                     Text("\(stopNumber)")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Theme.Colors.invertedPrimary)
                 }
                 .padding(4)
             }
