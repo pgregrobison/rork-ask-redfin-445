@@ -33,31 +33,64 @@ struct MyRedfinView: View {
 
     private var profileCard: some View {
         VStack(spacing: Theme.Spacing.md) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(.secondary)
+            avatar
 
-            Text("Sign in to Redfin")
-                .font(Theme.Typography.cardTitle)
+            VStack(spacing: 4) {
+                Text("Alex Morgan")
+                    .font(Theme.Typography.cardTitle)
 
-            Text("Save searches, get instant alerts, and chat with Ask Redfin from any device.")
-                .font(Theme.Typography.secondary)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+                Text("alex.morgan@example.com")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(.secondary)
+            }
 
             Button(action: {}) {
-                Text("Sign in")
+                Text("Edit profile")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, Theme.Spacing.xxl)
+                    .foregroundStyle(Theme.Colors.stepIndicator)
+                    .padding(.horizontal, Theme.Spacing.xl)
                     .padding(.vertical, Theme.ButtonSize.verticalPadding)
-                    .background(Theme.Colors.stepIndicator, in: Capsule())
+                    .background(
+                        Capsule()
+                            .stroke(Theme.Colors.stepIndicator.opacity(0.4), lineWidth: 1)
+                    )
             }
+            .padding(.top, 4)
         }
         .padding(Theme.Spacing.xl)
         .frame(maxWidth: .infinity)
         .background(Theme.Colors.secondaryBackground)
         .clipShape(.rect(cornerRadius: Theme.Radius.large))
+    }
+
+    private var avatar: some View {
+        let url = URL(string: "https://i.pravatar.cc/240?img=47")
+        return AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            case .failure:
+                Image(systemName: "person.crop.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(.secondary)
+            case .empty:
+                ZStack {
+                    Color(.tertiarySystemFill)
+                    ProgressView()
+                }
+            @unknown default:
+                Color(.tertiarySystemFill)
+            }
+        }
+        .frame(width: 88, height: 88)
+        .clipShape(Circle())
+        .overlay(
+            Circle().stroke(Color.white.opacity(0.6), lineWidth: 2)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
     }
 
     private var rowGroup: some View {
