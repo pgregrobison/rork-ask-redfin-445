@@ -1,13 +1,9 @@
-# Show signed-in state on My Redfin with placeholder avatar
+# Polish My Redfin profile card
 
-**Changes (My Redfin tab only)**
+**Changes to the profile card on the My Redfin tab:**
 
-- Replace the "Sign in to Redfin" card with a signed-in profile card showing:
-  - A circular avatar loaded from a public placeholder image on the internet (e.g. a randomuser.me or pravatar portrait), with a graceful fallback while loading
-  - A friendly display name (e.g. "Alex Morgan")
-  - The account email below the name (e.g. "alex.morgan@example.com")
-  - A subtle "Edit profile" pill button replacing the "Sign in" button
-- Leave the settings rows (Notifications, Email preferences, Privacy, Help & support) unchanged
-- No changes to any other tab, navigation, or theme
+- Swap the placeholder avatar for a more diverse portrait (different person from a free online avatar service).
+- Style the email with the secondary text treatment used elsewhere in the app so it reads as quieter supporting info.
+- Rework the "Edit profile" button so it's clearly visible in both light and dark mode by using the established button styling already used in the app (filled tonal capsule with theme-aware colors), instead of the faint outlined version.
 
-This is purely a visual/state change to make the tab look like a logged-in user.
+No other tabs or sections are affected.

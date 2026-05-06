@@ -40,21 +40,15 @@ struct MyRedfinView: View {
                     .font(Theme.Typography.cardTitle)
 
                 Text("alex.morgan@example.com")
-                    .font(Theme.Typography.secondary)
+                    .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
             }
 
             Button(action: {}) {
                 Text("Edit profile")
-                    .font(Theme.Typography.headline)
-                    .foregroundStyle(Theme.Colors.stepIndicator)
-                    .padding(.horizontal, Theme.Spacing.xl)
-                    .padding(.vertical, Theme.ButtonSize.verticalPadding)
-                    .background(
-                        Capsule()
-                            .stroke(Theme.Colors.stepIndicator.opacity(0.4), lineWidth: 1)
-                    )
+                    .padding(.horizontal, Theme.Spacing.lg)
             }
+            .buttonStyle(.smallPill)
             .padding(.top, 4)
         }
         .padding(Theme.Spacing.xl)
@@ -64,7 +58,7 @@ struct MyRedfinView: View {
     }
 
     private var avatar: some View {
-        let url = URL(string: "https://i.pravatar.cc/240?img=47")
+        let url = URL(string: "https://randomuser.me/api/portraits/women/68.jpg")
         return AsyncImage(url: url) { phase in
             switch phase {
             case .success(let image):
