@@ -159,7 +159,7 @@ struct ContentView: View {
     @available(iOS 26.0, *)
     private var accessoryLayout: some View {
         TabView(selection: tabSelectionBinding) {
-            Tab(AppTab.find.title, systemImage: AppTab.find.icon, value: AppTab.find) {
+            Tab(AppTab.find.title, systemImage: selectedTab == .find ? AppTab.find.selectedIcon : AppTab.find.icon, value: AppTab.find) {
                 NavigationStack(path: $navigationPath) {
                     FindView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .find, onProfileTap: {}, onListingTap: { listing in
                         navigateToListing(listing)
@@ -169,7 +169,7 @@ struct ContentView: View {
                     }
                 }
             }
-            Tab(AppTab.forYou.title, systemImage: AppTab.forYou.icon, value: AppTab.forYou) {
+            Tab(AppTab.forYou.title, systemImage: selectedTab == .forYou ? AppTab.forYou.selectedIcon : AppTab.forYou.icon, value: AppTab.forYou) {
                 NavigationStack(path: $forYouPath) {
                     ForYouView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .forYou, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
@@ -180,7 +180,7 @@ struct ContentView: View {
                     }
                 }
             }
-            Tab(AppTab.saved.title, systemImage: AppTab.saved.icon, value: AppTab.saved) {
+            Tab(AppTab.saved.title, systemImage: selectedTab == .saved ? AppTab.saved.selectedIcon : AppTab.saved.icon, value: AppTab.saved) {
                 NavigationStack(path: $savedPath) {
                     SavedView(viewModel: viewModel, zoomNamespace: zoomNamespace, isActive: selectedTab == .saved, onProfileTap: {}, onListingTap: { listing in
                         viewModel.markSeen(listing)
@@ -191,12 +191,12 @@ struct ContentView: View {
                     }
                 }
             }
-            Tab(AppTab.myHome.title, systemImage: AppTab.myHome.icon, value: AppTab.myHome) {
+            Tab(AppTab.myHome.title, systemImage: selectedTab == .myHome ? AppTab.myHome.selectedIcon : AppTab.myHome.icon, value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 }
             }
-            Tab(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.icon, value: AppTab.myRedfin) {
+            Tab(AppTab.myRedfin.title, systemImage: selectedTab == .myRedfin ? AppTab.myRedfin.selectedIcon : AppTab.myRedfin.icon, value: AppTab.myRedfin) {
                 NavigationStack(path: $myRedfinPath) {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true }, ownsNavStack: true)
                 }
