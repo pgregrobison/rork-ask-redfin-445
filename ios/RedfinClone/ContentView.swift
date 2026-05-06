@@ -169,7 +169,7 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                tabLabel(for: .find)
+                Label(AppTab.find.title, systemImage: AppTab.find.selectedIcon)
             }
             Tab(value: AppTab.forYou) {
                 NavigationStack(path: $forYouPath) {
@@ -182,7 +182,7 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                tabLabel(for: .forYou)
+                Label(AppTab.forYou.title, systemImage: AppTab.forYou.selectedIcon)
             }
             Tab(value: AppTab.saved) {
                 NavigationStack(path: $savedPath) {
@@ -195,24 +195,25 @@ struct ContentView: View {
                     }
                 }
             } label: {
-                tabLabel(for: .saved)
+                Label(AppTab.saved.title, systemImage: AppTab.saved.selectedIcon)
             }
             Tab(value: AppTab.myHome) {
                 NavigationStack(path: $myHomePath) {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 }
             } label: {
-                tabLabel(for: .myHome)
+                Label(AppTab.myHome.title, systemImage: AppTab.myHome.selectedIcon)
             }
             Tab(value: AppTab.myRedfin) {
                 NavigationStack(path: $myRedfinPath) {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true }, ownsNavStack: true)
                 }
             } label: {
-                tabLabel(for: .myRedfin)
+                Label(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.selectedIcon)
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .tint(Theme.Colors.brandRed)
         .tabViewBottomAccessory {
             AskRedfinAccessoryBar {
                 chatViewModel.focusInputOnAppear = true
@@ -297,16 +298,6 @@ struct ContentView: View {
               !viewModel.showListView,
               navigationPath.isEmpty else { return false }
         return stickyMinimized
-    }
-
-    @ViewBuilder
-    private func tabLabel(for tab: AppTab) -> some View {
-        Label {
-            Text(tab.title)
-        } icon: {
-            Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
-                .environment(\.symbolVariants, .none)
-        }
     }
 
     @available(iOS 26.0, *)
