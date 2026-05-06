@@ -48,7 +48,7 @@ struct MyRedfinView: View {
                 Text("Edit profile")
                     .padding(.horizontal, Theme.Spacing.lg)
             }
-            .buttonStyle(.smallPill)
+            .buttonStyle(.smallPillOutline)
             .padding(.top, 4)
         }
         .padding(Theme.Spacing.xl)

@@ -48,6 +48,21 @@ struct SmallPillButtonStyle: ButtonStyle {
     }
 }
 
+struct SmallPillOutlineButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, Theme.ButtonSize.pillHorizontalPadding)
+            .padding(.vertical, Theme.ButtonSize.compactVerticalPadding)
+            .background(
+                Capsule()
+                    .stroke(Theme.Colors.separator, lineWidth: 2)
+            )
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+    }
+}
+
 struct ActionCircleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -88,6 +103,10 @@ extension ButtonStyle where Self == TextLinkButtonStyle {
 
 extension ButtonStyle where Self == SmallPillButtonStyle {
     static var smallPill: SmallPillButtonStyle { SmallPillButtonStyle() }
+}
+
+extension ButtonStyle where Self == SmallPillOutlineButtonStyle {
+    static var smallPillOutline: SmallPillOutlineButtonStyle { SmallPillOutlineButtonStyle() }
 }
 
 extension ButtonStyle where Self == ActionCircleButtonStyle {

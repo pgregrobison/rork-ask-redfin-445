@@ -19,7 +19,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
 
     var icon: String {
         switch self {
-        case .find: "magnifyingglass"
+        case .find: "binoculars"
         case .forYou: "square.stack"
         case .saved: "heart"
         case .myHome: "house"
@@ -29,7 +29,7 @@ nonisolated enum AppTab: Int, CaseIterable, Sendable {
 
     var selectedIcon: String {
         switch self {
-        case .find: "magnifyingglass"
+        case .find: "binoculars.fill"
         case .forYou: "square.stack.fill"
         case .saved: "heart.fill"
         case .myHome: "house.fill"
