@@ -168,6 +168,7 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+                .tint(.primary)
             } label: {
                 Label(AppTab.find.title, systemImage: AppTab.find.selectedIcon)
             }
@@ -181,6 +182,7 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+                .tint(.primary)
             } label: {
                 Label(AppTab.forYou.title, systemImage: AppTab.forYou.selectedIcon)
             }
@@ -194,6 +196,7 @@ struct ContentView: View {
                         listingDetail(for: listing)
                     }
                 }
+                .tint(.primary)
             } label: {
                 Label(AppTab.saved.title, systemImage: AppTab.saved.selectedIcon)
             }
@@ -201,6 +204,7 @@ struct ContentView: View {
                 NavigationStack(path: $myHomePath) {
                     MyHomeView(isActive: selectedTab == .myHome, onProfileTap: {}, hideProfileButton: true, ownsNavStack: true, debugSettings: debugSettings, setupDraft: myHomeDraft)
                 }
+                .tint(.primary)
             } label: {
                 Label(AppTab.myHome.title, systemImage: AppTab.myHome.selectedIcon)
             }
@@ -208,6 +212,7 @@ struct ContentView: View {
                 NavigationStack(path: $myRedfinPath) {
                     MyRedfinView(isActive: selectedTab == .myRedfin, onProfileTap: { showDebugPanel = true }, ownsNavStack: true)
                 }
+                .tint(.primary)
             } label: {
                 Label(AppTab.myRedfin.title, systemImage: AppTab.myRedfin.selectedIcon)
             }
