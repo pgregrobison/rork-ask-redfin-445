@@ -76,7 +76,7 @@ class ChatViewModel {
     func createNewThread() {
         let welcomeMessage = ChatMessage(
             role: .assistant,
-            content: "Hey there! I see you're looking near Garner and Raleigh. I can help you find the perfect home \u{2014} just let me know what you're looking for, and I'll take care of the rest."
+            content: "Hey there! I see you're looking around New York. I can help you find the perfect home \u{2014} just let me know what you're looking for, and I'll take care of the rest."
         )
         let thread = ChatThread(messages: [welcomeMessage])
         threads.insert(thread, at: 0)
