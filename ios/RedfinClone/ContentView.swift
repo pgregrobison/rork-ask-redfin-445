@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var showLocationMenu: Bool = false
     @State private var chatDetent: PresentationDetent = .large
     @State private var showDebugPanel: Bool = false
+    @State private var pendingTourDayHandling: Bool = false
+    @Environment(\.scenePhase) private var scenePhase
     @Namespace private var zoomNamespace
 
     var body: some View {
@@ -41,12 +43,17 @@ struct ContentView: View {
                 viewModel?.notificationService.scheduleTourDayNotification()
             }
             if viewModel.notificationService.pendingTourDayTrigger > 0 {
-                handleTourDayTrigger()
+                tryHandleTourDayTrigger()
             }
         }
         .onChange(of: viewModel.notificationService.pendingTourDayTrigger) { _, newCount in
             guard newCount > 0 else { return }
-            handleTourDayTrigger()
+            tryHandleTourDayTrigger()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                tryHandleTourDayTrigger()
+            }
         }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)
@@ -331,15 +338,34 @@ struct ContentView: View {
         navigationPath.append(listing)
     }
 
-    private func handleTourDayTrigger() {
+    private func tryHandleTourDayTrigger() {
+        guard viewModel.notificationService.pendingTourDayTrigger > 0 else { return }
+        guard scenePhase == .active else { return }
+        guard !pendingTourDayHandling else { return }
+        pendingTourDayHandling = true
         viewModel.notificationService.pendingTourDayTrigger = 0
-        navigationPath = NavigationPath()
-        selectedTab = .find
-        viewModel.showListView = false
-        viewModel.showChat = true
-        Task {
+
+        // Close any other sheet first to avoid "presenting on top of another" crashes.
+        let hadOtherSheet = showDebugPanel
+        if hadOtherSheet {
+            showDebugPanel = false
+        }
+
+        Task { @MainActor in
+            // Let SwiftUI finish the current update / sheet dismissal before mutating
+            // navigation, tab selection, and presenting a new sheet.
+            try? await Task.sleep(for: .milliseconds(hadOtherSheet ? 350 : 50))
+
+            navigationPath = NavigationPath()
+            selectedTab = .find
+            viewModel.showListView = false
+            if !viewModel.showChat {
+                viewModel.showChat = true
+            }
+
             try? await Task.sleep(for: .milliseconds(450))
             chatViewModel.startTourDay()
+            pendingTourDayHandling = false
         }
     }
 }
