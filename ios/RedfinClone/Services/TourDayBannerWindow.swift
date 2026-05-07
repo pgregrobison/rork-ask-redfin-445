@@ -5,7 +5,7 @@ import UIKit
 final class TourDayBannerWindow {
     static let shared = TourDayBannerWindow()
 
-    private var window: UIWindow?
+    private var window: PassthroughWindow?
 
     private init() {}
 
@@ -29,6 +29,9 @@ final class TourDayBannerWindow {
             },
             onDismiss: { [weak self] in
                 self?.dismiss()
+            },
+            onFrameChange: { [weak newWindow] frame in
+                newWindow?.bannerFrame = frame
             }
         )
 
@@ -36,8 +39,10 @@ final class TourDayBannerWindow {
             VStack(spacing: 0) { banner; Spacer(minLength: 0) }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .padding(.top, 4)
+                .ignoresSafeArea()
         )
         host.view.backgroundColor = .clear
+        host.view.isOpaque = false
         newWindow.rootViewController = host
         self.window = newWindow
     }
@@ -48,10 +53,13 @@ final class TourDayBannerWindow {
     }
 }
 
-private final class PassthroughWindow: UIWindow {
+final class PassthroughWindow: UIWindow {
+    var bannerFrame: CGRect = .zero
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard let hit = super.hitTest(point, with: event) else { return nil }
-        // Only catch taps on the banner content; let everything else pass through to the app below.
-        return hit === rootViewController?.view ? nil : hit
+        // Only intercept touches that land within the banner pill;
+        // everything else passes through to the app below.
+        guard bannerFrame.contains(point) else { return nil }
+        return super.hitTest(point, with: event)
     }
 }

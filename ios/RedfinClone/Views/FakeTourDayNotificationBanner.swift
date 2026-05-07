@@ -4,6 +4,7 @@ import UIKit
 struct FakeTourDayNotificationBanner: View {
     let onTap: () -> Void
     let onDismiss: () -> Void
+    var onFrameChange: ((CGRect) -> Void)? = nil
 
     @State private var dragOffset: CGFloat = 0
     @State private var appeared: Bool = false
@@ -20,47 +21,60 @@ struct FakeTourDayNotificationBanner: View {
     }()
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            iconView
-                .frame(width: 38, height: 38)
-                .clipShape(.rect(cornerRadius: 9, style: .continuous))
+        Button(action: onTap) {
+            HStack(alignment: .top, spacing: 10) {
+                iconView
+                    .frame(width: 38, height: 38)
+                    .clipShape(.rect(cornerRadius: 9, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text("ASK REDFIN")
-                        .font(.system(size: 13, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("ASK REDFIN")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .tracking(-0.1)
+                        Spacer(minLength: 0)
+                        Text("now")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("Welcome to tour day!")
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.primary)
-                        .tracking(-0.1)
-                    Spacer(minLength: 0)
-                    Text("now")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text("I've created a new thread for all things tours.")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
                 }
-                Text("Welcome to tour day!")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                Text("I've created a new thread for all things tours.")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.ultraThinMaterial, in: .rect(cornerRadius: 22, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.05), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 4)
+            .contentShape(.rect(cornerRadius: 22, style: .continuous))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial, in: .rect(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.05), lineWidth: 0.5)
-        )
-        .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 4)
+        .buttonStyle(BannerPressStyle())
         .padding(.horizontal, 8)
+        .background(
+            GeometryReader { geo in
+                Color.clear
+                    .preference(key: BannerFrameKey.self, value: geo.frame(in: .global))
+            }
+        )
+        .onPreferenceChange(BannerFrameKey.self) { frame in
+            onFrameChange?(frame)
+        }
         .scaleEffect(appeared ? 1 : 0.94, anchor: .top)
         .offset(y: appeared ? min(dragOffset, 8) : -180)
         .opacity(appeared ? 1 : 0)
-        .gesture(
+        .simultaneousGesture(
             DragGesture()
                 .onChanged { value in
                     dragOffset = value.translation.height
@@ -75,9 +89,6 @@ struct FakeTourDayNotificationBanner: View {
                     }
                 }
         )
-        .onTapGesture {
-            onTap()
-        }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.82)) {
                 appeared = true
@@ -110,5 +121,21 @@ struct FakeTourDayNotificationBanner: View {
             try? await Task.sleep(for: .milliseconds(260))
             onDismiss()
         }
+    }
+}
+
+private struct BannerFrameKey: PreferenceKey {
+    static let defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if next != .zero { value = next }
+    }
+}
+
+private struct BannerPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
     }
 }

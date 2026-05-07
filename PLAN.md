@@ -1,11 +1,11 @@
-# Make the tour day notification look like a real iOS notification
+# Fix tour day notification tap
 
-**What changes**
+**Problem**
 
-- Restyle the fake "Welcome to tour day!" notification so it visually matches a real iOS push notification — same proportions, spacing, blur, corner radius, typography hierarchy, and subtle shadow.
-- Position it at the top of the screen just under the Dynamic Island / status bar (where real iOS notifications land), centered with the standard side margins.
-- Swap the icon for the actual Ask Redfin app icon (rounded squircle), matching the real notification icon size.
-- Keep behavior identical: tap opens Ask Redfin and starts tour day, swipe up to dismiss, auto-dismisses after 5 seconds.
-- Add the standard tiny entrance bounce so it slides down and settles like the real thing.
+Tapping the fake tour day notification banner currently does nothing — the tap isn't reliably reaching the banner's tap handler because the overlay window's pass-through logic and the gesture setup don't play well together.
 
-**No backend / notification system changes** — it remains a purely visual, in-app simulated banner.
+**Fix**
+
+- Make the floating banner's tap area reliable: wrap the banner content in a proper button so taps always register, and keep the swipe-up-to-dismiss drag gesture working alongside it.
+- Update the overlay window so it only intercepts touches that actually land on the banner pill, and lets every other tap pass straight through to the app underneath (so the rest of the app stays interactive while the banner is up).
+- Keep the existing look, animation, auto-dismiss after 5 seconds, and the behavior that tapping it opens Ask Redfin and starts Tour Day.
