@@ -40,12 +40,13 @@ struct ContentView: View {
             chatViewModel.requestTourDayNotificationHandler = { [weak viewModel] in
                 viewModel?.notificationService.scheduleTourDayNotification()
             }
+            if viewModel.notificationService.pendingTourDayTrigger > 0 {
+                handleTourDayTrigger()
+            }
         }
         .onChange(of: viewModel.notificationService.pendingTourDayTrigger) { _, newCount in
             guard newCount > 0 else { return }
-            viewModel.notificationService.pendingTourDayTrigger = 0
-            viewModel.showChat = true
-            chatViewModel.startTourDay()
+            handleTourDayTrigger()
         }
         .sheet(isPresented: $showDebugPanel) {
             DebugPanelView(settings: debugSettings)
@@ -328,5 +329,17 @@ struct ContentView: View {
     private func navigateToListing(_ listing: Listing) {
         viewModel.markSeen(listing)
         navigationPath.append(listing)
+    }
+
+    private func handleTourDayTrigger() {
+        viewModel.notificationService.pendingTourDayTrigger = 0
+        navigationPath = NavigationPath()
+        selectedTab = .find
+        viewModel.showListView = false
+        viewModel.showChat = true
+        Task {
+            try? await Task.sleep(for: .milliseconds(450))
+            chatViewModel.startTourDay()
+        }
     }
 }

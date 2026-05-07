@@ -1,23 +1,15 @@
-# Polish Tour Day: real notification, system colors, native button, tap-to-detail
+# Fix crash when tapping the tour day notification from background
 
-Refining the Tour Day flow based on your feedback.
+**What's happening**
 
-**Notification**
-- Replace the styled in-app banner with a real local notification (same approach as the Compass nudge): when you type "tour day", a system notification fires after about 3 seconds with the welcome copy.
-- Tapping the notification opens Ask Redfin and switches to the new Tour Day thread.
-- Removes the floating welcome card overlay entirely.
+When you tap the tour day notification from the lock screen or background, the app launches and tries to do too many things at once: open the Ask Redfin chat, create a brand new Tour Day thread, and start streaming messages — all in the same instant the screen is still being built. That race causes the crash.
 
-**Colors**
-- Buttons, icons, and text in the Tour Day UI default to the system primary color (white in dark mode, black in light mode) — affects the route widget header icon, "Open directions" button, and stop card numbers.
-- Map pins and the route polyline stay brand red so they remain visible on the map.
+**The fix**
 
-**"Open directions" button**
-- Reuses the same primary pill style as the existing "Show on map" button for consistency.
-- The Apple Maps / Google Maps confirmation dialog now spawns from the button itself (not the map), keeping the choice attached to the action that triggered it.
+- After tapping the notification, open Ask Redfin first, then start the Tour Day thread a moment later once the chat is fully on screen.
+- Make sure that if the notification arrives during the cold launch (before the main screen is ready), it still gets picked up and triggers Tour Day correctly instead of being missed.
+- Keep the existing behavior intact: a new Tour Day thread is created, the route map appears, and the scripted assistant messages stream in.
 
-**Tapping a stop**
-- Tapping any numbered stop in the route widget's stop list opens that home's detail page and dismisses the chat sheet, so you land directly on the listing.
-- The map preview still expands to fullscreen on tap (unchanged).
+**Result**
 
-**What stays the same**
-- Voice mode, route map widget layout, per-stop cards, and the wrap-up summary all behave as before.
+Tapping the tour day notification — from the lock screen, from a banner, or while the app is already open — reliably opens Ask Redfin and kicks off the Tour Day flow without crashing.
