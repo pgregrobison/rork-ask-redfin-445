@@ -36,7 +36,7 @@ struct ChatMessageBubble: View {
     private var assistantBubble: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs + 2) {
             if !message.content.isEmpty {
-                Text(message.content)
+                assistantContentText
                     .font(Theme.Typography.body)
                     .textSelection(.enabled)
                     .padding(.horizontal, Theme.Spacing.md)
@@ -87,6 +87,19 @@ struct ChatMessageBubble: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var assistantContentText: Text {
+        let raw = message.content
+        guard raw.contains("{waveform}") else { return Text(raw) }
+        let parts = raw.components(separatedBy: "{waveform}")
+        var result = Text(parts[0])
+        for i in 1..<parts.count {
+            result = result
+                + Text(Image(systemName: "waveform")).fontWeight(.semibold)
+                + Text(parts[i])
+        }
+        return result
     }
 
     private var userBubbleBackground: Color {

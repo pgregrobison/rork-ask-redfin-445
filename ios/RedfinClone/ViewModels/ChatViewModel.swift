@@ -31,7 +31,6 @@ class ChatViewModel {
     var isVoiceMuted: Bool = false
     var voiceTranscriptMessageId: String?
     var voiceScrollToTopId: String?
-    var tourDayHint: String?
     var tourDayCurrentStopIndex: Int = 0
     var searchResultsJustArrived: [Listing]?
     var searchFiltersJustArrived: SearchFilters?
@@ -166,7 +165,7 @@ class ChatViewModel {
         for stop in TourDayData.demoRoute.stops {
             if Task.isCancelled { return }
             tourDayCurrentStopIndex = stop.id
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: .seconds(stop.id == 1 ? 2 : 8))
             if Task.isCancelled { return }
 
             let intro: String
@@ -187,13 +186,10 @@ class ChatViewModel {
             saveThreads()
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
-            if stop.id > 1 {
-                tourDayHint = "Tap the waveform to reply by voice"
-                try? await Task.sleep(for: .seconds(5))
-                tourDayHint = nil
+            if stop.id == 1 {
+                try? await Task.sleep(for: .seconds(2))
                 if Task.isCancelled { return }
-            } else {
-                try? await Task.sleep(for: .seconds(4))
+                await streamAssistantMessage("Tap the {waveform} and let me know what you thought of this home!")
                 if Task.isCancelled { return }
             }
         }
@@ -330,7 +326,6 @@ class ChatViewModel {
         if let ack = tourDayAssistantAck() {
             isVoiceModeActive = false
             isVoiceMuted = false
-            tourDayHint = nil
             await streamAssistantMessage(ack)
             return
         }

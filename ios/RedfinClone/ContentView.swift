@@ -20,7 +20,6 @@ struct ContentView: View {
     @State private var showLocationMenu: Bool = false
     @State private var chatDetent: PresentationDetent = .large
     @State private var showDebugPanel: Bool = false
-    @State private var showFakeTourDayBanner: Bool = false
     @Environment(\.scenePhase) private var scenePhase
     @Namespace private var zoomNamespace
 
@@ -30,16 +29,6 @@ struct ContentView: View {
             .overlay(alignment: .top) {
                 if selectedTab == .find && navigationPath.isEmpty {
                     FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
-                }
-            }
-            .overlay(alignment: .top) {
-                if showFakeTourDayBanner {
-                    FakeTourDayNotificationBanner(
-                        onTap: { handleFakeTourDayTap() },
-                        onDismiss: { showFakeTourDayBanner = false }
-                    )
-                    .transition(.opacity)
-                    .zIndex(1000)
                 }
             }
         .tint(.primary)
@@ -340,12 +329,11 @@ struct ContentView: View {
         // Slight delay so the user sees the banner appear after sending the message.
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(600))
-            showFakeTourDayBanner = true
+            TourDayBannerWindow.shared.present(onTap: { handleFakeTourDayTap() })
         }
     }
 
     private func handleFakeTourDayTap() {
-        showFakeTourDayBanner = false
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(150))
             navigationPath = NavigationPath()

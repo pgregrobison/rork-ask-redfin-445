@@ -227,26 +227,9 @@ struct AskRedfinView: View {
                     .padding(.bottom, Theme.Spacing.sm)
             }
 
-            if let hint = chatViewModel.tourDayHint, !chatViewModel.isVoiceModeActive {
-                HStack(spacing: 6) {
-                    Image(systemName: "waveform")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Theme.Colors.brandRed)
-                    Text(hint)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(.ultraThinMaterial, in: Capsule())
-                .padding(.bottom, Theme.Spacing.xs)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-
             inputBar
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: chatViewModel.isVoiceModeActive)
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: chatViewModel.tourDayHint)
     }
 
     private var inputBar: some View {
