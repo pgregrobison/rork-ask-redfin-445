@@ -39,7 +39,6 @@ final class TourDayBannerWindow {
             VStack(spacing: 0) { banner; Spacer(minLength: 0) }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .padding(.top, 4)
-                .ignoresSafeArea()
         )
         host.view.backgroundColor = .clear
         host.view.isOpaque = false
