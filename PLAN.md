@@ -1,18 +1,17 @@
-# Fix crash when tapping Tour Day notification from background
+# Revert tour day trigger to a fake in-app notification banner
 
-**The problem**
+**What changes**
 
-When you tap the Tour Day notification while the app is in the background, the system delivers the tap to the app in the same instant the scene is still waking up. The app reacts immediately by clearing the navigation stack, switching tabs, opening the chat sheet, and kicking off the tour-day script — all while the UI hasn't finished becoming active yet. That race causes the crash.
+- When you mention "tour day" in Ask Redfin, instead of scheduling a real iOS push notification, the app will drop down a fake iOS-style notification banner from the top of the screen.
+- Tapping the fake banner opens Ask Redfin and starts the Tour Day flow (new thread, route map, voice prompts) just like before — no system permissions, no backgrounding, no crashes.
+- The banner auto-dismisses after a few seconds if not tapped, and can be swiped up to dismiss.
 
-**The fix**
+**Look & feel**
 
-- Wait until the app is fully foregrounded (scene becomes active) before acting on a Tour Day notification tap. If a tap arrives while still in the background, it's queued and runs the moment the app is visible.
-- When the trigger fires, dismiss any other sheet that may be open first, then open the Tour Day chat after the foreground transition settles. This avoids the "presenting one sheet on top of another" crash path.
-- Run the chat-sheet open and the tour-day script on the next run loop (instead of synchronously inside the change handler), so SwiftUI can finish its current update before we mutate navigation, tab selection, and presentation state.
-- Make the Tour Day script safe to start when the chat sheet is already open (no double-trigger, no overlapping scripts).
+- Mimics the native iOS notification: rounded rectangle with thin material background, small Redfin app icon on the left, bold title "Welcome to tour day!" and body "I've created a new thread for all things tours."
+- Subtle drop-in spring animation, soft shadow, respects light/dark mode.
 
-**What you'll experience**
+**Cleanup**
 
-- Lock the phone, get the Tour Day notification, tap it → the app reliably opens to the Tour Day chat with the route, no crash.
-- If you tap it while the app is already foregrounded, behavior is unchanged.
-- If another sheet (like the debug panel) happens to be open, it closes cleanly first before the Tour Day chat appears.
+- Removes the real local-notification scheduling and tap-handling for tour day (the compass "coming soon" notification stays untouched).
+- Removes the scene-phase / pending-trigger plumbing that was causing the crash on tap.

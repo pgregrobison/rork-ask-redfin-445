@@ -5,7 +5,6 @@ import CoreLocation
 @Observable
 class NotificationService: NSObject, UNUserNotificationCenterDelegate {
     var pendingCompassListingID: String?
-    var pendingTourDayTrigger: Int = 0
     private var hasSentThisSession: Bool = false
 
     override init() {
@@ -32,26 +31,6 @@ class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    func scheduleTourDayNotification() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            guard granted else { return }
-            let content = UNMutableNotificationContent()
-            content.title = "Welcome to tour day!"
-            content.body = "I've created a new thread for all things tours."
-            content.sound = .default
-            content.userInfo = ["tourDayTrigger": true]
-
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: "tour-day-welcome-\(UUID().uuidString)",
-                content: content,
-                trigger: trigger
-            )
-            center.add(request)
-        }
-    }
-
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
@@ -67,11 +46,6 @@ class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         if let listingID = userInfo["compassListingID"] as? String {
             await MainActor.run {
                 pendingCompassListingID = listingID
-            }
-        }
-        if userInfo["tourDayTrigger"] as? Bool == true {
-            await MainActor.run {
-                pendingTourDayTrigger += 1
             }
         }
     }

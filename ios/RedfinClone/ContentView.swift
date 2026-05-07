@@ -20,7 +20,7 @@ struct ContentView: View {
     @State private var showLocationMenu: Bool = false
     @State private var chatDetent: PresentationDetent = .large
     @State private var showDebugPanel: Bool = false
-    @State private var pendingTourDayHandling: Bool = false
+    @State private var showFakeTourDayBanner: Bool = false
     @Environment(\.scenePhase) private var scenePhase
     @Namespace private var zoomNamespace
 
@@ -32,6 +32,16 @@ struct ContentView: View {
                     FindPillOverlay(viewModel: viewModel, showLocationMenu: $showLocationMenu)
                 }
             }
+            .overlay(alignment: .top) {
+                if showFakeTourDayBanner {
+                    FakeTourDayNotificationBanner(
+                        onTap: { handleFakeTourDayTap() },
+                        onDismiss: { showFakeTourDayBanner = false }
+                    )
+                    .transition(.opacity)
+                    .zIndex(1000)
+                }
+            }
         .tint(.primary)
         .onAppear {
             viewModel.debugSettings = debugSettings
@@ -39,20 +49,8 @@ struct ContentView: View {
             chatViewModel.currentFindFiltersProvider = { [weak viewModel] in
                 viewModel?.currentSearchFilters ?? SearchFilters()
             }
-            chatViewModel.requestTourDayNotificationHandler = { [weak viewModel] in
-                viewModel?.notificationService.scheduleTourDayNotification()
-            }
-            if viewModel.notificationService.pendingTourDayTrigger > 0 {
-                tryHandleTourDayTrigger()
-            }
-        }
-        .onChange(of: viewModel.notificationService.pendingTourDayTrigger) { _, newCount in
-            guard newCount > 0 else { return }
-            tryHandleTourDayTrigger()
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active {
-                tryHandleTourDayTrigger()
+            chatViewModel.requestTourDayNotificationHandler = {
+                presentFakeTourDayBanner()
             }
         }
         .sheet(isPresented: $showDebugPanel) {
@@ -338,34 +336,26 @@ struct ContentView: View {
         navigationPath.append(listing)
     }
 
-    private func tryHandleTourDayTrigger() {
-        guard viewModel.notificationService.pendingTourDayTrigger > 0 else { return }
-        guard scenePhase == .active else { return }
-        guard !pendingTourDayHandling else { return }
-        pendingTourDayHandling = true
-        viewModel.notificationService.pendingTourDayTrigger = 0
-
-        // Close any other sheet first to avoid "presenting on top of another" crashes.
-        let hadOtherSheet = showDebugPanel
-        if hadOtherSheet {
-            showDebugPanel = false
-        }
-
+    private func presentFakeTourDayBanner() {
+        // Slight delay so the user sees the banner appear after sending the message.
         Task { @MainActor in
-            // Let SwiftUI finish the current update / sheet dismissal before mutating
-            // navigation, tab selection, and presenting a new sheet.
-            try? await Task.sleep(for: .milliseconds(hadOtherSheet ? 350 : 50))
+            try? await Task.sleep(for: .milliseconds(600))
+            showFakeTourDayBanner = true
+        }
+    }
 
+    private func handleFakeTourDayTap() {
+        showFakeTourDayBanner = false
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
             navigationPath = NavigationPath()
             selectedTab = .find
             viewModel.showListView = false
             if !viewModel.showChat {
                 viewModel.showChat = true
             }
-
-            try? await Task.sleep(for: .milliseconds(450))
+            try? await Task.sleep(for: .milliseconds(400))
             chatViewModel.startTourDay()
-            pendingTourDayHandling = false
         }
     }
 }
