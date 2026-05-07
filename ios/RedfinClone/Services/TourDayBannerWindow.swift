@@ -33,9 +33,9 @@ final class TourDayBannerWindow {
         )
 
         let host = UIHostingController(rootView:
-            ZStack(alignment: .top) { banner }
+            VStack(spacing: 0) { banner; Spacer(minLength: 0) }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .ignoresSafeArea()
+                .padding(.top, 4)
         )
         host.view.backgroundColor = .clear
         newWindow.rootViewController = host

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct FakeTourDayNotificationBanner: View {
     let onTap: () -> Void
@@ -7,19 +8,29 @@ struct FakeTourDayNotificationBanner: View {
     @State private var dragOffset: CGFloat = 0
     @State private var appeared: Bool = false
 
+    private static let appIconImage: UIImage? = {
+        if let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+           let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+           let files = primary["CFBundleIconFiles"] as? [String],
+           let last = files.last,
+           let img = UIImage(named: last) {
+            return img
+        }
+        return UIImage(named: "AppIcon") ?? UIImage(named: "icon")
+    }()
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image("RedfinLogo")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
+            iconView
                 .frame(width: 38, height: 38)
-                .clipShape(.rect(cornerRadius: 9))
+                .clipShape(.rect(cornerRadius: 9, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text("ASK REDFIN")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.primary)
+                        .tracking(-0.1)
                     Spacer(minLength: 0)
                     Text("now")
                         .font(.system(size: 13))
@@ -39,14 +50,15 @@ struct FakeTourDayNotificationBanner: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial, in: .rect(cornerRadius: 22))
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: 22, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 22)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.05), lineWidth: 0.5)
         )
-        .shadow(color: .black.opacity(0.18), radius: 18, x: 0, y: 8)
-        .padding(.horizontal, 10)
-        .offset(y: appeared ? min(dragOffset, 12) : -160)
+        .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 8)
+        .scaleEffect(appeared ? 1 : 0.94, anchor: .top)
+        .offset(y: appeared ? min(dragOffset, 8) : -180)
         .opacity(appeared ? 1 : 0)
         .gesture(
             DragGesture()
@@ -67,13 +79,26 @@ struct FakeTourDayNotificationBanner: View {
             onTap()
         }
         .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.78)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.82)) {
                 appeared = true
             }
             Task {
                 try? await Task.sleep(for: .seconds(5))
                 dismiss()
             }
+        }
+    }
+
+    @ViewBuilder
+    private var iconView: some View {
+        if let img = Self.appIconImage {
+            Image(uiImage: img)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } else {
+            Image("RedfinLogo")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
         }
     }
 
