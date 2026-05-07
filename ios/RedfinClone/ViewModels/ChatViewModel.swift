@@ -44,6 +44,7 @@ class ChatViewModel {
     private var streamTask: Task<Void, Never>?
     private var voiceSimTask: Task<Void, Never>?
     private var tourDayTask: Task<Void, Never>?
+    private var tourDayAwaitingFirstStopFeedback: Bool = false
 
     private let voiceSimPhrases = [
         "I'm looking for a 3 bedroom home near downtown Raleigh with a big backyard"
@@ -137,10 +138,10 @@ class ChatViewModel {
 
         UINotificationFeedbackGenerator().notificationOccurred(.success)
 
-        tourDayTask = Task { await runTourDayScript() }
+        tourDayTask = Task { await runTourDayIntro() }
     }
 
-    private func runTourDayScript() async {
+    private func runTourDayIntro() async {
         try? await Task.sleep(for: .milliseconds(400))
         if Task.isCancelled { return }
 
@@ -162,19 +163,40 @@ class ChatViewModel {
         try? await Task.sleep(for: .seconds(2))
         if Task.isCancelled { return }
 
-        for stop in TourDayData.demoRoute.stops {
+        guard let firstStop = TourDayData.demoRoute.stops.first else { return }
+        tourDayCurrentStopIndex = firstStop.id
+        try? await Task.sleep(for: .seconds(2))
+        if Task.isCancelled { return }
+
+        await streamAssistantMessage("First stop coming up at \(firstStop.time). Heading to the Tribeca home now.", currentStopId: nil)
+        if Task.isCancelled { return }
+
+        let card = ChatMessage(
+            role: .assistant,
+            content: "",
+            tourDayCurrentStopId: firstStop.listingId
+        )
+        appendMessage(card)
+        saveThreads()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+        try? await Task.sleep(for: .seconds(2))
+        if Task.isCancelled { return }
+        await streamAssistantMessage("Tap the {waveform} and let me know what you thought of this home!")
+        if Task.isCancelled { return }
+
+        tourDayAwaitingFirstStopFeedback = true
+    }
+
+    private func runTourDayRemainder() async {
+        let remaining = TourDayData.demoRoute.stops.dropFirst()
+        for stop in remaining {
             if Task.isCancelled { return }
             tourDayCurrentStopIndex = stop.id
-            try? await Task.sleep(for: .seconds(stop.id == 1 ? 2 : 8))
+            try? await Task.sleep(for: .seconds(8))
             if Task.isCancelled { return }
 
-            let intro: String
-            if stop.id == 1 {
-                intro = "First stop coming up at \(stop.time). Heading to the Tribeca home now."
-            } else {
-                intro = stopTransitionPrompt(for: stop.id)
-            }
-            await streamAssistantMessage(intro, currentStopId: nil)
+            await streamAssistantMessage(stopTransitionPrompt(for: stop.id), currentStopId: nil)
             if Task.isCancelled { return }
 
             let card = ChatMessage(
@@ -185,13 +207,6 @@ class ChatViewModel {
             appendMessage(card)
             saveThreads()
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
-
-            if stop.id == 1 {
-                try? await Task.sleep(for: .seconds(2))
-                if Task.isCancelled { return }
-                await streamAssistantMessage("Tap the {waveform} and let me know what you thought of this home!")
-                if Task.isCancelled { return }
-            }
         }
 
         if Task.isCancelled { return }
@@ -201,7 +216,7 @@ class ChatViewModel {
         let summary = """
         That's a wrap on tour day! Here's a recap of what you loved and didn't — I've passed this along to your agent.
 
-        • 100 Barclay St — Loved the natural light; kitchen felt cramped.
+        • 100 Barclay St — Loved the natural light and vaulted ceilings, but the kitchen was way too small.
         • 88 Greenwich St — Beautiful finishes, but the second bedroom was tight.
         • 55 Hudson Yards — Top pick. The view sold you.
         • 142 W 82nd St — Great space, unsure about the location.
@@ -326,7 +341,13 @@ class ChatViewModel {
         if let ack = tourDayAssistantAck() {
             isVoiceModeActive = false
             isVoiceMuted = false
+            let wasAwaitingFirstStop = tourDayAwaitingFirstStopFeedback && tourDayCurrentStopIndex == 1
             await streamAssistantMessage(ack)
+            if wasAwaitingFirstStop {
+                tourDayAwaitingFirstStopFeedback = false
+                tourDayTask?.cancel()
+                tourDayTask = Task { await runTourDayRemainder() }
+            }
             return
         }
 
