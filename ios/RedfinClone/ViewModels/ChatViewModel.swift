@@ -204,12 +204,12 @@ class ChatViewModel {
         saveThreads()
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
-        try? await Task.sleep(for: .seconds(2))
-        if Task.isCancelled { return }
-        await streamAssistantMessage("Tap the {waveform} and let me know what you thought of this home!")
-        if Task.isCancelled { return }
-
         tourDayAwaitingFirstStopFeedback = true
+
+        try? await Task.sleep(for: .seconds(20))
+        if Task.isCancelled { return }
+        guard tourDayAwaitingFirstStopFeedback else { return }
+        await streamAssistantMessage("Tap the {waveform} and let me know what you think of this home!")
     }
 
     private func runTourDayRemainder() async {
@@ -240,7 +240,7 @@ class ChatViewModel {
         let summary = """
         That's a wrap on tour day! Here's a recap of what you loved and didn't — I've passed this along to your agent.
 
-        • 100 Barclay St — Loved the natural light and vaulted ceilings, but the kitchen was way too small.
+        • 100 Barclay St — Loved the natural light and vaulted ceilings, but the kitchen felt way too small.
         • 88 Greenwich St — Beautiful finishes, but the second bedroom was tight.
         • 55 Hudson Yards — Top pick. The view sold you.
         • 142 W 82nd St — Great space, unsure about the location.

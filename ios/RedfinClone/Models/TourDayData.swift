@@ -9,7 +9,7 @@ nonisolated enum TourDayData {
     ])
 
     static let voicePhrasesByStop: [Int: String] = [
-        1: "I really liked all the natural light and vaulted ceilings, but the kitchen was way too small.",
+        1: "I really like all the natural light and vaulted ceilings, but the kitchen is way too small.",
         2: "Beautiful finishes, but the second bedroom was way smaller than I expected.",
         3: "Honestly, this one was incredible. The view sold me.",
         4: "The space is great, but I'm not sure about the location."

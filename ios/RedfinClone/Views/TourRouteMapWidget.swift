@@ -9,6 +9,7 @@ struct TourRouteMapWidget: View {
 
     @State private var mapPosition: MapCameraPosition
     @State private var showFullMap: Bool = false
+    @State private var hasAppeared: Bool = false
 
     init(route: TourDayRoute, allListings: [Listing], onStopTap: @escaping (Listing) -> Void) {
         self.route = route
@@ -65,6 +66,12 @@ struct TourRouteMapWidget: View {
         .background(Theme.Colors.secondaryBackground)
         .clipShape(.rect(cornerRadius: Theme.Radius.widget))
         .padding(.horizontal, Theme.Spacing.md)
+        .opacity(hasAppeared ? 1 : 0)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                hasAppeared = true
+            }
+        }
         .fullScreenCover(isPresented: $showFullMap) {
             FullScreenRouteMap(stopsWithListings: stopsWithListings, isPresented: $showFullMap)
         }
@@ -119,11 +126,11 @@ struct TourRouteMapWidget: View {
                     HStack(spacing: Theme.Spacing.sm) {
                         ZStack {
                             Circle()
-                                .fill(Color.primary)
+                                .fill(Theme.Colors.brandRed)
                                 .frame(width: 22, height: 22)
                             Text("\(item.stop.id)")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(Theme.Colors.invertedPrimary)
+                                .foregroundStyle(.white)
                         }
 
                         VStack(alignment: .leading, spacing: 1) {
