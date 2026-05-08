@@ -46,6 +46,7 @@ class ChatViewModel {
     private var voiceSimTask: Task<Void, Never>?
     private var tourDayTask: Task<Void, Never>?
     private var tourDayAwaitingFirstStopFeedback: Bool = false
+    private var tourDayAwaitingFirstStopPhoto: Bool = false
 
     private let voiceSimPhrases = [
         "I'm looking for a 3 bedroom home near downtown Raleigh with a big backyard"
@@ -120,6 +121,13 @@ class ChatViewModel {
 
         if text.lowercased().contains("tour day") {
             requestTourDayNotification()
+            return
+        }
+
+        if tourDayAwaitingFirstStopPhoto && !attachments.isEmpty {
+            tourDayAwaitingFirstStopPhoto = false
+            tourDayTask?.cancel()
+            tourDayTask = Task { await runTourDayPhotoResponse() }
             return
         }
 
@@ -212,6 +220,23 @@ class ChatViewModel {
         await streamAssistantMessage("Tap the {waveform} and let me know what you think of this home!")
     }
 
+    private func runTourDayPhotoPrompt() async {
+        try? await Task.sleep(for: .milliseconds(900))
+        if Task.isCancelled { return }
+        tourDayAwaitingFirstStopPhoto = true
+        await streamAssistantMessage("Snap a photo of something that stood out \u{2014} good or bad.")
+    }
+
+    private func runTourDayPhotoResponse() async {
+        try? await Task.sleep(for: .milliseconds(700))
+        if Task.isCancelled { return }
+        await streamAssistantMessage("Wow! There are a lot of smart people in this home!")
+        if Task.isCancelled { return }
+        try? await Task.sleep(for: .seconds(4))
+        if Task.isCancelled { return }
+        await runTourDayRemainder()
+    }
+
     private func runTourDayRemainder() async {
         let remaining = TourDayData.demoRoute.stops.dropFirst()
         for stop in remaining {
@@ -256,7 +281,7 @@ class ChatViewModel {
 
     private func stopTransitionPrompt(for stopId: Int) -> String {
         switch stopId {
-        case 2: return "On your way to the 2nd tour — let me know what you thought of the first home."
+        case 2: return "On your way to the 2nd tour."
         case 3: return "Heading to tour #3. How did the second one feel?"
         case 4: return "Last stop ahead. What did you think of #3?"
         default: return "Next stop coming up."
@@ -370,7 +395,7 @@ class ChatViewModel {
             if wasAwaitingFirstStop {
                 tourDayAwaitingFirstStopFeedback = false
                 tourDayTask?.cancel()
-                tourDayTask = Task { await runTourDayRemainder() }
+                tourDayTask = Task { await runTourDayPhotoPrompt() }
             }
             return
         }
