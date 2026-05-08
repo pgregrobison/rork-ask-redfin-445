@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct AskRedfinView: View {
     @Bindable var chatViewModel: ChatViewModel
@@ -15,6 +16,9 @@ struct AskRedfinView: View {
     @State private var scrollToTopTrigger: String?
     @State private var scrollToBottomTrigger: String?
     @State private var hasRestoredScroll: Bool = false
+    @State private var photoLibrarySelection: [PhotosPickerItem] = []
+    @State private var showPhotoLibrary: Bool = false
+    @State private var cameraMode: ChatCameraPicker.Mode? = nil
 
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
@@ -217,6 +221,11 @@ struct AskRedfinView: View {
 
     private var canSend: Bool {
         !chatViewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !chatViewModel.pendingAttachments.isEmpty
+    }
+
+    private var showAttachButton: Bool {
+        isInputFocused && !chatViewModel.isVoiceModeActive
     }
 
     private var inputFooter: some View {
@@ -227,13 +236,99 @@ struct AskRedfinView: View {
                     .padding(.bottom, Theme.Spacing.sm)
             }
 
+            if !chatViewModel.pendingAttachments.isEmpty {
+                ChatAttachmentPreviewTray(
+                    attachments: chatViewModel.pendingAttachments,
+                    onRemove: { att in
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            chatViewModel.removePendingAttachment(att)
+                        }
+                    }
+                )
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+
             inputBar
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: chatViewModel.isVoiceModeActive)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: chatViewModel.pendingAttachments.count)
+        .background(
+            ChatPhotoLibraryPicker(
+                selection: $photoLibrarySelection,
+                isPresented: $showPhotoLibrary,
+                onPicked: { items in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        chatViewModel.addPendingAttachments(items)
+                    }
+                }
+            )
+        )
+        .fullScreenCover(item: $cameraMode) { mode in
+            ChatCameraPicker(
+                mode: mode,
+                onPicked: { att in
+                    cameraMode = nil
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        chatViewModel.addPendingAttachment(att)
+                    }
+                },
+                onCancel: { cameraMode = nil }
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    @ViewBuilder
+    private var attachMenuButton: some View {
+        Menu {
+            Button {
+                cameraMode = .photo
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                Label("Take Photo", systemImage: "camera")
+            }
+            Button {
+                cameraMode = .video
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                Label("Record Video", systemImage: "video")
+            }
+            Button {
+                showPhotoLibrary = true
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                Label("Choose from Library", systemImage: "photo.on.rectangle")
+            }
+        } label: {
+            attachMenuLabel
+        }
+        .menuOrder(.fixed)
+    }
+
+    @ViewBuilder
+    private var attachMenuLabel: some View {
+        let icon = Image(systemName: "plus")
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.primary)
+            .frame(width: Theme.ButtonSize.circleSize, height: Theme.ButtonSize.circleSize)
+            .contentShape(Circle())
+        if #available(iOS 26.0, *) {
+            icon.glassEffect(.regular.interactive(), in: .circle)
+        } else {
+            icon.background(.ultraThinMaterial, in: Circle())
+        }
     }
 
     private var inputBar: some View {
         HStack(spacing: Theme.Spacing.xs) {
+            if showAttachButton {
+                attachMenuButton
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.3).combined(with: .opacity),
+                        removal: .scale(scale: 0.3).combined(with: .opacity)
+                    ))
+            }
+
             TextField("Ask or search anything", text: $chatViewModel.inputText, axis: .vertical)
                 .font(Theme.Typography.body)
                 .lineSpacing(7)
@@ -338,6 +433,7 @@ struct AskRedfinView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: chatViewModel.isVoiceModeActive)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: chatViewModel.isVoiceMuted)
+        .animation(.spring(response: 0.32, dampingFraction: 0.78), value: showAttachButton)
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.bottom, Theme.Spacing.xs)
     }

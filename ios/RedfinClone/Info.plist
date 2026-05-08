@@ -26,6 +26,12 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>See homes near your current location</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos and videos to share in chat with your Redfin agent.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record audio with videos you share in chat.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pick photos and videos from your library to share in chat.</string>
 	<key>EXPO_PUBLIC_TOOLKIT_URL</key>
 	<string>$(EXPO_PUBLIC_TOOLKIT_URL)</string>
 	<key>EXPO_PUBLIC_PROJECT_ID</key>

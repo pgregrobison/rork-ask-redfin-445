@@ -61,6 +61,7 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
     var tourDayCurrentStopId: String?
     var isTourDaySummary: Bool
     var toolCalls: [ToolCallRecord]?
+    var attachments: [ChatAttachment]?
 
     init(
         id: String = UUID().uuidString,
@@ -77,7 +78,8 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         tourDayRoute: TourDayRoute? = nil,
         tourDayCurrentStopId: String? = nil,
         isTourDaySummary: Bool = false,
-        toolCalls: [ToolCallRecord]? = nil
+        toolCalls: [ToolCallRecord]? = nil,
+        attachments: [ChatAttachment]? = nil
     ) {
         self.id = id
         self.role = role
@@ -94,6 +96,7 @@ nonisolated struct ChatMessage: Identifiable, Codable, Sendable, Hashable {
         self.tourDayCurrentStopId = tourDayCurrentStopId
         self.isTourDaySummary = isTourDaySummary
         self.toolCalls = toolCalls
+        self.attachments = attachments
     }
 
     static func == (lhs: ChatMessage, rhs: ChatMessage) -> Bool {

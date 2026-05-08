@@ -23,12 +23,20 @@ struct ChatMessageBubble: View {
     private var userBubble: some View {
         HStack {
             Spacer(minLength: 60)
-            Text(message.content)
-                .font(Theme.Typography.body)
-                .padding(.horizontal, Theme.Spacing.md)
-                .padding(.vertical, Theme.Spacing.xs + 2)
-                .background(userBubbleBackground)
-                .clipShape(.rect(cornerRadius: Theme.Radius.chatBubble, style: .continuous))
+            VStack(alignment: .trailing, spacing: 6) {
+                if let attachments = message.attachments, !attachments.isEmpty {
+                    ChatAttachmentGrid(attachments: attachments)
+                        .frame(maxWidth: 280)
+                }
+                if !message.content.isEmpty {
+                    Text(message.content)
+                        .font(Theme.Typography.body)
+                        .padding(.horizontal, Theme.Spacing.md)
+                        .padding(.vertical, Theme.Spacing.xs + 2)
+                        .background(userBubbleBackground)
+                        .clipShape(.rect(cornerRadius: Theme.Radius.chatBubble, style: .continuous))
+                }
+            }
         }
         .padding(.horizontal, Theme.Spacing.md)
     }

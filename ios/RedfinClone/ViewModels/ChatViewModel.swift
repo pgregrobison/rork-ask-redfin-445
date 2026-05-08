@@ -38,6 +38,7 @@ class ChatViewModel {
     var debugSettings: DebugSettings?
     var currentFindFiltersProvider: (() -> SearchFilters)?
     var focusInputOnAppear: Bool = false
+    var pendingAttachments: [ChatAttachment] = []
 
     private let chatService = ChatService()
     private let storageKey = "chatThreads_v2"
@@ -100,20 +101,43 @@ class ChatViewModel {
 
     func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+        let attachments = pendingAttachments
+        guard !text.isEmpty || !attachments.isEmpty else { return }
 
-        let userMessage = ChatMessage(role: .user, content: text)
+        let userMessage = ChatMessage(
+            role: .user,
+            content: text,
+            attachments: attachments.isEmpty ? nil : attachments
+        )
         appendMessage(userMessage)
         inputText = ""
-        updateThreadTitle(from: text)
+        pendingAttachments = []
+        if !text.isEmpty {
+            updateThreadTitle(from: text)
+        } else if !attachments.isEmpty {
+            updateThreadTitle(from: attachments.count == 1 ? "Photo" : "Photos")
+        }
 
         if text.lowercased().contains("tour day") {
             requestTourDayNotification()
             return
         }
 
+        let promptForAI = text.isEmpty ? "(shared a photo)" : text
         streamTask?.cancel()
-        streamTask = Task { await generateResponse(for: text) }
+        streamTask = Task { await generateResponse(for: promptForAI) }
+    }
+
+    func addPendingAttachment(_ attachment: ChatAttachment) {
+        pendingAttachments.append(attachment)
+    }
+
+    func addPendingAttachments(_ attachments: [ChatAttachment]) {
+        pendingAttachments.append(contentsOf: attachments)
+    }
+
+    func removePendingAttachment(_ attachment: ChatAttachment) {
+        pendingAttachments.removeAll { $0.id == attachment.id }
     }
 
     var requestTourDayNotificationHandler: (() -> Void)?

@@ -1,11 +1,29 @@
-# Pause tour day at first stop until voice mode is tapped
+# Add photo/video attachment + button to Ask Redfin chat
 
-## Changes to tour day flow
+## Features
 
-- **Pause at first stop**: After arriving at stop 1 and showing the "Tap the 🎙️ and let me know what you thought of this home!" prompt, the auto-progression stops. Stops 2, 3, and 4 will not appear until the user takes action.
-- **Voice mode resumes the tour**: When the user taps the voice mode button while paused on stop 1, the simulated transcript becomes "I really liked all the natural light and vaulted ceilings, but the kitchen was way too small." After the assistant acknowledges, the tour automatically continues with stop 2 and proceeds normally through stops 3 and 4.
-- **Summary update**: The post-tour recap to the agent now uses the user's exact words for the first home: "Loved the natural light and vaulted ceilings, but the kitchen was way too small." The other three bullets stay as-is.
+- A glass-styled circular **+** action button appears to the left of the chat input only when the input is focused, sliding in smoothly.
+- Tapping **+** opens a native iOS menu with three options: **Take Photo**, **Record Video**, **Choose from Library**.
+- **Take Photo** and **Record Video** open the system camera; **Choose from Library** opens the photo picker (multi-select up to a few items).
+- Selected media appears as thumbnail previews in a horizontal row directly above the input field, each with a small **×** to remove.
+- The user can still type a caption alongside the attachments (or send with no text).
+- The send button activates as soon as there's at least one attachment or text.
+- Tapping send posts a chat message that displays the attached photos/videos as a clean image/video grid, with the caption underneath if present.
+- Videos in the chat show a play indicator and tap to play inline.
 
-## Out of scope
-- Voice phrase outside of tour day stays unchanged.
-- Stops 2–4 still auto-progress on their existing timers.
+## Design
+
+- **+** button: 32pt circle with liquid-glass effect on iOS 26, ultra-thin material fallback otherwise, plus icon at medium weight, matching the existing input field's visual language.
+- Smooth spring-in / fade-out as focus changes — the text field gracefully shifts right to make room.
+- Attachment preview row: rounded thumbnails (~64pt) with subtle shadow, video thumbs show a play glyph overlay; remove badge sits at the top-right corner.
+- Native iOS share-sheet-style menu — no custom UI, just the standard system menu attached to the + button.
+- In-chat attachments: rounded image grid (1 image full width, 2 side-by-side, 3+ in a 2-column grid) with consistent corner radius matching message bubbles.
+
+## Screens
+
+- **Ask Redfin chat**: gains the new + button, attachment preview tray, and updated user message bubbles capable of displaying photo/video grids with optional caption text.
+
+## Notes
+
+- Camera will show the standard "install on device" placeholder in the cloud simulator (real camera works on device); the photo library picker works in the simulator with sample photos.
+- Required permissions (camera, microphone for video, photo library) will be added so the pickers function on real devices.
