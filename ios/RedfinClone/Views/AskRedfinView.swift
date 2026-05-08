@@ -117,6 +117,7 @@ struct AskRedfinView: View {
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
                     Color.clear.frame(height: 0)
+                    chatTitleHeader
                     ForEach(chatViewModel.activeMessages) { message in
                         ChatMessageBubble(
                             message: message,
@@ -217,6 +218,21 @@ struct AskRedfinView: View {
                 }
             }
         }
+    }
+
+    private var chatTitleHeader: some View {
+        HStack(spacing: Theme.Spacing.xs + 2) {
+            Image(systemName: "sparkle")
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(.primary)
+            Text("Ask Redfin")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(.primary)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, Theme.Spacing.md)
+        .padding(.top, Theme.Spacing.sm)
+        .padding(.bottom, Theme.Spacing.xs)
     }
 
     private var canSend: Bool {
