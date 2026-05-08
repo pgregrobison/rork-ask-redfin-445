@@ -1,9 +1,6 @@
-# Add scrolling "Ask Redfin" title with sparkle icon to chat
+# Tighten Ask Redfin title padding & fix + icon color
 
-**What changes**
+**Changes**
 
-- Add a large "Ask Redfin" title with a sparkle icon to its left at the very top of the chat content.
-- The title scrolls away naturally with the chat (it's part of the message list, not pinned).
-- Sits above the first message, with comfortable spacing below before messages begin.
-- Sparkle icon and title text use the primary text color, with the title in a bold prominent weight to feel like a screen header.
-- The existing thread switcher pill and close button at the very top of the sheet remain unchanged and stay pinned.
+- Reduce the space above the "Ask Redfin" title at the top of the chat so it sits closer to the top edge.
+- Make the "+" attachment button's icon use the standard primary text color (black in light mode / white in dark mode) instead of the blue accent color that the menu currently tints it with.

@@ -231,7 +231,6 @@ struct AskRedfinView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, Theme.Spacing.md)
-        .padding(.top, Theme.Spacing.sm)
         .padding(.bottom, Theme.Spacing.xs)
     }
 
@@ -319,6 +318,7 @@ struct AskRedfinView: View {
             attachMenuLabel
         }
         .menuOrder(.fixed)
+        .tint(.primary)
     }
 
     @ViewBuilder
