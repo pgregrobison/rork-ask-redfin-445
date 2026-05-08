@@ -1,23 +1,37 @@
-# Add photo step to tour day stop 1 flow
+# Tab-aware Ask Redfin placeholders + search-focused map prompts
 
-## Changes to tour day flow
+Update the rotating Ask Redfin placeholder text so it reflects whichever tab the user is on, and rework the map prompts to feel like real search queries.
 
-**Stop 1 — new photo step:**
+**Search map (Find tab)**
+Replace the current area-vibe prompts with search-style queries, e.g.:
+- "3 beds with natural light"
+- "Walkable, under $900k"
+- "Quiet street with a yard"
+- "Move-in ready near parks"
 
-1. Waveform prompt appears as today ("Tap the waveform and let me know what you think of this home!")
-2. User taps the voice button → fake voice response streams in (kept as-is)
-3. After a short delay, the bot adds a new short prompt: **"Snap a photo of something that stood out — good or bad."**
-4. Auto-progression pauses here until the user sends a photo via the + menu (camera or library).
-5. Once the photo message is sent, the bot replies: **"Wow! There are a lot of smart people in this home!"**
-6. After ~4 seconds, tour day auto-progresses to stop 2 as normal.
+**For You tab**
+Personalized discovery prompts, e.g.:
+- "Show me homes I'd love"
+- "What's new this week?"
+- "More like the ones I saved"
 
-**Stop 2 transition message:**
+**Saved tab**
+Compare/decide prompts, e.g.:
+- "Compare my saved homes"
+- "Which saved home is the best deal?"
+- "Rank these by commute"
 
-- Remove the trailing "— let me know what you thought of the first home." 
-- New text: **"On your way to the 2nd tour."**
+**My Home tab**
+Ownership prompts, e.g.:
+- "What's my home worth?"
+- "How's my neighborhood trending?"
+- "Should I refinance?"
 
-**Scope:**
+**My Redfin tab**
+Account/activity prompts, e.g.:
+- "Recap my recent searches"
+- "Any updates on my tours?"
+- "Help me pick an agent"
 
-- Photo step only happens for stop 1. Stops 2–4 behave as they do today.
-- No changes to the post-tour summary, map widget, or voice flow for other stops.
-
+**Wiring**
+Switch the active prompt set automatically when you change tabs so the accessory bar always matches the current screen. The map card / listing detail contexts stay as they are today.

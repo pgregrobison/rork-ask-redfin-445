@@ -100,6 +100,12 @@ struct ContentView: View {
                 return
             }
         }
+        .onChange(of: selectedTab) { _, _ in
+            updateAskContextForTab()
+        }
+        .onChange(of: navigationPath.count) { _, _ in
+            updateAskContextForTab()
+        }
         .onChange(of: viewModel.notificationService.pendingCompassListingID) { _, newID in
             guard let listingID = newID else { return }
             viewModel.notificationService.pendingCompassListingID = nil
@@ -318,6 +324,25 @@ struct ContentView: View {
                 selectedTab = newValue
             }
         )
+    }
+
+    private func updateAskContextForTab() {
+        // Don't override when a listing detail is on the stack — those views manage context themselves.
+        guard navigationPath.isEmpty else { return }
+        switch selectedTab {
+        case .find:
+            askRedfinContext.context = viewModel.showListView
+                ? .default
+                : (viewModel.selectedListing != nil ? .mapCard : .map)
+        case .forYou:
+            askRedfinContext.context = .forYou
+        case .saved:
+            askRedfinContext.context = .saved
+        case .myHome:
+            askRedfinContext.context = .myHome
+        case .myRedfin:
+            askRedfinContext.context = .myRedfin
+        }
     }
 
     private func navigateToListing(_ listing: Listing) {

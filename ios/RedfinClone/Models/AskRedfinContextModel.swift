@@ -11,6 +11,10 @@ final class AskRedfinContextModel {
         case detailFeatures
         case detailLifestyle
         case photoFocus
+        case forYou
+        case saved
+        case myHome
+        case myRedfin
     }
 
     var context: Context = .default
@@ -25,9 +29,34 @@ final class AskRedfinContextModel {
             ]
         case .map:
             return [
-                "What's it like here?",
-                "Schools in this area?",
-                "Walkable to coffee?"
+                "3 beds with natural light",
+                "Walkable, under $900k",
+                "Quiet street with a yard",
+                "Move-in ready near parks"
+            ]
+        case .forYou:
+            return [
+                "Show me homes I'd love",
+                "What's new this week?",
+                "More like the ones I saved"
+            ]
+        case .saved:
+            return [
+                "Compare my saved homes",
+                "Which saved home is the best deal?",
+                "Rank these by commute"
+            ]
+        case .myHome:
+            return [
+                "What's my home worth?",
+                "How's my neighborhood trending?",
+                "Should I refinance?"
+            ]
+        case .myRedfin:
+            return [
+                "Recap my recent searches",
+                "Any updates on my tours?",
+                "Help me pick an agent"
             ]
         case .mapCard:
             return [
