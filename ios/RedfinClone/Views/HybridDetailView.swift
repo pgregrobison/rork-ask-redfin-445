@@ -271,14 +271,21 @@ struct HybridDetailView: View {
     private func snapSheet(translationY: CGFloat, predictedY: CGFloat) {
         let velocityY = predictedY - translationY
         let projectedOffset = sheetOffset - velocityY * 0.2
-        let midPoint = maxSheetTravel * 0.5
+        // Asymmetric thresholds: easy to collapse from expanded (only ~20% pull),
+        // but expanding from collapsed still requires a deliberate ~50% pull.
+        let collapseThreshold = maxSheetTravel * 0.8
+        let expandThreshold = maxSheetTravel * 0.5
         let fastFlickDown = velocityY > 500
         let fastFlickUp = velocityY < -500
 
         let shouldExpand: Bool = {
             if fastFlickUp { return true }
             if fastFlickDown { return false }
-            return projectedOffset > midPoint
+            if sheetSnap == .expanded {
+                return projectedOffset >= collapseThreshold
+            } else {
+                return projectedOffset > expandThreshold
+            }
         }()
 
         let previousSnap = sheetSnap

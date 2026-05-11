@@ -1,13 +1,9 @@
-# Make expanded detail sheet easier to drag down when scrolled to top
+# Make it easier to collapse the detail sheet
 
-**Problem**
-When the property detail sheet is expanded and the inner content is scrolled all the way to the top, pulling the sheet down to collapse it often gets "eaten" by the scroll view, requiring a deliberate, large gesture before the sheet actually starts following the finger.
+**Change**
 
-**Fix**
-- Make the downward pull-to-collapse gesture take priority over the scroll view as soon as content is at the top, so the sheet starts moving with the very first downward pixel instead of after a 4‑pt threshold.
-- Disable scroll bouncing at the top edge while expanded so the scroll view can't briefly steal the drag with a rubber-band.
-- Apply the same change to both the standard listing detail sheet and the hybrid (map-style) detail sheet so behavior is consistent.
-- Keep upward drags untouched — scrolling the content up still works exactly as before.
+- When pulling the expanded detail sheet down, only a small downward drag will be needed to snap it back to the collapsed state — about 20% of the way instead of the current halfway point.
+- Pulling the collapsed sheet up to expand will still require a more deliberate drag (unchanged), so it doesn't accidentally expand.
+- A quick flick down will continue to collapse instantly, as today.
 
-**Result**
-From the fully scrolled-up state, a small downward swipe anywhere on the sheet immediately starts collapsing it, matching the feel of native Apple bottom sheets (Maps, Stocks).
+This applies to both the standard listing detail and the hybrid (map + detail) view, so the behavior feels consistent everywhere.
