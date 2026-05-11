@@ -256,7 +256,9 @@ struct ListingDetailView: View {
             .onChanged { value in
                 guard sheetSnap == .expanded, scrolledToTop else { return }
                 if !sheetDragActive {
-                    guard value.translation.height > 4 else { return }
+                    // Take over on the very first downward pixel so the
+                    // ScrollView never gets a chance to rubber-band.
+                    guard value.translation.height > 0 else { return }
                     sheetDragActive = true
                     dragStartOffset = sheetOffset
                 }
@@ -284,6 +286,7 @@ struct ListingDetailView: View {
             }
         }
         .scrollDisabled(sheetSnap == .collapsed || sheetDragActive)
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
         .scrollIndicators(.hidden)
         .onScrollGeometryChange(for: CGFloat.self) { geo in
             geo.contentOffset.y
