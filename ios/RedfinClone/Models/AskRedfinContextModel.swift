@@ -88,8 +88,8 @@ final class AskRedfinContextModel {
             ]
         case .photoFocus:
             return [
-                "What are these counters?",
                 "What style is this?",
+                "What's this material?",
                 "Cost to redo this room?"
             ]
         }
